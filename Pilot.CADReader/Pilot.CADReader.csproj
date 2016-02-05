@@ -7,8 +7,8 @@
     <ProjectGuid>{1FF8C39F-4853-468E-B872-2440E98CC140}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pilot.CADReader</RootNamespace>
-    <AssemblyName>Pilot.CADReader.ext</AssemblyName>
+    <RootNamespace>Ascon.Pilot.SDK.CADReader</RootNamespace>
+    <AssemblyName>Ascon.Pilot.SDK.CADReader.ext</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\Users\Oleg\AppData\Local\ASCON\Pilot-ICE\Development\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>

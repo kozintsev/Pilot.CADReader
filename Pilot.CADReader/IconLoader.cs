@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 
-namespace Pilot.CADReader
+namespace Ascon.Pilot.SDK.CADReader
 {
     class IconLoader
     {
