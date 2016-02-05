@@ -11,16 +11,24 @@ namespace Ascon.Pilot.SDK.CADReader
         {
             var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
             Application.ResourceAssembly = assembly;
-            var uri = new Uri(relativePath, UriKind.Relative);
-            var info = Application.GetResourceStream(uri);
-            using (var memoryStream = new MemoryStream())
+            var uri = new Uri(relativePath, UriKind.RelativeOrAbsolute);
+            try
             {
-                if (info == null)
-                    return null;
+                var info = Application.GetResourceStream(uri);
+                using (var memoryStream = new MemoryStream())
+                {
+                    if (info == null)
+                        return null;
 
-                info.Stream.CopyTo(memoryStream);
-                return memoryStream.ToArray();
+                    info.Stream.CopyTo(memoryStream);
+                    return memoryStream.ToArray();
+                }
             }
+            catch
+            {
+                return null;
+            }
+            
         }
     }
 }

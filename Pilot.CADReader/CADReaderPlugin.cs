@@ -8,7 +8,7 @@ namespace Ascon.Pilot.SDK.CADReader
     [Export(typeof(IObjectContextMenu))]
     public class CADReaderPlugin : IObjectContextMenu
     {
-        private const string MenuItemName = "Pilot CADReader";
+        private const string MenuItemName = "PilotCADReader";
         private const string DocumentMenuItemName = "DocumentPluginMenuItem";
         private const string ContextMenuItemName = "ContextPluginMenuItem";
         private const string ManySelectedMenuItemName = "ManySelectedMenuItemName";
@@ -26,7 +26,7 @@ namespace Ascon.Pilot.SDK.CADReader
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
         {
             var objects = selection.ToList();
-            var icon = IconLoader.GetIcon("/Resources/menu_icon.svg");
+            var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
 
             var itemNames = menuHost.GetItems().ToList();
             const string indexItemName = "miShowSharingSettings";
