@@ -32,12 +32,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ascon.Pilot.SDK, Version=16.0.1.21870, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ascon.Pilot.SDK.15.0.1.0\lib\net40-Client\Ascon.Pilot.SDK.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Coding\PilotSDKdev\Samples\packages\Ascon.Pilot.SDK\lib\net40-Client\Ascon.Pilot.SDK.dll</HintPath>
     </Reference>
     <Reference Include="Ascon.Pilot.Theme, Version=16.0.1.21870, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ascon.Pilot.SDK.15.0.1.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
-      <Private>True</Private>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Coding\PilotSDKdev\Samples\packages\Ascon.Pilot.SDK\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Windows.Shell, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Windows.Shell.3.0.1.0\lib\net40\Microsoft.Windows.Shell.dll</HintPath>
@@ -46,6 +46,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
     <Reference Include="WindowsBase" />
@@ -56,9 +57,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\icon.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\menu_icon.svg" />
   </ItemGroup>
