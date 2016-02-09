@@ -51,9 +51,11 @@ namespace Ascon.Pilot.SDK.CADReader
             var worker = sender as BackgroundWorker;
             var fileName = args.Argument as string;
             ZFile z = new ZFile();
-            z.ExtractZipToMemoryStream(fileName, null, "MetaInfo.xml");
-            //z.ExtractGZipToMemoryStream(fileName);
-            MemoryStream ms = z.OutputMemStream;
+            if (z.IsZip(fileName))
+            {
+                z.ExtractZipToMemoryStream(fileName, "MetaInfo");
+                SpwAnalyzer x = new SpwAnalyzer(z.OutputMemStream);
+            }
         }
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
