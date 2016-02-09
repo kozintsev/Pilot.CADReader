@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Linq;
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -11,15 +13,47 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private const string _command_name = "CopyPathCommand";
         private string _path;
+        private BackgroundWorker _worker;
+
+  
+
+        public CADReaderPlugin()
+        {
+            _worker = new BackgroundWorker
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
+        }
 
         public void OnMenuItemClick(string itemName)
         {
             if (!itemName.Equals(_command_name, StringComparison.InvariantCultureIgnoreCase))
                 return;
+            var fInfo = new FileInfo(_path);
+            if (!fInfo.Exists) // file does not exist; do nothing
+                return;
+
+            var ext = fInfo.Extension.ToLower();
+            if (ext == ".spw" || ext == ".zip")
+            {
+                _worker.DoWork += openSpwFile;
+                _worker.RunWorkerAsync(_path);
+            }
 
             //var thread = new Thread(() => Clipboard.SetText(_path));
             //thread.SetApartmentState(ApartmentState.STA);
             //thread.Start();
+        }
+
+        private void openSpwFile(object sender, DoWorkEventArgs args)
+        {
+            var worker = sender as BackgroundWorker;
+            var fileName = args.Argument as string;
+            ZFile z = new ZFile();
+            z.ExtractZipToMemoryStream(fileName, null, "MetaInfo.xml");
+            //z.ExtractGZipToMemoryStream(fileName);
+            MemoryStream ms = z.OutputMemStream;
         }
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
