@@ -11,7 +11,7 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     class SpwAnalyzer
     {
-        private XmlReader reader;
+        //private XmlReader reader;
         private XDocument xDoc;
         private bool xmlvalid;
         public bool Xmlvalid
@@ -34,16 +34,17 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
-        private bool opened = false;
+        private bool opened;
 
         public SpwAnalyzer(MemoryStream ms)
         {
+            opened = false;
             xmlvalid = true;
             try
             {
-                reader = XmlReader.Create(ms);
-                if (reader != null)
-                    xDoc = XDocument.Load(reader);
+                //reader = XmlReader.Create(ms);
+                //if (reader != null)
+                xDoc = XDocument.Load(ms);
                 opened = true;
             }
             catch(Exception ex)
