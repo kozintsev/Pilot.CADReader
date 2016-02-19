@@ -45,9 +45,43 @@ namespace Ascon.Pilot.SDK.CADReader
         {
             if (xDoc == null)
                 return;
-            IEnumerable<XElement> elements = xDoc.Descendants("spcObjects");
-            foreach (XElement e in elements)
+            SpcSection spcSection;
+            List<SpcSection> spcSections = new List<SpcSection>();
+
+            IEnumerable<XElement> sections = xDoc.Descendants("section");
+            bool isName = false, isNumber = false;
+            foreach (XElement section in sections)
             {
+                spcSection = new SpcSection();
+                foreach (var attr in section.Attributes())
+                {
+                    if (attr.Name == "name")
+                    {
+                        spcSection.Name = attr.Value;
+                        isName = true;
+                    }
+                        
+                    if (attr.Name == "number")
+                    {
+                        string strnum = attr.Value;
+                        int number = 0;
+                        if (Int32.TryParse(strnum, out number))
+                            spcSection.Number = number;
+                        isNumber = true;
+                    }   
+                }
+                if (isName && isNumber)
+                    spcSections.Add(spcSection);
+                isName = false;
+                isNumber = false;
+            }
+            
+            IEnumerable<XElement> spcObjects = xDoc.Descendants("spcObjects");
+            SpcObject spcObject;
+            List<SpcObject> listSpcObject = new List<SpcObject>();
+            foreach (XElement e in spcObjects)
+            {
+                spcObject = new SpcObject();
 
             }
 
