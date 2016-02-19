@@ -7,12 +7,12 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     class SpcObject
     {
-        private int id;
+        private string id;
         private string name;
 
-        public List<SpcColumn> Columns;
+        public List<SpcColumn> Columns = null;
 
-        public int Id
+        public string Id
         {
             get
             {

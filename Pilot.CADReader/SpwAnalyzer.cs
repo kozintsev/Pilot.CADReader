@@ -82,7 +82,29 @@ namespace Ascon.Pilot.SDK.CADReader
             foreach (XElement e in spcObjects)
             {
                 spcObject = new SpcObject();
+                foreach(XElement o in e.Elements())
+                {
+                    //spcObject.Id = 
+                    foreach (var attr in o.Attributes())
+                    {
+                        if (attr.Name == "id")
+                        {
+                            spcObject.Id = attr.Value;
+                        }
+                    }
+                    foreach(XElement context in o.Elements())
+                    {
+                        if(context.Name.ToString() == "section")
+                        {
 
+                        }
+                        if(context.Name.ToString() == "columnscolumns")
+                        {
+
+                        }
+                    }
+                }
+                listSpcObject.Add(spcObject);
             }
 
             foreach (XNode node in xDoc.Nodes())
