@@ -13,19 +13,7 @@ namespace Ascon.Pilot.SDK.CADReader
     {
         //private XmlReader reader;
         private XDocument xDoc;
-        private bool xmlvalid;
-        public bool Xmlvalid
-        {
-            get
-            {
-                return xmlvalid;
-            }
-            set
-            {
-                xmlvalid = value;
-            }
-        }
-
+        private bool opened;
         public bool Opened
         {
             get
@@ -34,12 +22,9 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
-        private bool opened;
-
         public SpwAnalyzer(MemoryStream ms)
         {
             opened = false;
-            xmlvalid = true;
             try
             {
                 long p = ms.Position;
@@ -52,7 +37,6 @@ namespace Ascon.Pilot.SDK.CADReader
             }
             catch(Exception ex)
             {
-                xmlvalid = false;
                 opened = false;
                 Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
             }
@@ -61,6 +45,12 @@ namespace Ascon.Pilot.SDK.CADReader
         {
             if (xDoc == null)
                 return;
+            IEnumerable<XElement> elements = xDoc.Descendants("spcObjects");
+            foreach (XElement e in elements)
+            {
+
+            }
+
             foreach (XNode node in xDoc.Nodes())
             {
                 Debug.WriteLine(node);

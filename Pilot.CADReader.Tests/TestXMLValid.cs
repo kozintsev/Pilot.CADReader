@@ -32,6 +32,22 @@ namespace Pilot.CADReader.Tests
                 Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
             }
         }
+        [TestMethod]
+        public void LoadXMLData()
+        {
+            try
+            {
+                //var reader = XmlReader.Create(mediaInfoFile);
+                //Assert.IsNull(reader as object);
+                XDocument xDoc = XDocument.Load(mediaInfoFile);
+                Assert.IsNull(xDoc as object);
+                IEnumerable<XElement> elements = xDoc.Descendants("spcObjects");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
+            }
+        }
 
 
     }
