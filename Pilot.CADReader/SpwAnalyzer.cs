@@ -42,9 +42,12 @@ namespace Ascon.Pilot.SDK.CADReader
             xmlvalid = true;
             try
             {
-                //reader = XmlReader.Create(ms);
-                //if (reader != null)
-                xDoc = XDocument.Load(ms);
+                long p = ms.Position;
+                ms.Position = 0;
+                var reader = new StreamReader(ms);
+                string s = reader.ReadToEnd();
+                ms.Position = p;
+                xDoc = XDocument.Parse(s);
                 opened = true;
             }
             catch(Exception ex)

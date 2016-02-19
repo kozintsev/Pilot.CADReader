@@ -1,6 +1,6 @@
 ﻿using Ionic.Zip;
 using System;
-
+using System.Diagnostics;
 using System.IO;
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -14,11 +14,8 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 return outputMemStream;
             }
-            set
-            {
-                outputMemStream = value;
-            }
         }
+
 
         public bool IsZip(string archiveFilenameIn)
         {
@@ -42,9 +39,10 @@ namespace Ascon.Pilot.SDK.CADReader
                                
                 }
             }
-            catch
+            catch(Exception ex)
             {
                 outputMemStream = null;
+                Debug.WriteLine(ex.Message);
             }           
         }
     }

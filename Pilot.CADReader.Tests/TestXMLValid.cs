@@ -32,16 +32,6 @@ namespace Pilot.CADReader.Tests
                 Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
             }
         }
-        [TestMethod]
-        public void LoadFromMemoryStream()
-        {
-            bool b = File.Exists(mediaInfoFile);
-            Assert.IsFalse(b, "File not found");  
-            var fs = new FileStream(mediaInfoFile, FileMode.Open);
-            Assert.IsNull(fs as object);
-            //MemoryStream memStream = new MemoryStream();
-            //memStream.WriteTo(fs);
-        }
 
 
     }
