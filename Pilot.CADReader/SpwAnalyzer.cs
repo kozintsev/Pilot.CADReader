@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,8 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     class SpwAnalyzer
     {
+        private XmlReader reader;
+        private XDocument xDoc;
         private bool xmlvalid;
         public bool Xmlvalid
         {
@@ -23,19 +26,41 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
+        public bool Opened
+        {
+            get
+            {
+                return opened;
+            }
+        }
+
+        private bool opened = false;
+
         public SpwAnalyzer(MemoryStream ms)
         {
             xmlvalid = true;
             try
             {
-                XmlReader reader = XmlReader.Create(ms);
-                XDocument xDoc = XDocument.Load(reader);
-
+                reader = XmlReader.Create(ms);
+                if (reader != null)
+                    xDoc = XDocument.Load(reader);
+                opened = true;
             }
-            catch
+            catch(Exception ex)
             {
                 xmlvalid = false;
-            }  
+                opened = false;
+                Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
+            }
+        }
+        public void Run()
+        {
+            if (xDoc == null)
+                return;
+            foreach (XNode node in xDoc.Nodes())
+            {
+                Debug.WriteLine(node);
+            }
         }
 
        

@@ -55,6 +55,7 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 z.ExtractZipToMemoryStream(fileName, "MetaInfo");
                 SpwAnalyzer x = new SpwAnalyzer(z.OutputMemStream);
+                x.Run();
             }
         }
 

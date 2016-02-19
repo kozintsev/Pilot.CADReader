@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CADReader", "Pilot.CADReader\Pilot.CADReader.csproj", "{1FF8C39F-4853-468E-B872-2440E98CC140}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CADReader.Tests", "Pilot.CADReader.Tests\Pilot.CADReader.Tests.csproj", "{4BFEEBC6-C093-489F-B26C-D950EE20A2C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{1FF8C39F-4853-468E-B872-2440E98CC140}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FF8C39F-4853-468E-B872-2440E98CC140}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FF8C39F-4853-468E-B872-2440E98CC140}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BFEEBC6-C093-489F-B26C-D950EE20A2C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BFEEBC6-C093-489F-B26C-D950EE20A2C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BFEEBC6-C093-489F-B26C-D950EE20A2C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BFEEBC6-C093-489F-B26C-D950EE20A2C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
