@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -22,9 +23,14 @@ namespace Ascon.Pilot.SDK.CADReader
         private IDataObject _selected; 
         // поток для открытия и анализа файла спецификации
         private BackgroundWorker _worker;
+        // список объктов спецификации полученных в ходе парсинга
+        private List<SpcObject> listSpcObject = null;
+        // список секций спецификации
+        private List<SpcSection> spcSections = null;
+        // 
 
-       
-         [ImportingConstructor]
+
+        [ImportingConstructor]
         public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository)
         {
             _modifier = modifier;
@@ -36,13 +42,23 @@ namespace Ascon.Pilot.SDK.CADReader
             };
         }
 
+        private IType GetTypeByTitle(string name)
+        {
+            return _repository.GetTypes().Where(t => t.Title == name).FirstOrDefault();
+        }
+
         public void OnMenuItemClick(string itemName)
         {
             // если выбрано меню в клиенте
             if (itemName == CreateCopyItemName)
             {
-                var parent = _repository.GetCachedObject(_selected.ParentId);
-                //var builder = _modifier.Create(parent, _selected.Type);
+                var parent = _repository.GetCachedObject(_selected.Id);
+                var t = GetTypeByTitle("Сборочная единица");
+                string s = t.Name.ToString();
+                Debug.WriteLine(s);
+                //Метод позволяет получить список всех типов.
+                //IEnumerable< IType > IObjectsRepository.GetTypes();
+                var builder = _modifier.Create(parent, _selected.Type);
                 //foreach (var attribute in _selected.Attributes)
                 //{
                 //    if (attribute.Value is string)
@@ -81,6 +97,12 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 z.ExtractZipToMemoryStream(fileName, "MetaInfo");
                 SpwAnalyzer x = new SpwAnalyzer(z.OutputMemStream);
+                // событие вызываемое после парсинга спецификации
+                x.ParsingCompletedEvent += delegate (object s, EventArgs e)
+                {
+                    spcSections   = x.GetListSpcSection();
+                    listSpcObject = x.GetListSpcObject();
+                };
                 if (x.Opened)
                 {
                     x.Run();

@@ -24,6 +24,24 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
+        private bool isCompleted;
+        public bool IsCompleted
+        {
+            get
+            {
+                return isCompleted;
+            }
+
+            set
+            {
+                isCompleted = value;
+            }
+        }
+
+        
+
+        public event EventHandler ParsingCompletedEvent;
+
         public List<SpcObject> GetListSpcObject()
         {
             return listSpcObject;
@@ -37,6 +55,7 @@ namespace Ascon.Pilot.SDK.CADReader
         public SpwAnalyzer(MemoryStream ms)
         {
             opened = false;
+            isCompleted = false;
             try
             {
                 long p = ms.Position;
@@ -50,6 +69,7 @@ namespace Ascon.Pilot.SDK.CADReader
             catch(Exception ex)
             {
                 opened = false;
+                isCompleted = false;
                 Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
             }
         }
@@ -142,6 +162,9 @@ namespace Ascon.Pilot.SDK.CADReader
                 // парсинг объектов завершён
             }
             // все циклы завершены
+            // вызываем событие о завершении парсинга.
+            isCompleted = true;
+            ParsingCompletedEvent(this, null);
         }
 
        
