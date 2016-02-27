@@ -119,7 +119,7 @@ namespace Ascon.Pilot.SDK.CADReader
                                 }
                             }
                         }
-                        if(context.Name.ToString() == "columnscolumns")
+                        if(context.Name.ToString() == "columns")
                         {
                             SpcColumn col = new SpcColumn();
                             foreach (XElement column in context.Elements())
