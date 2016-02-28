@@ -29,8 +29,6 @@ namespace Ascon.Pilot.SDK.CADReader
         private List<SpcObject> listSpcObject;
         // список секций спецификации
         private List<SpcSection> spcSections;
-        // 
-
 
         [ImportingConstructor]
         public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository)
