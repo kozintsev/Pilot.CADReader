@@ -144,6 +144,8 @@ namespace Ascon.Pilot.SDK.CADReader
                                 {
                                     if (attr.Name == "name")
                                         col.Name = attr.Value.ToString();
+                                    if (attr.Name == "typeName")
+                                        col.TypeName = attr.Value.ToString();
                                     if (attr.Name == "value")
                                         col.Value = attr.Value.ToString();
                                 }

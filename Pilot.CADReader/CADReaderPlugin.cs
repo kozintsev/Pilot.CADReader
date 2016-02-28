@@ -95,8 +95,10 @@ namespace Ascon.Pilot.SDK.CADReader
                             foreach(var attr in spcObject.Columns)
                             {
                                 // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-                                builder.SetAttribute(attr.TypeName, attr.Value);
-                                
+                                if (String.IsNullOrEmpty(attr.TypeName))
+                                    continue;
+                                if (!String.IsNullOrEmpty(attr.Value))
+                                    builder.SetAttribute(attr.TypeName, attr.Value);          
                             }
                             _modifier.Apply();
                         }
