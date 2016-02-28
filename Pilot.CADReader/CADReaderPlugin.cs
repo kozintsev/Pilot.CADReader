@@ -71,6 +71,14 @@ namespace Ascon.Pilot.SDK.CADReader
             return null;//_repository.GetTypes().Where(t => t.Title == sectionName).FirstOrDefault();
         }
 
+        private string ValueTextClear(string str)
+        {
+            str = str.Replace("$|", "");
+            str = str.Replace(" @/", " ");
+            str = str.Replace("@/", " ");
+            return str;
+        }
+
         public void OnMenuItemClick(string itemName)
         {
             // если выбрано меню в клиенте
@@ -94,11 +102,14 @@ namespace Ascon.Pilot.SDK.CADReader
                             var builder = _modifier.Create(parent, t);
                             foreach(var attr in spcObject.Columns)
                             {
+                                string val = attr.Value;
+                                // очишаем значение от служебных символов и выражений
+                                val = ValueTextClear(val);
                                 // в качестве наименование передаётся внутренее имя (а не то которое отображается)
                                 if (String.IsNullOrEmpty(attr.TypeName))
                                     continue;
-                                if (!String.IsNullOrEmpty(attr.Value))
-                                    builder.SetAttribute(attr.TypeName, attr.Value);          
+                                if (!String.IsNullOrEmpty(val))
+                                    builder.SetAttribute(attr.TypeName, val);          
                             }
                             _modifier.Apply();
                         }
