@@ -11,9 +11,14 @@ namespace Ascon.Pilot.SDK.CADReader
         private string name;
         private int sectionNumber;
         private string sectionName = String.Empty;
-
-        public List<SpcColumn> Columns = null;
+        public List<SpcColumn> Columns;
         
+        public SpcObject()
+        {
+            Columns = new List<SpcColumn>();
+            Columns.Clear();
+        }
+
 
         public string Id
         {

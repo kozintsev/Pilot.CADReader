@@ -12,8 +12,8 @@ namespace Ascon.Pilot.SDK.CADReader
     class SpwAnalyzer
     {
         //private XmlReader reader;
-        private List<SpcSection> spcSections = null;
-        private List<SpcObject> listSpcObject = null;
+        private List<SpcSection> spcSections;
+        private List<SpcObject> listSpcObject;
         private XDocument xDoc;
         private bool opened;
         public bool Opened
@@ -113,17 +113,13 @@ namespace Ascon.Pilot.SDK.CADReader
             listSpcObject = new List<SpcObject>();
             foreach (XElement e in spcObjects)
             {
-                spcObject = new SpcObject();
                 foreach(XElement o in e.Elements())
                 {
-                    //spcObject.Id = 
+                    spcObject = new SpcObject();
                     foreach (var attr in o.Attributes())
-                    {
                         if (attr.Name == "id")
-                        {
                             spcObject.Id = attr.Value;
-                        }
-                    }
+                    
                     foreach(XElement context in o.Elements())
                     {
                         if(context.Name.ToString() == "section")
@@ -156,9 +152,9 @@ namespace Ascon.Pilot.SDK.CADReader
                             }
                         }
                     }
+                    // добавляем в список объект спецификации
+                    listSpcObject.Add(spcObject);
                 }
-                // добавляем в список объект спецификации
-                listSpcObject.Add(spcObject);
                 // парсинг объектов завершён
             }
             // все циклы завершены

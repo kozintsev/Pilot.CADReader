@@ -26,9 +26,9 @@ namespace Ascon.Pilot.SDK.CADReader
         // поток для открытия и анализа файла спецификации
         private BackgroundWorker _worker;
         // список объктов спецификации полученных в ходе парсинга
-        private List<SpcObject> listSpcObject = null;
+        private List<SpcObject> listSpcObject;
         // список секций спецификации
-        private List<SpcSection> spcSections = null;
+        private List<SpcSection> spcSections;
         // 
 
 
@@ -92,30 +92,19 @@ namespace Ascon.Pilot.SDK.CADReader
                         if (t != null)
                         {
                             var builder = _modifier.Create(parent, t);
+                            foreach(var attr in spcObject.Columns)
+                            {
+                                // в качестве наименование передаётся внутренее имя (а не то которое отображается)
+                                builder.SetAttribute(attr.TypeName, attr.Value);
+                                
+                            }
+                            _modifier.Apply();
                         }
                         
                     }
                         
                     
                 }
-                //var t = GetTypeByTitle("Сборочная единица");
-                string s = t.Name.ToString();
-                Debug.WriteLine(s);
-                //Метод позволяет получить список всех типов.
-                //IEnumerable< IType > IObjectsRepository.GetTypes();
-                //var builder = _modifier.Create(parent, _selected.Type);
-                //foreach (var attribute in _selected.Attributes)
-                //{
-                //    if (attribute.Value is string)
-                //        builder.SetAttribute(attribute.Key, (string)attribute.Value);
-                //    if (attribute.Value is int)
-                //        builder.SetAttribute(attribute.Key, (int)attribute.Value);
-                //    if (attribute.Value is double)
-                //        builder.SetAttribute(attribute.Key, (double)attribute.Value);
-                //    if (attribute.Value is DateTime)
-                //        builder.SetAttribute(attribute.Key, (DateTime)attribute.Value);
-                //}
-                //_modifier.Apply();
             }
             // если выбрано меню на Pilot Storage
             if (itemName.Equals(_command_name, StringComparison.InvariantCultureIgnoreCase))
