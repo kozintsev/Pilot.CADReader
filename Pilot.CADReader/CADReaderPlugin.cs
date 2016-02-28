@@ -10,13 +10,15 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     [Export(typeof(IStorageContextMenu))]
     [Export(typeof(IObjectContextMenu))]
-    public class CADReaderPlugin : IStorageContextMenu, IObjectContextMenu
+    [Export(typeof(IMainMenu))]
+    public class CADReaderPlugin : IStorageContextMenu, IObjectContextMenu, IMainMenu
     {
 
         private readonly IObjectModifier _modifier;
         private readonly IObjectsRepository _repository;
         private const string CreateCopyItemName = "InsertObjects";
         private const string _command_name = "CopyPathCommand";
+        private const string ServiceMenu = "CADReaderSetting";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
         // выбранный с помощью контекстного меню клиента объект
@@ -35,6 +37,7 @@ namespace Ascon.Pilot.SDK.CADReader
         {
             _modifier = modifier;
             _repository = repository;
+            
             _worker = new BackgroundWorker
             {
                 WorkerReportsProgress = true,
@@ -42,9 +45,30 @@ namespace Ascon.Pilot.SDK.CADReader
             };
         }
 
-        private IType GetTypeByTitle(string name)
+        private IType GetTypeBySectionName(string sectionName)
         {
-            return _repository.GetTypes().Where(t => t.Title == name).FirstOrDefault();
+            string title;
+            foreach (var itype in _repository.GetTypes())
+            {
+                title = itype.Title;
+                if (sectionName == "Документация" && title == "Документ")
+                    return itype;
+                if (sectionName == "Комплексы" && title == "Комплекс")
+                    return itype;
+                if (sectionName == "Сборочные единицы" && title == "Сборочная единица")
+                    return itype;
+                if (sectionName == "Детали" && title == "Деталь")
+                    return itype;
+                if (sectionName == "Стандартные изделия" && title == "Стандартное изделие")
+                    return itype;
+                if (sectionName == "Прочие изделия" && title == "Прочее изделие")
+                    return itype;
+                if (sectionName == "Материалы" && title == "Материал")
+                    return itype;
+                if (sectionName == "Комплекты" && title == "Комплект")
+                    return itype;
+            }
+            return null;//_repository.GetTypes().Where(t => t.Title == sectionName).FirstOrDefault();
         }
 
         public void OnMenuItemClick(string itemName)
@@ -53,12 +77,33 @@ namespace Ascon.Pilot.SDK.CADReader
             if (itemName == CreateCopyItemName)
             {
                 var parent = _repository.GetCachedObject(_selected.Id);
-                var t = GetTypeByTitle("Сборочная единица");
+                foreach (var spcObject in listSpcObject)
+                {
+                    // определяем наименование секции спецификации
+                    // в будущем необходимо доработать 
+                    foreach (var spcSection in spcSections)
+                    {
+                        if (spcObject.SectionNumber == spcSection.Number)
+                            spcObject.SectionName = spcSection.Name;
+                    }
+                    if (!String.IsNullOrEmpty(spcObject.SectionName))
+                    {
+                        var t = GetTypeBySectionName(spcObject.SectionName);
+                        if (t != null)
+                        {
+                            var builder = _modifier.Create(parent, t);
+                        }
+                        
+                    }
+                        
+                    
+                }
+                //var t = GetTypeByTitle("Сборочная единица");
                 string s = t.Name.ToString();
                 Debug.WriteLine(s);
                 //Метод позволяет получить список всех типов.
                 //IEnumerable< IType > IObjectsRepository.GetTypes();
-                var builder = _modifier.Create(parent, _selected.Type);
+                //var builder = _modifier.Create(parent, _selected.Type);
                 //foreach (var attribute in _selected.Attributes)
                 //{
                 //    if (attribute.Value is string)
@@ -86,6 +131,12 @@ namespace Ascon.Pilot.SDK.CADReader
                     _worker.RunWorkerAsync(_path);
                 }
             }
+            // вызов окна с настройками 
+            if (itemName == ServiceMenu)
+            {
+                Debug.WriteLine("\"My menu in service\" was clicked");
+            }
+                
         }
 
         private void openSpwFile(object sender, DoWorkEventArgs args)
@@ -139,6 +190,15 @@ namespace Ascon.Pilot.SDK.CADReader
 
             _selected = dataObjects.FirstOrDefault();
             menuHost.AddItem(CreateCopyItemName, "S_et information", null, insertIndex);
+        }
+
+        public void BuildMenu(IMenuHost menuHost)
+        {
+            var menuItem = menuHost.GetItems().First();
+            //menuHost.AddSubItem(menuItem, ServiceMenu, "CAD Reader", null, 0);
+
+            //menuHost.AddItem("Setting", "Setting", null, 1);
+            //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
         }
     }
 }

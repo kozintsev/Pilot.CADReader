@@ -10,6 +10,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private string id;
         private string name;
         private int sectionNumber;
+        private string sectionName = String.Empty;
 
         public List<SpcColumn> Columns = null;
         
@@ -50,6 +51,19 @@ namespace Ascon.Pilot.SDK.CADReader
             set
             {
                 sectionNumber = value;
+            }
+        }
+
+        public string SectionName
+        {
+            get
+            {
+                return sectionName;
+            }
+
+            set
+            {
+                sectionName = value;
             }
         }
     }
