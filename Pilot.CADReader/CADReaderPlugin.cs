@@ -16,9 +16,9 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private readonly IObjectModifier _modifier;
         private readonly IObjectsRepository _repository;
-        private const string CreateCopyItemName = "InsertObjects";
-        private const string _command_name = "CopyPathCommand";
-        private const string ServiceMenu = "CADReaderSetting";
+        private const string ADD_INFORMATION_TO_PILOT = "InsertObjects";
+        private const string GET_INFORMATION_BY_FILE = "CopyPathCommand";
+        private const string SETTING_MENU_ITEM = "CADReaderSetting";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
         // выбранный с помощью контекстного меню клиента объект
@@ -41,6 +41,117 @@ namespace Ascon.Pilot.SDK.CADReader
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
             };
+        }
+
+
+        public void OnMenuItemClick(string itemName)
+        {
+            switch (itemName)
+            {
+                // если выбрано меню в клиенте
+                case ADD_INFORMATION_TO_PILOT:
+                    AddInformationByPilot();
+                    break;
+                // если выбрано меню на Pilot Storage
+                case GET_INFORMATION_BY_FILE:
+                    GetInformationByKompas();
+                    break;
+                case SETTING_MENU_ITEM:
+                    // вызов окна с настройками 
+                    Debug.WriteLine("\"My menu in service\" was clicked");
+                    break;
+            }
+        }
+
+
+
+        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
+        {
+            var icon = IconLoader.GetIcon(@"/Resources/icon.png");
+            var itemNames = menuHost.GetItems().ToList();
+            const string indexItemName = "mniShowProjectsExplorerCommand";
+            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
+
+            menuHost.AddItem(GET_INFORMATION_BY_FILE, "Get information", icon, insertIndex);
+            var item = selection.FirstOrDefault();
+            if (item == null)
+                return;
+            _path = item.Path;
+        }
+
+        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
+        {
+            if (isContext)
+                return;
+
+            var dataObjects = selection.ToArray();
+            if (dataObjects.Count() != 1)
+                return;
+
+            var itemNames = menuHost.GetItems().ToList();
+            const string indexItemName = "SetInfo";
+            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
+
+            _selected = dataObjects.FirstOrDefault();
+            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "S_et information", null, insertIndex);
+        }
+
+        public void BuildMenu(IMenuHost menuHost)
+        {
+            var menuItem = menuHost.GetItems().First();
+            //menuHost.AddSubItem(menuItem, ServiceMenu, "CAD Reader", null, 0);
+            //menuHost.AddItem("Setting", "Setting", null, 1);
+            //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
+        }
+
+        private void GetInformationByKompas()
+        {
+            var fInfo = new FileInfo(_path);
+            if (!fInfo.Exists) // file does not exist; do nothing
+                return;
+
+            var ext = fInfo.Extension.ToLower();
+            if (ext == ".spw" || ext == ".zip")
+            {
+                _worker.DoWork += openSpwFile;
+                _worker.RunWorkerAsync(_path);
+            }
+        }
+
+        private void AddInformationByPilot()
+        {
+            var parent = _repository.GetCachedObject(_selected.Id);
+            foreach (var spcObject in listSpcObject)
+            {
+                // определяем наименование секции спецификации
+                // в будущем необходимо доработать 
+                foreach (var spcSection in spcSections)
+                {
+                    if (spcObject.SectionNumber == spcSection.Number)
+                        spcObject.SectionName = spcSection.Name;
+                }
+                if (!String.IsNullOrEmpty(spcObject.SectionName))
+                {
+                    var t = GetTypeBySectionName(spcObject.SectionName);
+                    if (t != null)
+                    {
+                        var builder = _modifier.Create(parent, t);
+                        foreach (var attr in spcObject.Columns)
+                        {
+                            string val = attr.Value;
+                            // очишаем значение от служебных символов и выражений
+                            val = ValueTextClear(val);
+                            // в качестве наименование передаётся внутренее имя (а не то которое отображается)
+                            if (String.IsNullOrEmpty(attr.TypeName))
+                                continue;
+                            if (!String.IsNullOrEmpty(val))
+                                builder.SetAttribute(attr.TypeName, val);
+                        }
+                        _modifier.Apply();
+                    }
+
+                }
+            }
         }
 
         private IType GetTypeBySectionName(string sectionName)
@@ -77,68 +188,6 @@ namespace Ascon.Pilot.SDK.CADReader
             return str;
         }
 
-        public void OnMenuItemClick(string itemName)
-        {
-            // если выбрано меню в клиенте
-            if (itemName == CreateCopyItemName)
-            {
-                var parent = _repository.GetCachedObject(_selected.Id);
-                foreach (var spcObject in listSpcObject)
-                {
-                    // определяем наименование секции спецификации
-                    // в будущем необходимо доработать 
-                    foreach (var spcSection in spcSections)
-                    {
-                        if (spcObject.SectionNumber == spcSection.Number)
-                            spcObject.SectionName = spcSection.Name;
-                    }
-                    if (!String.IsNullOrEmpty(spcObject.SectionName))
-                    {
-                        var t = GetTypeBySectionName(spcObject.SectionName);
-                        if (t != null)
-                        {
-                            var builder = _modifier.Create(parent, t);
-                            foreach(var attr in spcObject.Columns)
-                            {
-                                string val = attr.Value;
-                                // очишаем значение от служебных символов и выражений
-                                val = ValueTextClear(val);
-                                // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-                                if (String.IsNullOrEmpty(attr.TypeName))
-                                    continue;
-                                if (!String.IsNullOrEmpty(val))
-                                    builder.SetAttribute(attr.TypeName, val);          
-                            }
-                            _modifier.Apply();
-                        }
-                        
-                    }
-                        
-                    
-                }
-            }
-            // если выбрано меню на Pilot Storage
-            if (itemName.Equals(_command_name, StringComparison.InvariantCultureIgnoreCase))
-            {
-                var fInfo = new FileInfo(_path);
-                if (!fInfo.Exists) // file does not exist; do nothing
-                    return;
-
-                var ext = fInfo.Extension.ToLower();
-                if (ext == ".spw" || ext == ".zip")
-                {
-                    _worker.DoWork += openSpwFile;
-                    _worker.RunWorkerAsync(_path);
-                }
-            }
-            // вызов окна с настройками 
-            if (itemName == ServiceMenu)
-            {
-                Debug.WriteLine("\"My menu in service\" was clicked");
-            }
-                
-        }
-
         private void openSpwFile(object sender, DoWorkEventArgs args)
         {
             var worker = sender as BackgroundWorker;
@@ -151,7 +200,7 @@ namespace Ascon.Pilot.SDK.CADReader
                 // событие вызываемое после парсинга спецификации
                 x.ParsingCompletedEvent += delegate (object s, EventArgs e)
                 {
-                    spcSections   = x.GetListSpcSection();
+                    spcSections = x.GetListSpcSection();
                     listSpcObject = x.GetListSpcObject();
                 };
                 if (x.Opened)
@@ -159,46 +208,6 @@ namespace Ascon.Pilot.SDK.CADReader
                     x.Run();
                 }
             }
-        }
-
-        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
-        {
-            var icon = IconLoader.GetIcon(@"/Resources/icon.png");
-            var itemNames = menuHost.GetItems().ToList();
-            const string indexItemName = "mniShowProjectsExplorerCommand";
-            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
-
-            menuHost.AddItem(_command_name, "Get information", icon, insertIndex);
-            var item = selection.FirstOrDefault();
-            if (item == null)
-                return;
-            _path = item.Path;
-        }
-
-        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
-        {
-            if (isContext)
-                return;
-
-            var dataObjects = selection.ToArray();
-            if (dataObjects.Count() != 1)
-                return;
-
-            var itemNames = menuHost.GetItems().ToList();
-            const string indexItemName = "SetInfo";
-            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
-
-            _selected = dataObjects.FirstOrDefault();
-            menuHost.AddItem(CreateCopyItemName, "S_et information", null, insertIndex);
-        }
-
-        public void BuildMenu(IMenuHost menuHost)
-        {
-            var menuItem = menuHost.GetItems().First();
-            //menuHost.AddSubItem(menuItem, ServiceMenu, "CAD Reader", null, 0);
-
-            //menuHost.AddItem("Setting", "Setting", null, 1);
-            //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
         }
     }
 }

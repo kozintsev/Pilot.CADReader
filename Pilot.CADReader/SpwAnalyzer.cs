@@ -11,7 +11,8 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     class SpwAnalyzer
     {
-        //private XmlReader reader;
+        public event EventHandler ParsingCompletedEvent;
+     
         private List<SpcSection> spcSections;
         private List<SpcObject> listSpcObject;
         private XDocument xDoc;
@@ -38,20 +39,6 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
-        
-
-        public event EventHandler ParsingCompletedEvent;
-
-        public List<SpcObject> GetListSpcObject()
-        {
-            return listSpcObject;
-        }
-
-        public List<SpcSection> GetListSpcSection()
-        {
-            return spcSections;
-        }
-
         public SpwAnalyzer(MemoryStream ms)
         {
             opened = false;
@@ -73,6 +60,17 @@ namespace Ascon.Pilot.SDK.CADReader
                 Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
             }
         }
+
+        public List<SpcObject> GetListSpcObject()
+        {
+            return listSpcObject;
+        }
+
+        public List<SpcSection> GetListSpcSection()
+        {
+            return spcSections;
+        }
+
         public void Run()
         {
             if (xDoc == null)
