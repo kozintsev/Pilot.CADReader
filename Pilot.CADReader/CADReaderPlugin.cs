@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,7 +23,6 @@ namespace Ascon.Pilot.SDK.CADReader
         private string _path;
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
-        private IDataObject _parent;
         IEnumerable<IType> pilotTypes;
         // задача для открытия и анализа файла спецификации
         Task<SpwAnalyzer> taskOpenSpwFile;
@@ -45,12 +43,11 @@ namespace Ascon.Pilot.SDK.CADReader
 
         public void OnMenuItemClick(string itemName)
         {
-            _parent = _repository.GetCachedObject(_selected.Id);
             switch (itemName)
             {
                 // если выбрано меню в клиенте
                 case ADD_INFORMATION_TO_PILOT:
-                    SetInformationOnMenuClick();
+                    SetInformationOnMenuClick(_selected.Id);
                     break;
                 // если выбрано меню на Pilot Storage
                 case GET_INFORMATION_BY_FILE:
@@ -58,7 +55,6 @@ namespace Ascon.Pilot.SDK.CADReader
                     break;
                 case SETTING_MENU_ITEM:
                     // вызов окна с настройками 
-                    Debug.WriteLine("\"My menu in service\" was clicked");
                     break;
             }
         }
@@ -71,7 +67,7 @@ namespace Ascon.Pilot.SDK.CADReader
             const string indexItemName = "mniShowProjectsExplorerCommand";
             var insertIndex = itemNames.IndexOf(indexItemName) + 1;
 
-            menuHost.AddItem(GET_INFORMATION_BY_FILE, "Get information", icon, insertIndex);
+            menuHost.AddItem(GET_INFORMATION_BY_FILE, "Получить информацию", icon, insertIndex);
             var item = selection.FirstOrDefault();
             if (item == null)
                 return;
@@ -92,7 +88,7 @@ namespace Ascon.Pilot.SDK.CADReader
             var insertIndex = itemNames.IndexOf(indexItemName) + 1;
 
             _selected = dataObjects.FirstOrDefault();
-            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "S_et information", null, insertIndex);
+            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -103,18 +99,19 @@ namespace Ascon.Pilot.SDK.CADReader
             //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
         }
 
-        private void SetInformationOnMenuClick()
+        private void SetInformationOnMenuClick(Guid selectedId)
         {
+            var parent = _repository.GetCachedObject(selectedId);
             if (taskOpenSpwFile != null)
             {
                 if (taskOpenSpwFile.Result.IsCompleted)
-                    AddInformationByPilot(_parent);
+                    AddInformationByPilot(parent);
             }
             else if (UserTakeFile())
             {
                 GetInformationByKompas(_path);
                 if (taskOpenSpwFile.Result.IsCompleted)
-                    AddInformationByPilot(_parent);
+                    AddInformationByPilot(parent);
             }
         }
 
