@@ -36,14 +36,13 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 z.ExtractZipToMemoryStream(fileName, "MetaInfo");
                 LoadFromMemoryStream(z.OutputMemStream);
-                // событие вызываемое после парсинга спецификации
                 if (Opened)
                 {
                     try
                     {
-                        Run();
+                        RunParsingSpw();
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         opened = false;
                         isCompleted = false;
@@ -63,7 +62,7 @@ namespace Ascon.Pilot.SDK.CADReader
             return spcSections;
         }
 
-        public void Run()
+        public void RunParsingSpw()
         {
             if (xDoc == null)
                 return;
@@ -168,7 +167,7 @@ namespace Ascon.Pilot.SDK.CADReader
                 xDoc = XDocument.Parse(s);
                 opened = true;
             }
-            catch (Exception ex)
+            catch
             {
                 opened = false;
                 isCompleted = false;

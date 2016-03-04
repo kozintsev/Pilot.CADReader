@@ -88,6 +88,8 @@ namespace Ascon.Pilot.SDK.CADReader
             var insertIndex = itemNames.IndexOf(indexItemName) + 1;
 
             _selected = dataObjects.FirstOrDefault();
+            if (_selected.Type.Name != "assembly")
+                return;
             menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
         }
 
@@ -229,10 +231,7 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private string ValueTextClear(string str)
         {
-            str = str.Replace("$|", "");
-            str = str.Replace(" @/", " ");
-            str = str.Replace("@/", " ");
-            return str;
+            return str.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
         }
     }
 }
