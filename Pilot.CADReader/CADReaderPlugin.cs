@@ -237,10 +237,5 @@ namespace Ascon.Pilot.SDK.CADReader
             str = str.Replace("@/", " ");
             return str;
         }
-
-        private void OpenSpwFile(string fileName)
-        {
-
-        }
     }
 }

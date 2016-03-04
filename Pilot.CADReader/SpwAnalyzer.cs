@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Xml.Linq;
 
@@ -8,8 +7,6 @@ namespace Ascon.Pilot.SDK.CADReader
 {
     class SpwAnalyzer
     {
-        public event EventHandler ParsingCompletedEvent;
-     
         private List<SpcSection> spcSections;
         private List<SpcObject> listSpcObject;
         private XDocument xDoc;
@@ -50,33 +47,11 @@ namespace Ascon.Pilot.SDK.CADReader
                     {
                         opened = false;
                         isCompleted = false;
-                        Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
                     }
                 }
             }
         }
 
-        private void LoadFromMemoryStream(MemoryStream ms)
-        {
-            opened = false;
-            isCompleted = false;
-            try
-            {
-                long p = ms.Position;
-                ms.Position = 0;
-                var reader = new StreamReader(ms);
-                string s = reader.ReadToEnd();
-                ms.Position = p;
-                xDoc = XDocument.Parse(s);
-                opened = true;
-            }
-            catch (Exception ex)
-            {
-                opened = false;
-                isCompleted = false;
-                Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
-            }
-        }
 
         public List<SpcObject> GetListSpcObject()
         {
@@ -179,6 +154,27 @@ namespace Ascon.Pilot.SDK.CADReader
             isCompleted = true;
         }
 
-       
+        private void LoadFromMemoryStream(MemoryStream ms)
+        {
+            opened = false;
+            isCompleted = false;
+            try
+            {
+                long p = ms.Position;
+                ms.Position = 0;
+                var reader = new StreamReader(ms);
+                string s = reader.ReadToEnd();
+                ms.Position = p;
+                xDoc = XDocument.Parse(s);
+                opened = true;
+            }
+            catch (Exception ex)
+            {
+                opened = false;
+                isCompleted = false;
+            }
+        }
+
+
     }
 }
