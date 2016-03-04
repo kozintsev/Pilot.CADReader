@@ -63,7 +63,10 @@
     <Compile Include="IconLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyDescription.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="CADReaderSettings.cs" />
+    <Compile Include="SettingsFeature.cs" />
+    <Compile Include="SettingsFeatureKeys.cs" />
+    <Compile Include="SettingsFeatureNode.cs" />
     <Compile Include="SpcColumn.cs" />
     <Compile Include="SpcObject.cs" />
     <Compile Include="SpcSection.cs" />

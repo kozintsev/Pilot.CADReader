@@ -1,0 +1,14 @@
+﻿namespace Ascon.Pilot.SDK.CADReader
+{
+    static class SettingsFeatureKeys
+    {
+        public static string SampleFeatureKey
+        {
+            get
+            {
+                return "CADReader-0A96A39A - E605 - 4203 - B376 - 381DE1CA89D1";
+            }
+        }
+
+    }
+}

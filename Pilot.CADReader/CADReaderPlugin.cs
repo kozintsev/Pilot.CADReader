@@ -6,19 +6,19 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+
 namespace Ascon.Pilot.SDK.CADReader
 {
     [Export(typeof(IStorageContextMenu))]
     [Export(typeof(IObjectContextMenu))]
-    [Export(typeof(IMainMenu))]
-    public class CADReaderPlugin : IStorageContextMenu, IObjectContextMenu, IMainMenu
+    public class CADReaderPlugin : IStorageContextMenu, IObjectContextMenu
     {
 
-        private readonly IObjectModifier _modifier;
-        private readonly IObjectsRepository _repository;
+        private readonly IObjectModifier _objectModifier;
+        private readonly IObjectsRepository _objectsRepository;
+        private readonly IPersonalSettings _personalSettings;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
-        private const string SETTING_MENU_ITEM = "SETTING_MENU_ITEM";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
         // выбранный с помощью контекстного меню клиента объект
@@ -33,11 +33,14 @@ namespace Ascon.Pilot.SDK.CADReader
 
 
         [ImportingConstructor]
-        public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository)
+        public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings)
         {
-            _modifier = modifier;
-            _repository = repository;
-            pilotTypes = _repository.GetTypes();
+            _objectModifier = modifier;
+            _objectsRepository = repository;
+            pilotTypes = _objectsRepository.GetTypes();
+            _personalSettings = personalSettings;
+            var s = new CADReaderSettings(personalSettings, repository);
+            
         }
 
 
@@ -52,9 +55,6 @@ namespace Ascon.Pilot.SDK.CADReader
                 // если выбрано меню на Pilot Storage
                 case GET_INFORMATION_BY_FILE:
                     GetInformationByKompas(_path);
-                    break;
-                case SETTING_MENU_ITEM:
-                    // вызов окна с настройками 
                     break;
             }
         }
@@ -93,17 +93,9 @@ namespace Ascon.Pilot.SDK.CADReader
             menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
         }
 
-        public void BuildMenu(IMenuHost menuHost)
-        {
-            var menuItem = menuHost.GetItems().First();
-            //menuHost.AddSubItem(menuItem, ServiceMenu, "CAD Reader", null, 0);
-            //menuHost.AddItem("Setting", "Setting", null, 1);
-            //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
-        }
-
         private void SetInformationOnMenuClick(Guid selectedId)
         {
-            var parent = _repository.GetCachedObject(selectedId);
+            var parent = _objectsRepository.GetCachedObject(selectedId);
             if (taskOpenSpwFile != null)
             {
                 if (taskOpenSpwFile.Result.IsCompleted)
@@ -184,7 +176,7 @@ namespace Ascon.Pilot.SDK.CADReader
                     var t = GetTypeBySectionName(spcObject.SectionName);
                     if (t != null)
                     {
-                        var builder = _modifier.Create(parent, t);
+                        var builder = _objectModifier.Create(parent, t);
                         foreach (var attr in spcObject.Columns)
                         {
                             string val = attr.Value;
@@ -196,7 +188,7 @@ namespace Ascon.Pilot.SDK.CADReader
                             if (!String.IsNullOrEmpty(val))
                                 builder.SetAttribute(attr.TypeName, val);
                         }
-                        _modifier.Apply();
+                        _objectModifier.Apply();
                     }
 
                 }
