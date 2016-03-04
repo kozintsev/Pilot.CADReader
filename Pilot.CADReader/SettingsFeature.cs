@@ -4,7 +4,7 @@ using System.Windows;
 namespace Ascon.Pilot.SDK.CADReader
 {
     [Export(typeof(ISettingsFeature))]
-    public class SampleSettingsFeature : ISettingsFeature
+    public class SettingsFeature : ISettingsFeature
     {
         private ISettingValueProvider _settingValueProvider;
 
@@ -15,7 +15,7 @@ namespace Ascon.Pilot.SDK.CADReader
 
         public string Key
         {
-            get { return SettingsFeatureKeys.SampleFeatureKey; }
+            get { return SettingsFeatureKeys.FeatureKey; }
         }
 
         public string Title

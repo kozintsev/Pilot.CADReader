@@ -66,7 +66,6 @@
     <Compile Include="CADReaderSettings.cs" />
     <Compile Include="SettingsFeature.cs" />
     <Compile Include="SettingsFeatureKeys.cs" />
-    <Compile Include="SettingsFeatureNode.cs" />
     <Compile Include="SpcColumn.cs" />
     <Compile Include="SpcObject.cs" />
     <Compile Include="SpcSection.cs" />

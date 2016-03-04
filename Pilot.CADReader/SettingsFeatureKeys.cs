@@ -2,7 +2,7 @@
 {
     static class SettingsFeatureKeys
     {
-        public static string SampleFeatureKey
+        public static string FeatureKey
         {
             get
             {

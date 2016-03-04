@@ -21,6 +21,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
+        private CADReaderSettings settings;
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         IEnumerable<IType> pilotTypes;
@@ -39,8 +40,7 @@ namespace Ascon.Pilot.SDK.CADReader
             _objectsRepository = repository;
             pilotTypes = _objectsRepository.GetTypes();
             _personalSettings = personalSettings;
-            var s = new CADReaderSettings(personalSettings, repository);
-            
+            settings = new CADReaderSettings(personalSettings, repository);
         }
 
 
