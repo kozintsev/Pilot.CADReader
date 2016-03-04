@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -32,14 +29,34 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 return isCompleted;
             }
+        }
 
-            set
+        public SpwAnalyzer(string fileName)
+        {
+            isCompleted = false;
+            ZFile z = new ZFile();
+            if (z.IsZip(fileName))
             {
-                isCompleted = value;
+                z.ExtractZipToMemoryStream(fileName, "MetaInfo");
+                LoadFromMemoryStream(z.OutputMemStream);
+                // событие вызываемое после парсинга спецификации
+                if (Opened)
+                {
+                    try
+                    {
+                        Run();
+                    }
+                    catch (Exception ex)
+                    {
+                        opened = false;
+                        isCompleted = false;
+                        Debug.WriteLine("SpwAnalyzer threw exception: " + ex.Message);
+                    }
+                }
             }
         }
 
-        public SpwAnalyzer(MemoryStream ms)
+        private void LoadFromMemoryStream(MemoryStream ms)
         {
             opened = false;
             isCompleted = false;
@@ -53,7 +70,7 @@ namespace Ascon.Pilot.SDK.CADReader
                 xDoc = XDocument.Parse(s);
                 opened = true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 opened = false;
                 isCompleted = false;
@@ -160,7 +177,6 @@ namespace Ascon.Pilot.SDK.CADReader
             // все циклы завершены
             // вызываем событие о завершении парсинга.
             isCompleted = true;
-            ParsingCompletedEvent(this, null);
         }
 
        

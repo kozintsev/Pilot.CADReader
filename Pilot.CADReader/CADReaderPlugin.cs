@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Ascon.Pilot.SDK.CADReader
 {
@@ -16,45 +17,44 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private readonly IObjectModifier _modifier;
         private readonly IObjectsRepository _repository;
-        private const string ADD_INFORMATION_TO_PILOT = "InsertObjects";
-        private const string GET_INFORMATION_BY_FILE = "CopyPathCommand";
-        private const string SETTING_MENU_ITEM = "CADReaderSetting";
+        private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
+        private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
+        private const string SETTING_MENU_ITEM = "SETTING_MENU_ITEM";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
         // выбранный с помощью контекстного меню клиента объект
-        private IDataObject _selected; 
-        // поток для открытия и анализа файла спецификации
-        private BackgroundWorker _worker;
+        private IDataObject _selected;
+        private IDataObject _parent;
+        IEnumerable<IType> pilotTypes;
+        // задача для открытия и анализа файла спецификации
+        Task<SpwAnalyzer> taskOpenSpwFile;
         // список объктов спецификации полученных в ходе парсинга
         private List<SpcObject> listSpcObject;
         // список секций спецификации
         private List<SpcSection> spcSections;
+
 
         [ImportingConstructor]
         public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository)
         {
             _modifier = modifier;
             _repository = repository;
-            
-            _worker = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true
-            };
+            pilotTypes = _repository.GetTypes();
         }
 
 
         public void OnMenuItemClick(string itemName)
         {
+            _parent = _repository.GetCachedObject(_selected.Id);
             switch (itemName)
             {
                 // если выбрано меню в клиенте
                 case ADD_INFORMATION_TO_PILOT:
-                    AddInformationByPilot();
+                    SetInformationOnMenuClick();
                     break;
                 // если выбрано меню на Pilot Storage
                 case GET_INFORMATION_BY_FILE:
-                    GetInformationByKompas();
+                    GetInformationByKompas(_path);
                     break;
                 case SETTING_MENU_ITEM:
                     // вызов окна с настройками 
@@ -62,7 +62,6 @@ namespace Ascon.Pilot.SDK.CADReader
                     break;
             }
         }
-
 
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
@@ -104,23 +103,74 @@ namespace Ascon.Pilot.SDK.CADReader
             //menuHost.AddSubItem("MyMenu", MySubMenu, "Submenu item", null, 0);
         }
 
-        private void GetInformationByKompas()
+        private void SetInformationOnMenuClick()
         {
-            var fInfo = new FileInfo(_path);
+            if (taskOpenSpwFile != null)
+            {
+                if (taskOpenSpwFile.Result.IsCompleted)
+                    AddInformationByPilot(_parent);
+            }
+            else if (UserTakeFile())
+            {
+                GetInformationByKompas(_path);
+                if (taskOpenSpwFile.Result.IsCompleted)
+                    AddInformationByPilot(_parent);
+            }
+        }
+
+        private void GetInformationByKompas(string filename)
+        {
+            var fInfo = new FileInfo(filename);
             if (!fInfo.Exists) // file does not exist; do nothing
                 return;
 
             var ext = fInfo.Extension.ToLower();
             if (ext == ".spw" || ext == ".zip")
             {
-                _worker.DoWork += openSpwFile;
-                _worker.RunWorkerAsync(_path);
+                taskOpenSpwFile = new Task<SpwAnalyzer>(() =>
+                {
+                    return new SpwAnalyzer(filename);
+                });
+                taskOpenSpwFile.Start();
+                taskOpenSpwFile.Wait();
+                if (taskOpenSpwFile.Result.IsCompleted)
+                {
+                    listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
+                    spcSections = taskOpenSpwFile.Result.GetListSpcSection();
+                }
+
             }
         }
 
-        private void AddInformationByPilot()
+
+        private string CreateOpenFileDialog()
         {
-            var parent = _repository.GetCachedObject(_selected.Id);
+            string filename = String.Empty;
+            var dlg = new OpenFileDialog();
+            dlg.Filter = "Компас-спецификация|;*.spw"; // Filter files by extension
+            dlg.FileOk += delegate (object sender, System.ComponentModel.CancelEventArgs e)
+            {
+                if (dlg != null)
+                {
+                    filename = dlg.FileName;
+                }
+            };
+            dlg.ShowDialog();
+            return filename;
+        }
+
+        private bool UserTakeFile()
+        {
+            string path = CreateOpenFileDialog();
+            if (String.IsNullOrEmpty(path))
+                return false;
+            _path = path;
+            return true;
+        }
+
+        private void AddInformationByPilot(IDataObject parent)
+        {
+            //var parent = _repository.GetCachedObject(parentId);
             foreach (var spcObject in listSpcObject)
             {
                 // определяем наименование секции спецификации
@@ -157,7 +207,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private IType GetTypeBySectionName(string sectionName)
         {
             string title;
-            foreach (var itype in _repository.GetTypes())
+            foreach (var itype in pilotTypes)
             {
                 title = itype.Title;
                 if (sectionName == "Документация" && title == "Документ")
@@ -188,26 +238,9 @@ namespace Ascon.Pilot.SDK.CADReader
             return str;
         }
 
-        private void openSpwFile(object sender, DoWorkEventArgs args)
+        private void OpenSpwFile(string fileName)
         {
-            var worker = sender as BackgroundWorker;
-            var fileName = args.Argument as string;
-            ZFile z = new ZFile();
-            if (z.IsZip(fileName))
-            {
-                z.ExtractZipToMemoryStream(fileName, "MetaInfo");
-                SpwAnalyzer x = new SpwAnalyzer(z.OutputMemStream);
-                // событие вызываемое после парсинга спецификации
-                x.ParsingCompletedEvent += delegate (object s, EventArgs e)
-                {
-                    spcSections = x.GetListSpcSection();
-                    listSpcObject = x.GetListSpcObject();
-                };
-                if (x.Opened)
-                {
-                    x.Run();
-                }
-            }
+
         }
     }
 }
