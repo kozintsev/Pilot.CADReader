@@ -53,7 +53,7 @@ namespace Ascon.Pilot.SDK.CADReader
             {
                 // если выбрано меню в клиенте
                 case ADD_INFORMATION_TO_PILOT:
-                    SetInformationOnMenuClick(_selected.Id);
+                    SetInformationOnMenuClick(_selected);
                     break;
                 // если выбрано меню на Pilot Storage
                 case GET_INFORMATION_BY_FILE:
@@ -91,35 +91,54 @@ namespace Ascon.Pilot.SDK.CADReader
             var insertIndex = itemNames.IndexOf(indexItemName) + 1;
 
             _selected = dataObjects.FirstOrDefault();
-            if (_selected.Type.Name != "assembly")
-                return;
-            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
+            if (_selected.Type.Name == "assembly" || _selected.Type.Name == "document")
+            {
+                menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
+            }
         }
 
-        private void SetInformationOnMenuClick(Guid selectedId)
+        private void SetInformationOnMenuClick(IDataObject selected)
         {
-            var parent = _objectsRepository.GetCachedObject(selectedId);
-
-            if (taskOpenSpwFile != null)
+            IDataObject parent;
+            if (selected.Type.Name == "assembly")
             {
-                if (taskOpenSpwFile.Result.IsCompleted)
-                    AddInformationByPilot(parent);
+                parent = _objectsRepository.GetCachedObject(selected.Id);
+            }
+            else if (selected.Type.Name == "document")
+            {
+                parent = _objectsRepository.GetCachedObject(selected.ParentId);
             }
             else
             {
-                var file = GetFileByPilotStorage();
-                if (file != null)
+                return;
+            }
+           
+            var file = GetFileByPilotStorage();
+            if (file != null)
+            {
+                var info = GetInformationByKompas(file);
+                if (info != null)
                 {
-                    GetInformationByKompas(file);
-                    if (taskOpenSpwFile.Result.IsCompleted)
+                    if (info.Result.IsCompleted)
+                    {
                         AddInformationByPilot(parent);
+                        return;
+                    }
                 }
-                else if (UserTakeFile())
+            }
+            if (taskOpenSpwFile != null)
+            {
+                if (taskOpenSpwFile.Result.IsCompleted)
                 {
-                    GetInformationByKompas(_path);
-                    if (taskOpenSpwFile.Result.IsCompleted)
-                        AddInformationByPilot(parent);
+                    AddInformationByPilot(parent);
+                    return;
                 }
+            }
+            if (UserTakeFile())
+            {
+                GetInformationByKompas(_path);
+                if (taskOpenSpwFile.Result.IsCompleted)
+                    AddInformationByPilot(parent);
             }
         }
 
@@ -134,16 +153,18 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private IFile GetFileByPilotStorage()
         {
+            if (_selected == null)
+                return null;
             var obj = _objectsRepository.GetCachedObject(_selected.RelatedSourceFiles.FirstOrDefault());
             IFile file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
             return file;
         }
 
 
-        private void GetInformationByKompas(IFile file)
+        private Task<SpwAnalyzer> GetInformationByKompas(IFile file)
         {
             if (!_fileProvider.Exists(file.Id))
-                return;
+                return null;
 
             var inputStream = _fileProvider.OpenRead(file);
             MemoryStream ms = new MemoryStream();
@@ -162,15 +183,14 @@ namespace Ascon.Pilot.SDK.CADReader
                 listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
                 spcSections = taskOpenSpwFile.Result.GetListSpcSection();
             }
-
-
+            return taskOpenSpwFile;
         }
 
-        private void GetInformationByKompas(string filename)
+        private Task<SpwAnalyzer> GetInformationByKompas(string filename)
         {
             var fInfo = new FileInfo(filename);
             if (!fInfo.Exists) // file does not exist; do nothing
-                return;
+                return null;
 
             var ext = fInfo.Extension.ToLower();
             if (ext == ".spw" || ext == ".zip")
@@ -186,8 +206,9 @@ namespace Ascon.Pilot.SDK.CADReader
                     listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
                     spcSections = taskOpenSpwFile.Result.GetListSpcSection();
                 }
-
+                return taskOpenSpwFile;
             }
+            return null;
         }
 
 
