@@ -17,6 +17,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
         private readonly IPersonalSettings _personalSettings;
+        private readonly IFileProvider _fileProvider;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
         // путь к файлу выбранному на Pilot Storage
@@ -34,12 +35,14 @@ namespace Ascon.Pilot.SDK.CADReader
 
 
         [ImportingConstructor]
-        public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings)
+        public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            pilotTypes = _objectsRepository.GetTypes();
             _personalSettings = personalSettings;
+            _fileProvider = fileProvider;
+            pilotTypes = _objectsRepository.GetTypes();
+
             settings = new CADReaderSettings(personalSettings, repository);
         }
 
@@ -96,17 +99,71 @@ namespace Ascon.Pilot.SDK.CADReader
         private void SetInformationOnMenuClick(Guid selectedId)
         {
             var parent = _objectsRepository.GetCachedObject(selectedId);
+
             if (taskOpenSpwFile != null)
             {
                 if (taskOpenSpwFile.Result.IsCompleted)
                     AddInformationByPilot(parent);
             }
-            else if (UserTakeFile())
+            else
             {
-                GetInformationByKompas(_path);
-                if (taskOpenSpwFile.Result.IsCompleted)
-                    AddInformationByPilot(parent);
+                var file = GetFileByPilotStorage();
+                if (file != null)
+                {
+                    GetInformationByKompas(file);
+                    if (taskOpenSpwFile.Result.IsCompleted)
+                        AddInformationByPilot(parent);
+                }
+                else if (UserTakeFile())
+                {
+                    GetInformationByKompas(_path);
+                    if (taskOpenSpwFile.Result.IsCompleted)
+                        AddInformationByPilot(parent);
+                }
             }
+        }
+
+        private bool IsCorrectFileExtension(string name)
+        {
+            var ext = Path.GetExtension(name).ToLower();
+            if (ext == ".spw" || ext == ".zip")
+                return true;
+
+            return false;
+        }
+
+        private IFile GetFileByPilotStorage()
+        {
+            var obj = _objectsRepository.GetCachedObject(_selected.RelatedSourceFiles.FirstOrDefault());
+            IFile file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
+            return file;
+        }
+
+
+        private void GetInformationByKompas(IFile file)
+        {
+            if (!_fileProvider.Exists(file.Id))
+                return;
+
+            var inputStream = _fileProvider.OpenRead(file);
+            MemoryStream ms = new MemoryStream();
+            inputStream.Seek(0, SeekOrigin.Begin);
+            inputStream.CopyTo(ms);
+            ms.Position = 0;
+
+            taskOpenSpwFile = new Task<SpwAnalyzer>(() =>
+            {
+                return new SpwAnalyzer(ms);
+            });
+            taskOpenSpwFile.Start();
+            taskOpenSpwFile.Wait();
+            if (taskOpenSpwFile.Result.IsCompleted)
+            {
+                listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
+                spcSections = taskOpenSpwFile.Result.GetListSpcSection();
+            }
+
+
         }
 
         private void GetInformationByKompas(string filename)

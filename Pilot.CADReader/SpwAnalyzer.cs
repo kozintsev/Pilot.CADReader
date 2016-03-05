@@ -34,7 +34,30 @@ namespace Ascon.Pilot.SDK.CADReader
             ZFile z = new ZFile();
             if (z.IsZip(fileName))
             {
-                z.ExtractZipToMemoryStream(fileName, "MetaInfo");
+                z.ExtractFileToMemoryStream(fileName, "MetaInfo");
+                LoadFromMemoryStream(z.OutputMemStream);
+                if (Opened)
+                {
+                    try
+                    {
+                        RunParsingSpw();
+                    }
+                    catch
+                    {
+                        opened = false;
+                        isCompleted = false;
+                    }
+                }
+            }
+        }
+
+        public SpwAnalyzer(Stream fileStream)
+        {
+            isCompleted = false;
+            ZFile z = new ZFile();
+            if (z.IsZip(fileStream))
+            {
+                z.ExtractFileToMemoryStream(fileStream, "MetaInfo");
                 LoadFromMemoryStream(z.OutputMemStream);
                 if (Opened)
                 {

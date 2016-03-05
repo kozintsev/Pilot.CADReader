@@ -22,7 +22,12 @@ namespace Ascon.Pilot.SDK.CADReader
             return ZipFile.IsZipFile(archiveFilenameIn);
         }
 
-        public void ExtractZipToMemoryStream(string archiveFilenameIn, string fileInArchive)
+        public bool IsZip(Stream fileStream)
+        {
+            return ZipFile.IsZipFile(fileStream, false);
+        }
+
+        public void ExtractFileToMemoryStream(string archiveFilenameIn, string fileInArchive)
         {
             var ms = new MemoryStream();
             try
@@ -44,6 +49,31 @@ namespace Ascon.Pilot.SDK.CADReader
                 outputMemStream = null;
                 Debug.WriteLine(ex.Message);
             }           
+        }
+
+        public void ExtractFileToMemoryStream(Stream fileStream, string fileInArchive)
+        {
+            var ms = new MemoryStream();
+            try
+            {
+                fileStream.Position = 0;
+                ZipFile zip = ZipFile.Read(fileStream);
+                foreach (ZipEntry entry in zip)
+                {
+                    if (entry.FileName == fileInArchive)
+                    {
+                        entry.Extract(ms);  // extract uncompressed content into a memorystream
+                        // the application can now access the MemoryStream here
+                        outputMemStream = ms;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                outputMemStream = null;
+                Debug.WriteLine(ex.Message);
+            }
         }
     }
 }
