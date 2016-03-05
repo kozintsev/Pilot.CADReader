@@ -180,8 +180,8 @@ namespace Ascon.Pilot.SDK.CADReader
             taskOpenSpwFile.Wait();
             if (taskOpenSpwFile.Result.IsCompleted)
             {
-                listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
-                spcSections = taskOpenSpwFile.Result.GetListSpcSection();
+                listSpcObject = taskOpenSpwFile.Result.GetListSpcObject;
+                spcSections = taskOpenSpwFile.Result.GetListSpcSection;
             }
             return taskOpenSpwFile;
         }
@@ -203,8 +203,8 @@ namespace Ascon.Pilot.SDK.CADReader
                 taskOpenSpwFile.Wait();
                 if (taskOpenSpwFile.Result.IsCompleted)
                 {
-                    listSpcObject = taskOpenSpwFile.Result.GetListSpcObject();
-                    spcSections = taskOpenSpwFile.Result.GetListSpcSection();
+                    listSpcObject = taskOpenSpwFile.Result.GetListSpcObject;
+                    spcSections = taskOpenSpwFile.Result.GetListSpcSection;
                 }
                 return taskOpenSpwFile;
             }
@@ -242,13 +242,6 @@ namespace Ascon.Pilot.SDK.CADReader
             //var parent = _repository.GetCachedObject(parentId);
             foreach (var spcObject in listSpcObject)
             {
-                // определяем наименование секции спецификации
-                // в будущем необходимо доработать 
-                foreach (var spcSection in spcSections)
-                {
-                    if (spcObject.SectionNumber == spcSection.Number)
-                        spcObject.SectionName = spcSection.Name;
-                }
                 if (!String.IsNullOrEmpty(spcObject.SectionName))
                 {
                     var t = GetTypeBySectionName(spcObject.SectionName);

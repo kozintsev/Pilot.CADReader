@@ -1,6 +1,4 @@
 ﻿using Ionic.Zip;
-using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -44,10 +42,9 @@ namespace Ascon.Pilot.SDK.CADReader
                                
                 }
             }
-            catch(Exception ex)
+            catch
             {
                 outputMemStream = null;
-                Debug.WriteLine(ex.Message);
             }           
         }
 
@@ -69,10 +66,9 @@ namespace Ascon.Pilot.SDK.CADReader
 
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 outputMemStream = null;
-                Debug.WriteLine(ex.Message);
             }
         }
     }

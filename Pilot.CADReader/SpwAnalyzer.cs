@@ -75,17 +75,17 @@ namespace Ascon.Pilot.SDK.CADReader
         }
 
 
-        public List<SpcObject> GetListSpcObject()
+        public List<SpcObject> GetListSpcObject
         {
-            return listSpcObject;
+            get { return listSpcObject; }
         }
 
-        public List<SpcSection> GetListSpcSection()
+        public List<SpcSection> GetListSpcSection
         {
-            return spcSections;
+            get { return spcSections; }
         }
 
-        public void RunParsingSpw()
+        private void RunParsingSpw()
         {
             if (xDoc == null)
                 return;
@@ -104,7 +104,7 @@ namespace Ascon.Pilot.SDK.CADReader
                         spcSection.Name = attr.Value;
                         isName = true;
                     }
-                        
+
                     if (attr.Name == "number")
                     {
                         string strnum = attr.Value;
@@ -112,29 +112,29 @@ namespace Ascon.Pilot.SDK.CADReader
                         if (Int32.TryParse(strnum, out number))
                             spcSection.Number = number;
                         isNumber = true;
-                    }   
+                    }
                 }
                 if (isName && isNumber)
                     spcSections.Add(spcSection);
                 isName = false;
                 isNumber = false;
             }
-            
+
             IEnumerable<XElement> spcObjects = xDoc.Descendants("spcObjects");
             SpcObject spcObject;
             listSpcObject = new List<SpcObject>();
             foreach (XElement e in spcObjects)
             {
-                foreach(XElement o in e.Elements())
+                foreach (XElement o in e.Elements())
                 {
                     spcObject = new SpcObject();
                     foreach (var attr in o.Attributes())
                         if (attr.Name == "id")
                             spcObject.Id = attr.Value;
-                    
-                    foreach(XElement context in o.Elements())
+
+                    foreach (XElement context in o.Elements())
                     {
-                        if(context.Name.ToString() == "section")
+                        if (context.Name.ToString() == "section")
                         {
                             foreach (var attr in context.Attributes())
                             {
@@ -147,7 +147,7 @@ namespace Ascon.Pilot.SDK.CADReader
                                 }
                             }
                         }
-                        if(context.Name.ToString() == "columns")
+                        if (context.Name.ToString() == "columns")
                         {
                             foreach (XElement column in context.Elements())
                             {
@@ -172,8 +172,22 @@ namespace Ascon.Pilot.SDK.CADReader
                 // парсинг объектов завершён
             }
             // все циклы завершены
+            JointSpcNameAndSpcObj();
             // вызываем событие о завершении парсинга.
             isCompleted = true;
+        }
+
+        private void JointSpcNameAndSpcObj()
+        {
+            foreach (var spcObject in listSpcObject)
+            {
+                // определяем наименование секции спецификации 
+                foreach (var spcSection in spcSections)
+                {
+                    if (spcObject.SectionNumber == spcSection.Number)
+                        spcObject.SectionName = spcSection.Name;
+                }
+            }
         }
 
         private void LoadFromMemoryStream(MemoryStream ms)
