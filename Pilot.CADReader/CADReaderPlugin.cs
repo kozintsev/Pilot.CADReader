@@ -237,15 +237,54 @@ namespace Ascon.Pilot.SDK.CADReader
             return true;
         }
 
+
+        private void SynchronizeCheck(IDataObject parent)
+        {
+            bool isName = false, isMark = false;
+            var linkobjects = parent.TypesByChildren;
+            foreach (var obj in linkobjects)
+            {
+                var key = obj.Key;
+                var i = obj.Value;
+                var currentObj =_objectsRepository.GetCachedObject(key);
+                string attrName = String.Empty;
+                string attrMark = String.Empty;
+                foreach (var a in currentObj.Attributes)
+                {
+                    if (a.Key == "name")
+                        attrName = a.Value.ToString();
+                    if (a.Key == "mark")
+                        attrMark = a.Value.ToString();
+
+                }
+                if (String.IsNullOrEmpty(attrName) && String.IsNullOrEmpty(attrMark))
+                    return;
+                foreach (var spcObj in listSpcObject)
+                {
+                    foreach (SpcColumn col in spcObj.Columns)
+                    {
+                        string s = ValueTextClear(col.Value);
+                        if (s == attrName)
+                            isName = true;
+                        if (s == attrMark)
+                            isMark = true;
+                    }
+                    if (isName && isMark)
+                        spcObj.IsSynchronized = true;
+                }
+            }
+        }
+
         private void AddInformationByPilot(IDataObject parent)
         {
             //var parent = _repository.GetCachedObject(parentId);
+            SynchronizeCheck(parent);
             foreach (var spcObject in listSpcObject)
             {
                 if (!String.IsNullOrEmpty(spcObject.SectionName))
                 {
                     var t = GetTypeBySectionName(spcObject.SectionName);
-                    if (t != null)
+                    if (t != null && !spcObject.IsSynchronized)
                     {
                         var builder = _objectModifier.Create(parent, t);
                         foreach (var attr in spcObject.Columns)

@@ -12,7 +12,8 @@ namespace Ascon.Pilot.SDK.CADReader
         private int sectionNumber;
         private string sectionName = String.Empty;
         public List<SpcColumn> Columns;
-        
+        private bool isSynchronized = false;
+
         public SpcObject()
         {
             Columns = new List<SpcColumn>();
@@ -69,6 +70,19 @@ namespace Ascon.Pilot.SDK.CADReader
             set
             {
                 sectionName = value;
+            }
+        }
+
+        public bool IsSynchronized
+        {
+            get
+            {
+                return isSynchronized;
+            }
+
+            set
+            {
+                isSynchronized = value;
             }
         }
     }
