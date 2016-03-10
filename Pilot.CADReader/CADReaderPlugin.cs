@@ -108,26 +108,25 @@ namespace Ascon.Pilot.SDK.CADReader
                 return;
             if (_selected.Type.Name == "assembly" || _selected.Type.Name == "document")
             {
-                menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", null, insertIndex);
+                var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
+                menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
             }
         }
 
         private void SetInformationOnMenuClick(IDataObject selected)
         {
             IDataObject parent;
-            if (selected.Type.Name == "assembly")
+            switch (selected.Type.Name)
             {
-                parent = _objectsRepository.GetCachedObject(selected.Id);
+                case "assembly":
+                    parent = _objectsRepository.GetCachedObject(selected.Id);
+                    break;
+                case "document":
+                    parent = _objectsRepository.GetCachedObject(selected.ParentId);
+                    break;
+                default:
+                    return;
             }
-            else if (selected.Type.Name == "document")
-            {
-                parent = _objectsRepository.GetCachedObject(selected.ParentId);
-            }
-            else
-            {
-                return;
-            }
-           
             var file = GetFileByPilotStorage();
             if (file != null)
             {
@@ -149,19 +148,19 @@ namespace Ascon.Pilot.SDK.CADReader
                     return;
                 }
             }
-            if (UserTakeFile())
-            {
-                GetInformationByKompas(_path);
-                if (_taskOpenSpwFile == null)
-                    return;
-                if (_taskOpenSpwFile.Result.IsCompleted)
-                    AddInformationByPilot(parent);
-            }
+            if (!UserTakeFile())
+                return; ;
+            GetInformationByKompas(_path);
+            if (_taskOpenSpwFile == null)
+                return;
+            if (_taskOpenSpwFile.Result.IsCompleted)
+                AddInformationByPilot(parent);
+
         }
 
         private bool IsCorrectFileExtension(string name)
         {
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
                 return false;
             var ext = Path.GetExtension(name).ToLower();
             if (ext == ".spw" || ext == ".zip")
@@ -175,7 +174,7 @@ namespace Ascon.Pilot.SDK.CADReader
             if (_selected == null)
                 return null;
             var obj = _objectsRepository.GetCachedObject(_selected.RelatedSourceFiles.FirstOrDefault());
-            IFile file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
+            var file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
             return file;
         }
 
@@ -321,7 +320,7 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private IType GetTypeBySectionName(string sectionName)
         {
-            string title;
+            var title = string.Empty;
             foreach (var itype in _pilotTypes)
             {
                 title = itype.Title;
