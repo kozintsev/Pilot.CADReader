@@ -5,6 +5,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+// ReSharper disable UseObjectOrCollectionInitializer
 
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -113,6 +114,24 @@ namespace Ascon.Pilot.SDK.CADReader
             }
         }
 
+        private static string ValueTextClear(string str)
+        {
+            return str.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
+        }
+
+        private static string CreateOpenFileDialog()
+        {
+            var filename = string.Empty;
+            var dlg = new OpenFileDialog();
+            dlg.Filter = "Компас-спецификация|;*.spw"; // Filter files by extension
+            dlg.FileOk += delegate (object sender, System.ComponentModel.CancelEventArgs e)
+            {
+                filename = dlg.FileName;
+            };
+            dlg.ShowDialog();
+            return filename;
+        }
+
         private void SetInformationOnMenuClick(IDataObject selected)
         {
             IDataObject parent;
@@ -190,10 +209,7 @@ namespace Ascon.Pilot.SDK.CADReader
             inputStream.CopyTo(ms);
             ms.Position = 0;
 
-            _taskOpenSpwFile = new Task<SpwAnalyzer>(() =>
-            {
-                return new SpwAnalyzer(ms);
-            });
+            _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
             _taskOpenSpwFile.Start();
             _taskOpenSpwFile.Wait();
             if (!_taskOpenSpwFile.Result.IsCompleted)
@@ -212,10 +228,7 @@ namespace Ascon.Pilot.SDK.CADReader
             var ext = fInfo.Extension.ToLower();
             if (ext == ".spw" || ext == ".zip")
             {
-                _taskOpenSpwFile = new Task<SpwAnalyzer>(() =>
-                {
-                    return new SpwAnalyzer(filename);
-                });
+                _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(filename));
                 _taskOpenSpwFile.Start();
                 _taskOpenSpwFile.Wait();
                 if (!_taskOpenSpwFile.Result.IsCompleted)
@@ -228,18 +241,7 @@ namespace Ascon.Pilot.SDK.CADReader
         }
 
 
-        private static string CreateOpenFileDialog()
-        {
-            var filename = string.Empty;
-            var dlg = new OpenFileDialog();
-            dlg.Filter = "Компас-спецификация|;*.spw"; // Filter files by extension
-            dlg.FileOk += delegate (object sender, System.ComponentModel.CancelEventArgs e)
-            {
-                    filename = dlg.FileName;
-            };
-            dlg.ShowDialog();
-            return filename;
-        }
+        
 
         private bool UserTakeFile()
         {
@@ -341,13 +343,10 @@ namespace Ascon.Pilot.SDK.CADReader
                 if (sectionName == "Комплекты" && title == "Комплект")
                     return itype;
             }
-            return null;//_repository.GetTypes().Where(t => t.Title == sectionName).FirstOrDefault();
+            return null;
         }
 
-        private static string ValueTextClear(string str)
-        {
-            return str.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
-        }
+        
 
 
     }

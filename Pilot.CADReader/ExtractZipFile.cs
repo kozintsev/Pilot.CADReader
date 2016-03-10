@@ -1,5 +1,6 @@
 ﻿using Ionic.Zip;
 using System.IO;
+using System.Linq;
 
 namespace Ascon.Pilot.SDK.CADReader
 {
@@ -30,16 +31,12 @@ namespace Ascon.Pilot.SDK.CADReader
             var ms = new MemoryStream();
             try
             {
-                ZipFile zip = ZipFile.Read(archiveFilenameIn);
-                foreach (ZipEntry entry in zip)
+                var zip = ZipFile.Read(archiveFilenameIn);
+                foreach (var entry in zip.Where(entry => entry.FileName == fileInArchive))
                 {
-                    if (entry.FileName == fileInArchive)
-                    {
-                        entry.Extract(ms);  // extract uncompressed content into a memorystream
-                        // the application can now access the MemoryStream here
-                        outputMemStream = ms;
-                    }
-                               
+                    entry.Extract(ms);  // extract uncompressed content into a memorystream
+                    // the application can now access the MemoryStream here
+                    outputMemStream = ms;
                 }
             }
             catch
@@ -54,16 +51,12 @@ namespace Ascon.Pilot.SDK.CADReader
             try
             {
                 fileStream.Position = 0;
-                ZipFile zip = ZipFile.Read(fileStream);
-                foreach (ZipEntry entry in zip)
+                var zip = ZipFile.Read(fileStream);
+                foreach (var entry in zip.Where(entry => entry.FileName == fileInArchive))
                 {
-                    if (entry.FileName == fileInArchive)
-                    {
-                        entry.Extract(ms);  // extract uncompressed content into a memorystream
-                        // the application can now access the MemoryStream here
-                        outputMemStream = ms;
-                    }
-
+                    entry.Extract(ms);  // extract uncompressed content into a memorystream
+                    // the application can now access the MemoryStream here
+                    outputMemStream = ms;
                 }
             }
             catch

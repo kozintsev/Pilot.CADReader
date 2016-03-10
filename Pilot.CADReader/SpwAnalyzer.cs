@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -31,72 +32,59 @@ namespace Ascon.Pilot.SDK.CADReader
         public SpwAnalyzer(string fileName)
         {
             isCompleted = false;
-            ZFile z = new ZFile();
-            if (z.IsZip(fileName))
+            var z = new ZFile();
+            if (!z.IsZip(fileName)) return;
+            z.ExtractFileToMemoryStream(fileName, "MetaInfo");
+            LoadFromMemoryStream(z.OutputMemStream);
+            if (!Opened) return;
+            try
             {
-                z.ExtractFileToMemoryStream(fileName, "MetaInfo");
-                LoadFromMemoryStream(z.OutputMemStream);
-                if (Opened)
-                {
-                    try
-                    {
-                        RunParsingSpw();
-                    }
-                    catch
-                    {
-                        opened = false;
-                        isCompleted = false;
-                    }
-                }
+                RunParsingSpw();
+            }
+            catch
+            {
+                opened = false;
+                isCompleted = false;
             }
         }
 
         public SpwAnalyzer(Stream fileStream)
         {
             isCompleted = false;
-            ZFile z = new ZFile();
-            if (z.IsZip(fileStream))
+            var z = new ZFile();
+            if (!z.IsZip(fileStream)) return;
+            z.ExtractFileToMemoryStream(fileStream, "MetaInfo");
+            LoadFromMemoryStream(z.OutputMemStream);
+            if (!Opened) return;
+            try
             {
-                z.ExtractFileToMemoryStream(fileStream, "MetaInfo");
-                LoadFromMemoryStream(z.OutputMemStream);
-                if (Opened)
-                {
-                    try
-                    {
-                        RunParsingSpw();
-                    }
-                    catch
-                    {
-                        opened = false;
-                        isCompleted = false;
-                    }
-                }
+                RunParsingSpw();
+            }
+            catch
+            {
+                opened = false;
+                isCompleted = false;
             }
         }
 
 
-        public List<SpcObject> GetListSpcObject
-        {
-            get { return listSpcObject; }
-        }
+        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+        public List<SpcObject> GetListSpcObject => listSpcObject;
 
-        public List<SpcSection> GetListSpcSection
-        {
-            get { return spcSections; }
-        }
+        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+        public List<SpcSection> GetListSpcSection => spcSections;
 
         private void RunParsingSpw()
         {
             if (xDoc == null)
                 return;
-            SpcSection spcSection;
             spcSections = new List<SpcSection>();
 
-            IEnumerable<XElement> sections = xDoc.Descendants("section");
+            var sections = xDoc.Descendants("section");
             bool isName = false, isNumber = false;
-            foreach (XElement section in sections)
+            foreach (var section in sections)
             {
-                spcSection = new SpcSection();
+                var spcSection = new SpcSection();
                 foreach (var attr in section.Attributes())
                 {
                     if (attr.Name == "name")
@@ -104,15 +92,12 @@ namespace Ascon.Pilot.SDK.CADReader
                         spcSection.Name = attr.Value;
                         isName = true;
                     }
-
-                    if (attr.Name == "number")
-                    {
-                        string strnum = attr.Value;
-                        int number = 0;
-                        if (Int32.TryParse(strnum, out number))
-                            spcSection.Number = number;
-                        isNumber = true;
-                    }
+                    if (attr.Name != "number") continue;
+                    var strnum = attr.Value;
+                    var number = 0;
+                    if (int.TryParse(strnum, out number))
+                        spcSection.Number = number;
+                    isNumber = true;
                 }
                 if (isName && isNumber)
                     spcSections.Add(spcSection);
@@ -120,19 +105,17 @@ namespace Ascon.Pilot.SDK.CADReader
                 isNumber = false;
             }
 
-            IEnumerable<XElement> spcObjects = xDoc.Descendants("spcObjects");
-            SpcObject spcObject;
+            var spcObjects = xDoc.Descendants("spcObjects");
             listSpcObject = new List<SpcObject>();
-            foreach (XElement e in spcObjects)
+            foreach (var e in spcObjects)
             {
-                foreach (XElement o in e.Elements())
+                foreach (var o in e.Elements())
                 {
-                    spcObject = new SpcObject();
-                    foreach (var attr in o.Attributes())
-                        if (attr.Name == "id")
-                            spcObject.Id = attr.Value;
+                    var spcObject = new SpcObject();
+                    foreach (var attr in o.Attributes().Where(attr => attr.Name == "id"))
+                        spcObject.Id = attr.Value;
 
-                    foreach (XElement context in o.Elements())
+                    foreach (var context in o.Elements())
                     {
                         if (context.Name.ToString() == "section")
                         {
@@ -140,30 +123,28 @@ namespace Ascon.Pilot.SDK.CADReader
                             {
                                 if (attr.Name == "number")
                                 {
-                                    string strnum = attr.Value;
-                                    int number = 0;
-                                    if (Int32.TryParse(strnum, out number))
+                                    var strnum = attr.Value;
+                                    var number = 0;
+                                    if (int.TryParse(strnum, out number))
                                         spcObject.SectionNumber = number;
                                 }
                             }
                         }
-                        if (context.Name.ToString() == "columns")
+                        if (context.Name.ToString() != "columns") continue;
+                        foreach (var column in context.Elements())
                         {
-                            foreach (XElement column in context.Elements())
+                            var col = new SpcColumn();
+                            foreach (var attr in column.Attributes())
                             {
-                                SpcColumn col = new SpcColumn();
-                                foreach (var attr in column.Attributes())
-                                {
-                                    if (attr.Name == "name")
-                                        col.Name = attr.Value.ToString();
-                                    if (attr.Name == "typeName")
-                                        col.TypeName = attr.Value.ToString();
-                                    if (attr.Name == "value")
-                                        col.Value = attr.Value.ToString();
-                                }
-                                // добавляем колонку спецификации в объект
-                                spcObject.Columns.Add(col);
+                                if (attr.Name == "name")
+                                    col.Name = attr.Value.ToString();
+                                if (attr.Name == "typeName")
+                                    col.TypeName = attr.Value.ToString();
+                                if (attr.Name == "value")
+                                    col.Value = attr.Value.ToString();
                             }
+                            // добавляем колонку спецификации в объект
+                            spcObject.Columns.Add(col);
                         }
                     }
                     // добавляем в список объект спецификации
@@ -182,10 +163,9 @@ namespace Ascon.Pilot.SDK.CADReader
             foreach (var spcObject in listSpcObject)
             {
                 // определяем наименование секции спецификации 
-                foreach (var spcSection in spcSections)
+                foreach (var spcSection in spcSections.Where(spcSection => spcObject.SectionNumber == spcSection.Number))
                 {
-                    if (spcObject.SectionNumber == spcSection.Number)
-                        spcObject.SectionName = spcSection.Name;
+                    spcObject.SectionName = spcSection.Name;
                 }
             }
         }
@@ -196,10 +176,10 @@ namespace Ascon.Pilot.SDK.CADReader
             isCompleted = false;
             try
             {
-                long p = ms.Position;
+                var p = ms.Position;
                 ms.Position = 0;
                 var reader = new StreamReader(ms);
-                string s = reader.ReadToEnd();
+                var s = reader.ReadToEnd();
                 ms.Position = p;
                 xDoc = XDocument.Parse(s);
                 opened = true;
