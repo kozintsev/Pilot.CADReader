@@ -1,11 +1,9 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-// ReSharper disable UseObjectOrCollectionInitializer
 
 
 namespace Ascon.Pilot.SDK.CADReader
@@ -23,7 +21,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private readonly IEnumerable<IType> _pilotTypes;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
-        private const string AboutProgramMenu = "AboutProgramMenu";
+        private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
         private CADReaderSettings _settings;
@@ -53,8 +51,8 @@ namespace Ascon.Pilot.SDK.CADReader
         public void BuildMenu(IMenuHost menuHost)
         {
             var menuItem = menuHost.GetItems().First();
-            menuHost.AddSubItem(menuItem, AboutProgramMenu, "О интеграции с КОМПАС", null, 0);
-            menuHost.AddItem(AboutProgramMenu, "О интеграции с КОМПАС", null, 1);
+            menuHost.AddSubItem(menuItem, ABOUT_PROGRAM_MENU, "О интеграции с КОМПАС", null, 0);
+            menuHost.AddItem(ABOUT_PROGRAM_MENU, "О интеграции с КОМПАС", null, 1);
         }
 
 
@@ -62,15 +60,13 @@ namespace Ascon.Pilot.SDK.CADReader
         {
             switch (itemName)
             {
-                // если выбрано меню в клиенте
                 case ADD_INFORMATION_TO_PILOT:
                     SetInformationOnMenuClick(_selected);
                     break;
-                // если выбрано меню на Pilot Storage
                 case GET_INFORMATION_BY_FILE:
                     GetInformationByKompas(_path);
                     break;
-                case AboutProgramMenu:
+                case ABOUT_PROGRAM_MENU:
                     new MessageBox().Show();
                     break;
             }
@@ -122,8 +118,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private static string CreateOpenFileDialog()
         {
             var filename = string.Empty;
-            var dlg = new OpenFileDialog();
-            dlg.Filter = "Компас-спецификация|;*.spw"; // Filter files by extension
+            var dlg = new OpenFileDialog {Filter = "Компас-спецификация|;*.spw"};
             dlg.FileOk += delegate (object sender, System.ComponentModel.CancelEventArgs e)
             {
                 filename = dlg.FileName;
