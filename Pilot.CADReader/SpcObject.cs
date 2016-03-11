@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Ascon.Pilot.SDK.CADReader
 {
@@ -11,8 +8,10 @@ namespace Ascon.Pilot.SDK.CADReader
         private string name;
         private int sectionNumber;
         private string sectionName;
-        public List<SpcColumn> Columns;
         private bool isSynchronized;
+
+        public List<SpcColumn> Columns;
+        
 
         public SpcObject()
         {
