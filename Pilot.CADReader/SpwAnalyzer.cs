@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpwAnalyzer
     {

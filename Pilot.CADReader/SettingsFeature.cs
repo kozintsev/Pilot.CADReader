@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.Composition;
 using System.Windows;
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     [Export(typeof(ISettingsFeature))]
     public class SettingsFeature : ISettingsFeature

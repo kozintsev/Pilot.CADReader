@@ -6,12 +6,12 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     [Export(typeof(IStorageContextMenu))]
     [Export(typeof(IObjectContextMenu))]
     [Export(typeof(IMainMenu))]
-    public class CADReaderPlugin : IStorageContextMenu, IObjectContextMenu, IMainMenu
+    public class SpwReaderPlugin : IStorageContextMenu, IObjectContextMenu, IMainMenu
     {
 
         private readonly IObjectModifier _objectModifier;
@@ -24,7 +24,7 @@ namespace Ascon.Pilot.SDK.CADReader
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         // путь к файлу выбранному на Pilot Storage
         private string _path;
-        private CADReaderSettings _settings;
+        private SpwReaderSettings _settings;
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         
@@ -37,7 +37,7 @@ namespace Ascon.Pilot.SDK.CADReader
 
 
         [ImportingConstructor]
-        public CADReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
+        public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
@@ -45,7 +45,7 @@ namespace Ascon.Pilot.SDK.CADReader
             _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
 
-            _settings = new CADReaderSettings(personalSettings, repository);
+            _settings = new SpwReaderSettings(personalSettings, repository);
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -255,7 +255,6 @@ namespace Ascon.Pilot.SDK.CADReader
             foreach (var obj in linkobjects)
             {
                 var key = obj.Key;
-                var i = obj.Value;
                 var currentObj =_objectsRepository.GetCachedObject(key);
                 var attrName = string.Empty;
                 var attrMark = string.Empty;
@@ -271,12 +270,11 @@ namespace Ascon.Pilot.SDK.CADReader
                     return;
                 foreach (var spcObj in _listSpcObject)
                 {
-                    foreach (var col in spcObj.Columns)
+                    foreach (var column in spcObj.Columns.Select(col => ValueTextClear(col.Value)))
                     {
-                        var s = ValueTextClear(col.Value);
-                        if (s == attrName)
+                        if (column == attrName)
                             isName = true;
-                        if (s == attrMark)
+                        if (column == attrMark)
                             isMark = true;
                     }
                     if (isName && isMark)
@@ -317,6 +315,7 @@ namespace Ascon.Pilot.SDK.CADReader
 
         private IType GetTypeBySectionName(string sectionName)
         {
+            // ReSharper disable once RedundantAssignment
             var title = string.Empty;
             foreach (var itype in _pilotTypes)
             {
@@ -340,9 +339,5 @@ namespace Ascon.Pilot.SDK.CADReader
             }
             return null;
         }
-
-        
-
-
     }
 }

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     public class ZFile
     {

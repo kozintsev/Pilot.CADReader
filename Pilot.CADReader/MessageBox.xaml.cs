@@ -11,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     /// <summary>
     /// Interaction logic for MessageBox.xaml

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ascon.Pilot.SDK.CADReader
+namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpcObject
     {

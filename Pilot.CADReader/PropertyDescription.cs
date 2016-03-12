@@ -1,4 +1,4 @@
-﻿namespace Ascon.Pilot.SDK.CADReader
+﻿namespace Ascon.Pilot.SDK.SpwReader
 {
     class PropertyDescription
     {
