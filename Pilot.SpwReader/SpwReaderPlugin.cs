@@ -123,22 +123,12 @@ namespace Ascon.Pilot.SDK.SpwReader
         /// "Умный" поиск секции в спецификации, возвращает True если передана название секции спецификации по ГОСТ
         /// </summary>
         /// <param name="sectionName">Наименование секции в спецификации, например: Сборочные единицы</param>
+        /// <param name="pattern">Шаблон для поиска секции</param>
         /// <returns>True or false</returns>
-        private static bool ParsingSectionName(string sectionName)
+        private static bool ParsingSectionName(string sectionName, string pattern)
         {
             sectionName = sectionName.ToLower();
-            var array = new string[]
-            {
-                "документ" ,
-                "комплекс",
-                "сборочн",
-                "детал",
-                "стандарт",
-                "прочи",
-                "материал",
-                "комплект"
-            };
-            return array.Any(sectionName.Contains);
+            return sectionName.Contains(pattern);          
         }
 
         private static string CreateOpenFileDialog()
@@ -346,21 +336,21 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var itype in _pilotTypes)
             {
                 title = itype.Title;
-                if (ParsingSectionName(sectionName) && title == "Документ")
+                if (ParsingSectionName(sectionName, "документ") && title == "Документ")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Комплекс")
+                if (ParsingSectionName(sectionName, "комплекс") && title == "Комплекс")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Сборочная единица")
+                if (ParsingSectionName(sectionName, "сборочн") && title == "Сборочная единица")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Деталь")
+                if (ParsingSectionName(sectionName, "детал") && title == "Деталь")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Стандартное изделие")
+                if (ParsingSectionName(sectionName, "стандарт") && title == "Стандартное изделие")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Прочее изделие")
+                if (ParsingSectionName(sectionName, "прочи") && title == "Прочее изделие")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Материал")
+                if (ParsingSectionName(sectionName, "материал") && title == "Материал")
                     return itype;
-                if (ParsingSectionName(sectionName) && title == "Комплект")
+                if (ParsingSectionName(sectionName, "комплект") && title == "Комплект")
                     return itype;
             }
             return null;
