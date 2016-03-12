@@ -181,11 +181,8 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!UserTakeFile())
                 return; ;
             GetInformationByKompas(_path);
-            if (_taskOpenSpwFile == null)
-                return;
-            if (_taskOpenSpwFile.Result.IsCompleted)
+            if ( _taskOpenSpwFile != null && _taskOpenSpwFile.Result.IsCompleted)
                 AddInformationByPilot(parent);
-
         }
 
         private bool IsCorrectFileExtension(string name)

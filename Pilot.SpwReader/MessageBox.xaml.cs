@@ -21,6 +21,10 @@ namespace Ascon.Pilot.SDK.SpwReader
         public MessageBox()
         {
             InitializeComponent();
+            var strVersion = System.Reflection.Assembly.GetExecutingAssembly()
+                .GetName().Version.ToString();
+            VersionBlock.Text = "Версия: " + strVersion;
+
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
