@@ -103,11 +103,8 @@ namespace Ascon.Pilot.SDK.SpwReader
             _selected = dataObjects.FirstOrDefault();
             if (_selected == null)
                 return;
-            if (_selected.Type.Name != "document")
-                return;
-            var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
-            if (parent.Type.Name != "assembly")
-                return;
+            if (!CheckObjectsType(_selected))
+                return;;
 
             var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
             menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
@@ -146,19 +143,18 @@ namespace Ascon.Pilot.SDK.SpwReader
             return filename;
         }
 
+        private bool CheckObjectsType(IDataObject selected)
+        {
+            if (selected.Type.Name != "document") return false;
+            var parent = _objectsRepository.GetCachedObject(selected.ParentId);
+            return parent.Type.Name == "assembly";
+        }
+
         private void SetInformationOnMenuClick(IDataObject selected)
         {
-            IDataObject parent;
-            if (selected.Type.Name != "document")
-            {
+            if (!CheckObjectsType(selected))
                 return;
-            }
-            else
-            {
-                parent = _objectsRepository.GetCachedObject(selected.ParentId);
-                if (parent.Type.Name != "assembly")
-                    return;
-            }
+            var parent = _objectsRepository.GetCachedObject(selected.ParentId);
             var file = GetFileByPilotStorage();
             if (file != null)
             {
