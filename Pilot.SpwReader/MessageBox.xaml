@@ -26,13 +26,13 @@
             <TextBlock Name ="VersionBlock" Text=""/>
             <TextBlock Text="Разработчик Козинцев Олег"/>
             <TextBlock>
-                <Hyperlink NavigateUri="mailto:o.kozintsev@gmail.com?subject=Pilot.SpwReaderPlugin" RequestNavigate="Hyperlink_RequestNavigate">e-mail: o.kozintsev@gmail.com</Hyperlink>
+                <Hyperlink NavigateUri="mailto:o.kozintsev@gmail.com?subject=Pilot.SpwReaderPlugin" RequestNavigate="OnHyperlinkRequestNavigateClick">e-mail: o.kozintsev@gmail.com</Hyperlink>
             </TextBlock>
             <TextBlock Text=""/>
-            <Button x:Name="btnClose" Content="Close" 
+            <Button x:Name="BtnClose" Content="Close" 
                     IsDefault="True"
                     Width="80" 
-                    IsCancel="True" Click="btnClose_Click"/>
+                    IsCancel="True" Click="OnBtnCloseClick"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -12,22 +12,10 @@ namespace Ascon.Pilot.SDK.SpwReader
         private List<SpcObject> listSpcObject;
         private XDocument xDoc;
         private bool opened;
-        public bool Opened
-        {
-            get
-            {
-                return opened;
-            }
-        }
+        public bool Opened => opened;
 
         private bool isCompleted;
-        public bool IsCompleted
-        {
-            get
-            {
-                return isCompleted;
-            }
-        }
+        public bool IsCompleted => isCompleted;
 
         public SpwAnalyzer(string fileName)
         {

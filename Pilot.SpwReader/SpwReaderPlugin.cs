@@ -8,32 +8,24 @@ using System.Threading.Tasks;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    [Export(typeof(IStorageContextMenu))]
-    [Export(typeof(IObjectContextMenu))]
     [Export(typeof(IMainMenu))]
-    public class SpwReaderPlugin : IStorageContextMenu, IObjectContextMenu, IMainMenu
+    [Export(typeof(IObjectContextMenu))]
+    public class SpwReaderPlugin : IObjectContextMenu, IMainMenu
     {
 
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
-        private readonly IPersonalSettings _personalSettings;
         private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
-        private const string GET_INFORMATION_BY_FILE = "GET_INFORMATION_BY_FILE";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
-        // путь к файлу выбранному на Pilot Storage
-        private string _path;
-        private SpwReaderSettings _settings;
         // выбранный с помощью контекстного меню клиента объект
-        private IDataObject _selected;
-        
+        private IDataObject _selected; 
         // задача для открытия и анализа файла спецификации
         private Task<SpwAnalyzer> _taskOpenSpwFile;
         // список объктов спецификации полученных в ходе парсинга
         private List<SpcObject> _listSpcObject;
         // список секций спецификации
-        private List<SpcSection> _spcSections;
 
 
         [ImportingConstructor]
@@ -41,11 +33,9 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            _personalSettings = personalSettings;
             _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
-
-            _settings = new SpwReaderSettings(personalSettings, repository);
+            //new SpwReaderSettings(personalSettings, repository);
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -58,13 +48,11 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         public void OnMenuItemClick(string itemName)
         {
+            // ReSharper disable once SwitchStatementMissingSomeCases
             switch (itemName)
             {
                 case ADD_INFORMATION_TO_PILOT:
                     SetInformationOnMenuClick(_selected);
-                    break;
-                case GET_INFORMATION_BY_FILE:
-                    GetInformationByKompas(_path);
                     break;
                 case ABOUT_PROGRAM_MENU:
                     new MessageBox().Show();
@@ -72,20 +60,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-
-        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
-        {
-            var icon = IconLoader.GetIcon(@"/Resources/icon.png");
-            var itemNames = menuHost.GetItems().ToList();
-            const string indexItemName = "mniShowProjectsExplorerCommand";
-            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
-
-            menuHost.AddItem(GET_INFORMATION_BY_FILE, "Получить информацию", icon, insertIndex);
-            var item = selection.FirstOrDefault();
-            if (item == null)
-                return;
-            _path = item.Path;
-        }
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
         {
@@ -156,31 +130,11 @@ namespace Ascon.Pilot.SDK.SpwReader
                 return;
             var parent = _objectsRepository.GetCachedObject(selected.ParentId);
             var file = GetFileByPilotStorage();
-            if (file != null)
-            {
-                var info = GetInformationByKompas(file);
-                if (info != null)
-                {
-                    if (info.Result.IsCompleted)
-                    {
-                        AddInformationByPilot(parent);
-                        return;
-                    }
-                }
-            }
-            if (_taskOpenSpwFile != null)
-            {
-                if (_taskOpenSpwFile.Result.IsCompleted)
-                {
-                    AddInformationByPilot(parent);
-                    return;
-                }
-            }
-            if (!UserTakeFile())
-                return; ;
-            GetInformationByKompas(_path);
-            if ( _taskOpenSpwFile != null && _taskOpenSpwFile.Result.IsCompleted)
-                AddInformationByPilot(parent);
+            if (file == null) return;
+            var info = GetInformationByKompas(file);
+            if (info == null) return;
+            if (!info.Result.IsCompleted) return;
+            AddInformationByPilot(parent);
         }
 
         private static bool IsCorrectFileExtension(string name)
@@ -218,40 +172,8 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!_taskOpenSpwFile.Result.IsCompleted)
                 return null;
             _listSpcObject = _taskOpenSpwFile.Result.GetListSpcObject;
-            _spcSections = _taskOpenSpwFile.Result.GetListSpcSection;
             return _taskOpenSpwFile;
         }
-
-        private Task<SpwAnalyzer> GetInformationByKompas(string filename)
-        {
-            var fInfo = new FileInfo(filename);
-            if (!fInfo.Exists) // file does not exist; do nothing
-                return null;
-
-            var ext = fInfo.Extension.ToLower();
-            if (ext != ".spw") return null;
-            _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(filename));
-            _taskOpenSpwFile.Start();
-            _taskOpenSpwFile.Wait();
-            if (!_taskOpenSpwFile.Result.IsCompleted)
-                return null;
-            _listSpcObject = _taskOpenSpwFile.Result.GetListSpcObject;
-            _spcSections = _taskOpenSpwFile.Result.GetListSpcSection;
-            return _taskOpenSpwFile;
-        }
-
-
-        
-
-        private bool UserTakeFile()
-        {
-            var path = CreateOpenFileDialog();
-            if (string.IsNullOrEmpty(path))
-                return false;
-            _path = path;
-            return true;
-        }
-
 
         private void SynchronizeCheck(IDataObject parent)
         {
