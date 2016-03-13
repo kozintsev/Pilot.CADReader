@@ -80,9 +80,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\icon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\menu_icon.svg" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,79 @@
-<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
-  <g>
-    <title>Layer 1</title>
-    <g id="svg_3">
-      <g id="svg_4">
-        <path d="m5.768173,24.632231l22.24199,32.608503l-5.5937,3.816498l-22.243299,-32.608501l5.59501,-3.8165zm52.151692,-1.267099c-0.4109,0.0019 -0.825802,0.122099 -1.191502,0.3706c-0.972698,0.6628 -1.222698,1.9909 -0.558598,2.9622c0.6628,0.9753 1.992199,1.2253 2.963497,0.561199c0.974003,-0.664101 1.224003,-1.9909 0.559902,-2.9636c-0.415001,-0.607899 -1.088501,-0.9335 -1.7733,-0.930399zm-11.613102,-17.02518c-0.410999,0.00181 -0.825699,0.12212 -1.190498,0.37117c-0.972599,0.66265 -1.2239,1.989491 -0.559898,2.96348c0.664097,0.97266 1.992199,1.224 2.9636,0.56116c0.9739,-0.66399 1.225197,-1.99212 0.561199,-2.96478c-0.4151,-0.6079 -1.0895,-0.93404 -1.774403,-0.93103zm2.850201,-3.200688c1.086502,-0.004712 2.155602,0.512837 2.8148,1.477988c1.054699,1.54431 0.6549,3.651051 -0.888,4.70452l-0.1758,0.118401l-11.800797,8.050758l7.796898,11.429701l11.8022,-8.0508l0.1744,-0.117201c1.5443,-1.054699 3.6511,-0.6563 4.705799,0.889301c1.052002,1.5443 0.653603,3.6511 -0.890701,4.705799l-0.174397,0.117201l-11.800903,8.0494l3.3685,4.9375l-24.0952,16.437401l-22.2436,-32.606602l24.0939,-16.43749l3.446602,5.052121l11.803501,-8.050824l0.173199,-0.11853c0.579601,-0.394978 1.237701,-0.585819 1.889599,-0.588645z" fill="#557CD2" transform="translate(0,0) scale(0.4999921917915344) " id="path1"/>
-      </g>
-    </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32"
+   height="32"
+   id="svg15005"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="menu_icon.svg">
+  <metadata
+     id="metadata15018">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs15016" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1538"
+     inkscape:window-height="878"
+     id="namedview15014"
+     showgrid="false"
+     inkscape:zoom="7.375"
+     inkscape:cx="16"
+     inkscape:cy="16"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg15005" />
+  <rect
+     style="opacity:1;fill:none;fill-opacity:1;stroke:none;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1"
+     id="rect15023"
+     width="32"
+     height="28.959"
+     x="0.086999997"
+     y="1.5690004" />
+  <g
+     transform="matrix(0.96,0,0,0.96,0.84845251,0.57338955)"
+     id="g15042">
+    <ellipse
+       rx="15"
+       ry="14.952332"
+       cy="15.986185"
+       cx="16.00532"
+       id="path6905"
+       style="fill:#557cd2;fill-opacity:1;stroke:none;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3362"
+       y="26.32835"
+       x="8.7971106"
+       style="font-style:normal;font-weight:normal;font-size:27.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:semi-expanded;font-size:27.5px;font-family:Ravie;-inkscape-font-specification:'Ravie Semi-Expanded';fill:#ffffff;stroke:none;stroke-linecap:square;stroke-linejoin:miter;stroke-opacity:1"
+         y="26.32835"
+         x="8.7971106"
+         id="tspan3364"
+         sodipodi:role="line">i</tspan></text>
   </g>
 </svg>

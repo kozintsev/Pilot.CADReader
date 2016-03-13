@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -12,7 +11,6 @@ namespace Ascon.Pilot.SDK.SpwReader
     [Export(typeof(IObjectContextMenu))]
     public class SpwReaderPlugin : IObjectContextMenu, IMainMenu
     {
-
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
         private readonly IFileProvider _fileProvider;
@@ -25,8 +23,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         private Task<SpwAnalyzer> _taskOpenSpwFile;
         // список объктов спецификации полученных в ходе парсинга
         private List<SpcObject> _listSpcObject;
-        // список секций спецификации
-
 
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
@@ -45,7 +41,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             menuHost.AddItem(ABOUT_PROGRAM_MENU, "О интеграции с КОМПАС", null, 1);
         }
 
-
         public void OnMenuItemClick(string itemName)
         {
             // ReSharper disable once SwitchStatementMissingSomeCases
@@ -59,7 +54,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                     break;
             }
         }
-
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
         {
@@ -105,18 +99,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             return sectionName.Contains(pattern);          
         }
 
-        private static string CreateOpenFileDialog()
-        {
-            var filename = string.Empty;
-            var dlg = new OpenFileDialog {Filter = "Компас-спецификация|;*.spw"};
-            dlg.FileOk += delegate (object sender, System.ComponentModel.CancelEventArgs e)
-            {
-                filename = dlg.FileName;
-            };
-            dlg.ShowDialog();
-            return filename;
-        }
-
         private bool CheckObjectsType(IDataObject selected)
         {
             if (selected.Type.Name != "document") return false;
@@ -129,12 +111,12 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!CheckObjectsType(selected))
                 return;
             var parent = _objectsRepository.GetCachedObject(selected.ParentId);
-            var file = GetFileByPilotStorage();
+            var file = GetFileFromPilotStorage(selected);
             if (file == null) return;
             var info = GetInformationByKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
-            AddInformationByPilot(parent);
+            AddInformationToPilot(parent);
         }
 
         private static bool IsCorrectFileExtension(string name)
@@ -145,15 +127,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             return ext == ".spw";
         }
 
-        private IFile GetFileByPilotStorage()
+        private IFile GetFileFromPilotStorage(IDataObject selected)
         {
-            if (_selected == null)
+            if (selected == null)
                 return null;
-            var obj = _objectsRepository.GetCachedObject(_selected.RelatedSourceFiles.FirstOrDefault());
+            var obj = _objectsRepository.GetCachedObject(selected.RelatedSourceFiles.FirstOrDefault());
             var file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
             return file;
         }
-
 
         private Task<SpwAnalyzer> GetInformationByKompas(IFile file)
         {
@@ -210,7 +191,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        private void AddInformationByPilot(IDataObject parent)
+        private void AddInformationToPilot(IDataObject parent)
         {
             //var parent = _repository.GetCachedObject(parentId);
             SynchronizeCheck(parent);
@@ -235,7 +216,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                         }
                         _objectModifier.Apply();
                     }
-
                 }
             }
         }
