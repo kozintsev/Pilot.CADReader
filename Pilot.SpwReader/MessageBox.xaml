@@ -25,7 +25,9 @@
                     Margin="10">
             <TextBlock Name ="VersionBlock" Text=""/>
             <TextBlock Text="Разработчик Козинцев Олег"/>
-            <TextBlock Text="e-mail:o.kozintsev@gmail.com"/>
+            <TextBlock>
+                <Hyperlink NavigateUri="mailto:o.kozintsev@gmail.com?subject=Pilot.SpwReaderPlugin" RequestNavigate="Hyperlink_RequestNavigate">e-mail: o.kozintsev@gmail.com</Hyperlink>
+            </TextBlock>
             <TextBlock Text=""/>
             <Button x:Name="btnClose" Content="Close" 
                     IsDefault="True"

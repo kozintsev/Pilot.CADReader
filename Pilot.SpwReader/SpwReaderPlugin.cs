@@ -103,11 +103,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             _selected = dataObjects.FirstOrDefault();
             if (_selected == null)
                 return;
-            if (_selected.Type.Name == "assembly" || _selected.Type.Name == "document")
-            {
-                var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
-                menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
-            }
+            if (_selected.Type.Name != "document")
+                return;
+            var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
+            if (parent.Type.Name != "assembly")
+                return;
+
+            var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
+            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
         }
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
@@ -146,15 +149,14 @@ namespace Ascon.Pilot.SDK.SpwReader
         private void SetInformationOnMenuClick(IDataObject selected)
         {
             IDataObject parent;
-            switch (selected.Type.Name)
+            if (selected.Type.Name != "document")
             {
-                case "assembly":
-                    parent = _objectsRepository.GetCachedObject(selected.Id);
-                    break;
-                case "document":
-                    parent = _objectsRepository.GetCachedObject(selected.ParentId);
-                    break;
-                default:
+                return;
+            }
+            else
+            {
+                parent = _objectsRepository.GetCachedObject(selected.ParentId);
+                if (parent.Type.Name != "assembly")
                     return;
             }
             var file = GetFileByPilotStorage();
@@ -185,15 +187,12 @@ namespace Ascon.Pilot.SDK.SpwReader
                 AddInformationByPilot(parent);
         }
 
-        private bool IsCorrectFileExtension(string name)
+        private static bool IsCorrectFileExtension(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return false;
             var ext = Path.GetExtension(name).ToLower();
-            if (ext == ".spw" || ext == ".zip")
-                return true;
-
-            return false;
+            return ext == ".spw";
         }
 
         private IFile GetFileByPilotStorage()
@@ -234,18 +233,15 @@ namespace Ascon.Pilot.SDK.SpwReader
                 return null;
 
             var ext = fInfo.Extension.ToLower();
-            if (ext == ".spw" || ext == ".zip")
-            {
-                _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(filename));
-                _taskOpenSpwFile.Start();
-                _taskOpenSpwFile.Wait();
-                if (!_taskOpenSpwFile.Result.IsCompleted)
-                    return null;
-                _listSpcObject = _taskOpenSpwFile.Result.GetListSpcObject;
-                _spcSections = _taskOpenSpwFile.Result.GetListSpcSection;
-                return _taskOpenSpwFile;
-            }
-            return null;
+            if (ext != ".spw") return null;
+            _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(filename));
+            _taskOpenSpwFile.Start();
+            _taskOpenSpwFile.Wait();
+            if (!_taskOpenSpwFile.Result.IsCompleted)
+                return null;
+            _listSpcObject = _taskOpenSpwFile.Result.GetListSpcObject;
+            _spcSections = _taskOpenSpwFile.Result.GetListSpcSection;
+            return _taskOpenSpwFile;
         }
 
 
