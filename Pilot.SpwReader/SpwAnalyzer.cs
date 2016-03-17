@@ -104,30 +104,41 @@ namespace Ascon.Pilot.SDK.SpwReader
                     {
                         if (context.Name.ToString() == "section")
                         {
-                            foreach (var attr in context.Attributes())
+                            foreach (var strnum in from attr in context.Attributes() where attr.Name == "number" select attr.Value)
                             {
-                                if (attr.Name != "number") continue;
-                                var strnum = attr.Value;
                                 int number;
                                 if (int.TryParse(strnum, out number))
                                     spcObject.SectionNumber = number;
                             }
                         }
-                        if (context.Name.ToString() != "columns") continue;
-                        foreach (var column in context.Elements())
+                        if (context.Name.ToString() == "columns")
                         {
-                            var col = new SpcColumn();
-                            foreach (var attr in column.Attributes())
+                            foreach (var column in context.Elements())
                             {
-                                if (attr.Name == "name")
-                                    col.Name = attr.Value;
-                                if (attr.Name == "typeName")
-                                    col.TypeName = attr.Value;
-                                if (attr.Name == "value")
-                                    col.Value = attr.Value;
+                                var col = new SpcColumn();
+                                foreach (var attr in column.Attributes())
+                                {
+                                    if (attr.Name == "name")
+                                        col.Name = attr.Value;
+                                    if (attr.Name == "typeName")
+                                        col.TypeName = attr.Value;
+                                    if (attr.Name == "value")
+                                        col.Value = attr.Value;
+                                }
+                                // добавляем колонку спецификации в объект
+                                spcObject.Columns.Add(col);
                             }
-                            // добавляем колонку спецификации в объект
-                            spcObject.Columns.Add(col);
+                        }
+                        if (context.Name.ToString() != "documents") continue;
+                        foreach (var document in context.Elements())
+                        {
+                            var doc = new SpcDocument();
+                            foreach (var attr in document.Attributes().Where(attr => attr.Name == "fileName"))
+                            {
+                                doc.FileName = attr.Value;
+                            }
+                            // добавить документы связанные с объектом спецификации
+                            spcObject.Documents.Add(doc);
                         }
                     }
                     // добавляем в список объект спецификации

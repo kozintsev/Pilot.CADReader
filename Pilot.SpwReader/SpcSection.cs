@@ -2,33 +2,8 @@
 {
     class SpcSection
     {
-        private int number;
-        private string name;
+        public int Number { get; set; }
 
-        public int Number
-        {
-            get
-            {
-                return number;
-            }
-
-            set
-            {
-                number = value;
-            }
-        }
-
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
-
-            set
-            {
-                name = value;
-            }
-        }
+        public string Name { get; set; }
     }
 }

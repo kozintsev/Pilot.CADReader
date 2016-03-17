@@ -4,87 +4,28 @@ namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpcObject
     {
-        private string id;
-        private string name;
-        private int sectionNumber;
-        private string sectionName;
-        private bool isSynchronized;
-
         public List<SpcColumn> Columns;
-        
+
+        public List<SpcDocument> Documents;
 
         public SpcObject()
         {
             Columns = new List<SpcColumn>();
+            Documents = new List<SpcDocument>();
             Columns.Clear();
-            sectionName = string.Empty;
-            isSynchronized = false;
+            Documents.Clear();
+            SectionName = string.Empty;
+            IsSynchronized = false;
         }
 
+        public string Id { get; set; }
 
-        public string Id
-        {
-            get
-            {
-                return id;
-            }
+        public string Name { get; set; }
 
-            set
-            {
-                id = value;
-            }
-        }
+        public int SectionNumber { get; set; }
 
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
+        public string SectionName { get; set; }
 
-            set
-            {
-                name = value;
-            }
-        }
-
-        public int SectionNumber
-        {
-            get
-            {
-                return sectionNumber;
-            }
-
-            set
-            {
-                sectionNumber = value;
-            }
-        }
-
-        public string SectionName
-        {
-            get
-            {
-                return sectionName;
-            }
-
-            set
-            {
-                sectionName = value;
-            }
-        }
-
-        public bool IsSynchronized
-        {
-            get
-            {
-                return isSynchronized;
-            }
-
-            set
-            {
-                isSynchronized = value;
-            }
-        }
+        public bool IsSynchronized { get; set; }
     }
 }

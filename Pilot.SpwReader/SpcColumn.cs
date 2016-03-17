@@ -2,103 +2,18 @@
 {
     class SpcColumn
     {
-        private string name;
-        private string typeName;
-        private int type;
-        private int number;
-        private int blockNumber;
-        private string value;
-        private int modified;
+        public string Name { get; set; }
 
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
+        public string TypeName { get; set; }
 
-            set
-            {
-                name = value;
-            }
-        }
+        public int Type { get; set; }
 
-        public string TypeName
-        {
-            get
-            {
-                return typeName;
-            }
+        public int Number { get; set; }
 
-            set
-            {
-                typeName = value;
-            }
-        }
+        public int BlockNumber { get; set; }
 
-        public int Type
-        {
-            get
-            {
-                return type;
-            }
+        public string Value { get; set; }
 
-            set
-            {
-                type = value;
-            }
-        }
-
-        public int Number
-        {
-            get
-            {
-                return number;
-            }
-
-            set
-            {
-                number = value;
-            }
-        }
-
-        public int BlockNumber
-        {
-            get
-            {
-                return blockNumber;
-            }
-
-            set
-            {
-                blockNumber = value;
-            }
-        }
-
-        public string Value
-        {
-            get
-            {
-                return value;
-            }
-
-            set
-            {
-                this.value = value;
-            }
-        }
-
-        public int Modified
-        {
-            get
-            {
-                return modified;
-            }
-
-            set
-            {
-                modified = value;
-            }
-        }
+        public int Modified { get; set; }
     }
 }
