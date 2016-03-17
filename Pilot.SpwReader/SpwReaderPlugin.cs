@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -99,6 +101,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             return sectionName.Contains(pattern);          
         }
 
+        private static bool IsCorrectFileExtension(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return false;
+            var ext = Path.GetExtension(name).ToLower();
+            return ext == ".spw";
+        }
+
         private bool CheckObjectsType(IDataObject selected)
         {
             if (selected.Type.Name != "document") return false;
@@ -119,14 +129,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             AddInformationToPilot(parent);
         }
 
-        private static bool IsCorrectFileExtension(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-                return false;
-            var ext = Path.GetExtension(name).ToLower();
-            return ext == ".spw";
-        }
-
         private IFile GetFileFromPilotStorage(IDataObject selected)
         {
             if (selected == null)
@@ -138,10 +140,11 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private Task<SpwAnalyzer> GetInformationByKompas(IFile file)
         {
+            var inputStream = _fileProvider.OpenRead(file);
+            if (inputStream == null)
+                return null;
             if (!_fileProvider.Exists(file.Id))
                 return null;
-
-            var inputStream = _fileProvider.OpenRead(file);
             var ms = new MemoryStream();
             inputStream.Seek(0, SeekOrigin.Begin);
             inputStream.CopyTo(ms);
