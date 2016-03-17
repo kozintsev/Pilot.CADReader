@@ -159,11 +159,10 @@ namespace Ascon.Pilot.SDK.SpwReader
         private void SynchronizeCheck(IDataObject parent)
         {
             bool isName = false, isMark = false;
-            var linkobjects = parent.TypesByChildren;
-            foreach (var obj in linkobjects)
+            var children = parent.TypesByChildren;
+            foreach (var obj in children)
             {
-                var key = obj.Key;
-                var currentObj =_objectsRepository.GetCachedObject(key);
+                var currentObj =_objectsRepository.GetCachedObject(obj.Key);
                 var attrName = string.Empty;
                 var attrMark = string.Empty;
                 foreach (var a in currentObj.Attributes)
@@ -193,30 +192,27 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private void AddInformationToPilot(IDataObject parent)
         {
-            //var parent = _repository.GetCachedObject(parentId);
             SynchronizeCheck(parent);
             foreach (var spcObject in _listSpcObject)
             {
-                if (!string.IsNullOrEmpty(spcObject.SectionName))
+                if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
+                var t = GetTypeBySectionName(spcObject.SectionName);
+                if (t == null || spcObject.IsSynchronized) continue;
+                var builder = _objectModifier.Create(parent, t);
+                foreach (var attr in spcObject.Columns)
                 {
-                    var t = GetTypeBySectionName(spcObject.SectionName);
-                    if (t != null && !spcObject.IsSynchronized)
-                    {
-                        var builder = _objectModifier.Create(parent, t);
-                        foreach (var attr in spcObject.Columns)
-                        {
-                            var val = attr.Value;
-                            // очишаем значение от служебных символов и выражений
-                            val = ValueTextClear(val);
-                            // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-                            if (string.IsNullOrEmpty(attr.TypeName))
-                                continue;
-                            if (!string.IsNullOrEmpty(val))
-                                builder.SetAttribute(attr.TypeName, val);
-                        }
-                        _objectModifier.Apply();
-                    }
+                    var val = attr.Value;
+                    if (string.IsNullOrEmpty(attr.TypeName) || string.IsNullOrEmpty(val)) continue;
+                    // очишаем значение от служебных символов и выражений
+                    val = ValueTextClear(val);
+                    // в качестве наименование передаётся внутренее имя (а не то которое отображается)
+                    int i;
+                    if (int.TryParse(val, out i))
+                        builder.SetAttribute(attr.TypeName, i);
+                    else
+                        builder.SetAttribute(attr.TypeName, val);
                 }
+                _objectModifier.Apply();
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -8,18 +7,16 @@ namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpwAnalyzer
     {
-        private List<SpcSection> spcSections;
-        private List<SpcObject> listSpcObject;
-        private XDocument xDoc;
-        private bool opened;
-        public bool Opened => opened;
+        private List<SpcSection> _spcSections;
+        private List<SpcObject> _listSpcObject;
+        private XDocument _xDoc;
 
-        private bool isCompleted;
-        public bool IsCompleted => isCompleted;
+        public bool Opened { get; private set; }
+        public bool IsCompleted { get; private set; }
 
         public SpwAnalyzer(string fileName)
         {
-            isCompleted = false;
+            IsCompleted = false;
             var z = new ZFile();
             if (!z.IsZip(fileName)) return;
             z.ExtractFileToMemoryStream(fileName, "MetaInfo");
@@ -31,14 +28,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
             catch
             {
-                opened = false;
-                isCompleted = false;
+                Opened = false;
+                IsCompleted = false;
             }
         }
 
         public SpwAnalyzer(Stream fileStream)
         {
-            isCompleted = false;
+            IsCompleted = false;
             var z = new ZFile();
             if (!z.IsZip(fileStream)) return;
             z.ExtractFileToMemoryStream(fileStream, "MetaInfo");
@@ -50,25 +47,25 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
             catch
             {
-                opened = false;
-                isCompleted = false;
+                Opened = false;
+                IsCompleted = false;
             }
         }
 
 
         // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-        public List<SpcObject> GetListSpcObject => listSpcObject;
+        public List<SpcObject> GetListSpcObject => _listSpcObject;
 
         // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-        public List<SpcSection> GetListSpcSection => spcSections;
+        public List<SpcSection> GetListSpcSection => _spcSections;
 
         private void RunParsingSpw()
         {
-            if (xDoc == null)
+            if (_xDoc == null)
                 return;
-            spcSections = new List<SpcSection>();
+            _spcSections = new List<SpcSection>();
 
-            var sections = xDoc.Descendants("section");
+            var sections = _xDoc.Descendants("section");
             bool isName = false, isNumber = false;
             foreach (var section in sections)
             {
@@ -88,13 +85,13 @@ namespace Ascon.Pilot.SDK.SpwReader
                     isNumber = true;
                 }
                 if (isName && isNumber)
-                    spcSections.Add(spcSection);
+                    _spcSections.Add(spcSection);
                 isName = false;
                 isNumber = false;
             }
 
-            var spcObjects = xDoc.Descendants("spcObjects");
-            listSpcObject = new List<SpcObject>();
+            var spcObjects = _xDoc.Descendants("spcObjects");
+            _listSpcObject = new List<SpcObject>();
             foreach (var e in spcObjects)
             {
                 foreach (var o in e.Elements())
@@ -109,13 +106,11 @@ namespace Ascon.Pilot.SDK.SpwReader
                         {
                             foreach (var attr in context.Attributes())
                             {
-                                if (attr.Name == "number")
-                                {
-                                    var strnum = attr.Value;
-                                    var number = 0;
-                                    if (int.TryParse(strnum, out number))
-                                        spcObject.SectionNumber = number;
-                                }
+                                if (attr.Name != "number") continue;
+                                var strnum = attr.Value;
+                                int number;
+                                if (int.TryParse(strnum, out number))
+                                    spcObject.SectionNumber = number;
                             }
                         }
                         if (context.Name.ToString() != "columns") continue;
@@ -125,43 +120,43 @@ namespace Ascon.Pilot.SDK.SpwReader
                             foreach (var attr in column.Attributes())
                             {
                                 if (attr.Name == "name")
-                                    col.Name = attr.Value.ToString();
+                                    col.Name = attr.Value;
                                 if (attr.Name == "typeName")
-                                    col.TypeName = attr.Value.ToString();
+                                    col.TypeName = attr.Value;
                                 if (attr.Name == "value")
-                                    col.Value = attr.Value.ToString();
+                                    col.Value = attr.Value;
                             }
                             // добавляем колонку спецификации в объект
                             spcObject.Columns.Add(col);
                         }
                     }
                     // добавляем в список объект спецификации
-                    listSpcObject.Add(spcObject);
+                    _listSpcObject.Add(spcObject);
                 }
                 // парсинг объектов завершён
             }
             // все циклы завершены
             JointSpcNameAndSpcObj();
             // вызываем событие о завершении парсинга.
-            isCompleted = true;
+            IsCompleted = true;
         }
 
         private void JointSpcNameAndSpcObj()
         {
-            foreach (var spcObject in listSpcObject)
+            foreach (var spcObject in _listSpcObject)
             {
                 // определяем наименование секции спецификации 
-                foreach (var spcSection in spcSections.Where(spcSection => spcObject.SectionNumber == spcSection.Number))
+                foreach (var spcSection in _spcSections.Where(spcSection => spcObject.SectionNumber == spcSection.Number))
                 {
                     spcObject.SectionName = spcSection.Name;
                 }
             }
         }
 
-        private void LoadFromMemoryStream(MemoryStream ms)
+        private void LoadFromMemoryStream(Stream ms)
         {
-            opened = false;
-            isCompleted = false;
+            Opened = false;
+            IsCompleted = false;
             try
             {
                 var p = ms.Position;
@@ -169,13 +164,13 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var reader = new StreamReader(ms);
                 var s = reader.ReadToEnd();
                 ms.Position = p;
-                xDoc = XDocument.Parse(s);
-                opened = true;
+                _xDoc = XDocument.Parse(s);
+                Opened = true;
             }
             catch
             {
-                opened = false;
-                isCompleted = false;
+                Opened = false;
+                IsCompleted = false;
             }
         }
 
