@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
@@ -7,6 +8,8 @@ namespace Ascon.Pilot.SDK.SpwReader
         public List<SpcColumn> Columns;
 
         public List<SpcDocument> Documents;
+
+        public Guid GlobalId { get; set; }
 
         public SpcObject()
         {

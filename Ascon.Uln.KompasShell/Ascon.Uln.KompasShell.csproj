@@ -55,7 +55,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\KAPITypes\KAPITypes.csproj">
+    <ProjectReference Include="..\KAPITypes\KAPITypes.csproj">
       <Project>{3B02F815-F2E7-45A2-B828-8AA4DA54D54F}</Project>
       <Name>KAPITypes</Name>
     </ProjectReference>

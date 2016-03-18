@@ -193,6 +193,11 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
+        private void AddPdfFileToPilot(IObjectBuilder builder)
+        {
+            //builder.AddFile(fileName, )
+        }
+
         private void AddInformationToPilot(IDataObject parent)
         {
             SynchronizeCheck(parent);
@@ -216,6 +221,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                         builder.SetAttribute(attr.TypeName, val);
                 }
                 _objectModifier.Apply();
+                spcObject.GlobalId = builder.DataObject.Id;
             }
         }
 
