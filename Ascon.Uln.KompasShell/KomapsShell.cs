@@ -1,0 +1,189 @@
+﻿// Для работы с API Компас Разработал Козинцев О.В. 2013 - 2016
+using System;
+using System.Collections.Generic;
+using Microsoft.Win32;
+using System.Runtime.InteropServices;
+using System.IO;
+// Библиотеки подключаются из каталога c:\Program Files\ASCON\KOMPAS-3D V16\SDK\C#\Common\
+using Kompas6API5;
+using KompasAPI7;
+using Pdf2d_LIBRARY;
+
+
+namespace Ascon.Uln.KompasShell
+{
+    public class KomapsShell
+    {
+        #region Custom declarations        
+        private ksDocument2D _doc2D;
+        private _Application _kompasApp;
+        private KompasObject _kompasObj;
+        #endregion
+
+        public List<string> Log { get; }
+
+        public KomapsShell()
+        {
+            Log = new List<string>();
+            Log.Clear();
+        }
+
+        public bool InitKompas(out string result)
+        {
+            result = string.Empty;
+            try
+            {    	
+                var t = Type.GetTypeFromProgID("KOMPAS.Application.5");
+                _kompasObj = (KompasObject)Activator.CreateInstance(t);               
+                _kompasApp = (_Application)_kompasObj.ksGetApplication7();                
+                if (_kompasApp == null)
+                    return false; 
+            }
+            catch
+            {
+                result = "Error: Компас не установлен";
+                AddLog(result);
+                return false;
+            }
+            result = string.Empty;
+            return true;
+        }
+        /// <summary>
+        ///Завершение работы с Компас 
+        /// </summary>   
+        public void ExitKompas()
+        {
+            if (_kompasObj == null) return;
+            try
+            {
+                _kompasObj.Quit();
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(_kompasObj);
+            }
+        }
+
+        public bool OpenFileKompas(string fileName, out string result)
+        {
+            var fileopen = false;
+            if (_kompasObj != null)
+            {
+                _doc2D = (ksDocument2D)_kompasObj.Document2D();
+                if (_doc2D != null) fileopen = _doc2D.ksOpenDocument(fileName, false);
+                if (!fileopen)
+                {
+                    result = "Error: Не могу открыть файл";
+                    AddLog(result);
+                    return false;
+                }
+
+                _kompasObj.Visible = true;
+                var err = _kompasObj.ksReturnResult();
+                if (err != 0) _kompasObj.ksResultNULL();
+
+            }
+            else
+            {
+                result = "Warning: Подключение с Компасом не установлено";
+                AddLog(result);
+                return false;
+            }
+            result = string.Empty;
+            return true;
+        }         
+
+        public bool ConvertToPdf(string fileName, string outFileName, out string result)
+        {
+            result = string.Empty;
+            #if DEBUG
+                AddLog("Запускаем преобразование в PDF " + fileName);
+            #endif
+            string pathOfConverter = null;
+            object valueOfRegistry = null;
+            try
+            {
+                var registryKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).
+                    OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d");
+                if (registryKey != null)
+                {
+                    valueOfRegistry = registryKey.GetValue(@"Path");
+                }                
+                if (valueOfRegistry == null)
+                {
+                    registryKey =
+                        RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64).
+                    OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d");
+                    if (registryKey != null)
+                    {
+                        valueOfRegistry = registryKey.GetValue(@"Path");
+                    }                    
+                    if (valueOfRegistry == null)
+                    {
+                        result = "Error: Не зарегистрирован модуль конвертера документов КОМПАС в формат PDF";
+                        AddLog(result);
+                        return false;
+                    }
+                }
+                pathOfConverter = valueOfRegistry as string;
+            }
+            catch
+            {
+                #if DEBUG
+                    AddLog("Исключение при попытки получить путь к Pdf2d.dll из реестра");
+                #endif
+            }
+            if (!File.Exists(pathOfConverter))
+            {
+                result = "Файл Pdf2d.dll не найден";
+                AddLog(result);  
+                return false;
+            }
+            try
+            {
+                IConverter converter = _kompasApp.Converter[pathOfConverter]; 
+                if (converter != null)
+                {
+                    try
+                    {
+                        IPdf2dParam pdfPrm = converter.ConverterParameters(0);
+                        if (pdfPrm != null)
+                        {
+                            pdfPrm.ColorType = 0;
+                        }
+                    }
+                    catch
+                    {
+                        AddLog("Warning: Не возможно установить чёрно-белый формат");
+                    }
+                    var r = converter.Convert(fileName, outFileName, 0, false);
+                if (r == 1) 
+                        return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+            return false;
+        }
+
+        #region Реализаця интерфейса IDisposable
+        public void Dispose()
+        {
+            if (_kompasObj != null)
+            {
+                Marshal.ReleaseComObject(_kompasObj);
+                GC.SuppressFinalize(_kompasObj);
+                _kompasObj = null;
+            }
+        }
+        #endregion
+
+        private void AddLog(string msg)
+        {
+            Log.Add(msg);
+        }
+
+    }
+}
