@@ -101,7 +101,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             return sectionName.Contains(pattern);          
         }
 
-        private static bool IsCorrectFileExtension(string name)
+        private static bool IsSpwFileExtension(string name)
         {
             if (string.IsNullOrEmpty(name))
                 return false;
@@ -134,7 +134,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (selected == null)
                 return null;
             var obj = _objectsRepository.GetCachedObject(selected.RelatedSourceFiles.FirstOrDefault());
-            var file = obj.Files.FirstOrDefault(f => IsCorrectFileExtension(f.Name));
+            var file = obj.Files.FirstOrDefault(f => IsSpwFileExtension(f.Name));
             return file;
         }
 
