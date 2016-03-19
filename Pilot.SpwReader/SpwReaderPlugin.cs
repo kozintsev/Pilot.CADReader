@@ -205,10 +205,9 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        private void AddPdfFileToPilot(IObjectBuilder building, SpcObject spcObject)
+        private void AddPdfFileToPilotObject(IObjectBuilder builder, SpcObject spcObject)
         {         
             if (!_isKompasInit) return;
-
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
             if (doc == null) return;
             var fullPath = doc.FileName;
@@ -229,7 +228,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     var array = new byte[fileStream.Length];
                     fileStream.Read(array, 0, array.Length);
                     fileStream.Position = 0;
-                    building.AddFile(name, fileStream, DateTime.Now, DateTime.Now, DateTime.Now);
+                    builder.AddFile(name, fileStream, DateTime.Now, DateTime.Now, DateTime.Now);
                 }
             }
             catch (Exception ex)
@@ -261,7 +260,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                         builder.SetAttribute(attr.TypeName, val);
                 }
                 spcObject.GlobalId = builder.DataObject.Id;
-                AddPdfFileToPilot(builder, spcObject);
+                AddPdfFileToPilotObject(builder, spcObject);
                 _objectModifier.Apply();
             }
         }
