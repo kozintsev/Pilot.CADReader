@@ -205,27 +205,19 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        private void AddPdfFileToPilotObject(IObjectBuilder builder, SpcObject spcObject)
+        private void AddPdfFileToPilotObject(IObjectBuilder builder, string fileName)
         {         
             if (!_isKompasInit) return;
-            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
-            if (doc == null) return;
-            var fullPath = doc.FileName;
-            if (!File.Exists(fullPath)) return;
+            if (!File.Exists(fileName)) return;
             var pdfFile = Path.GetTempFileName() + ".pdf";
             string message;
-            var isConvert = _komaps.ConvertToPdf(fullPath, pdfFile, out message);
+            var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
             if (!isConvert)
             {
                 Logger.Error(message);
                 return;
             }
             builder.AddFile(pdfFile);
-            string[] paths = { fullPath };
-            var storageObjects =_objectsRepository.GetStorageObjects(paths);
-            var storageObject = storageObjects.FirstOrDefault();
-            if (storageObject != null)
-                builder.AddSourceFileRelation(storageObject.DataObject.Id);
         }
 
         private void AddInformationToPilot(IDataObject parent)
@@ -251,7 +243,17 @@ namespace Ascon.Pilot.SDK.SpwReader
                         builder.SetAttribute(attr.TypeName, val);
                 }
                 spcObject.GlobalId = builder.DataObject.Id;
-                AddPdfFileToPilotObject(builder, spcObject);
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
+                if (doc != null)
+                {
+                    var fileName = doc.FileName;
+                    string[] paths = { fileName };
+                    var storageObjects = _objectsRepository.GetStorageObjects(paths);
+                    var storageObject = storageObjects.FirstOrDefault();
+                    if (storageObject != null)
+                        builder.AddSourceFileRelation(storageObject.DataObject.Id);
+                    AddPdfFileToPilotObject(builder, fileName);
+                }
                 _objectModifier.Apply();
             }
         }
