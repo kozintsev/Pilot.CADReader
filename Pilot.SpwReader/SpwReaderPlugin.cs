@@ -221,6 +221,11 @@ namespace Ascon.Pilot.SDK.SpwReader
                 return;
             }
             builder.AddFile(pdfFile);
+            string[] paths = { fullPath };
+            var storageObjects =_objectsRepository.GetStorageObjects(paths);
+            var storageObject = storageObjects.FirstOrDefault();
+            if (storageObject != null)
+                builder.AddSourceFileRelation(storageObject.DataObject.Id);
         }
 
         private void AddInformationToPilot(IDataObject parent)

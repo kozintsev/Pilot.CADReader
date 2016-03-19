@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 
 namespace Ascon.Pilot.SDK.SpwReader
@@ -11,8 +12,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         public MessageBox()
         {
             InitializeComponent();
-            var strVersion = System.Reflection.Assembly.GetExecutingAssembly()
-                .GetName().Version.ToString();
+            var strVersion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
             VersionBlock.Text = "Версия: " + strVersion;
 
         }
