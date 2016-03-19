@@ -134,7 +134,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
             AddInformationToPilot(parent);
-            _komaps.Dispose();
+            _komaps.ExitKompas();
         }
 
         private IFile GetFileFromPilotStorage(IDataObject selected)
@@ -212,7 +212,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (doc == null) return;
             var fullPath = doc.FileName;
             if (!File.Exists(fullPath)) return;
-            var name = Path.GetFileNameWithoutExtension(fullPath);
             var pdfFile = Path.GetTempFileName() + ".pdf";
             string message;
             var isConvert = _komaps.ConvertToPdf(fullPath, pdfFile, out message);
@@ -221,20 +220,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 Logger.Error(message);
                 return;
             }
-            try
-            {
-                using (var fileStream = File.OpenRead(pdfFile))
-                {
-                    var array = new byte[fileStream.Length];
-                    fileStream.Read(array, 0, array.Length);
-                    fileStream.Position = 0;
-                    builder.AddFile(name, fileStream, DateTime.Now, DateTime.Now, DateTime.Now);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Exception in AddPdfFileToPilot: {ex.Message}");
-            }
+            builder.AddFile(pdfFile);
         }
 
         private void AddInformationToPilot(IDataObject parent)
