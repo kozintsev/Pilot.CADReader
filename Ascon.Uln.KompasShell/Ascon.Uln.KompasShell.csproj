@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>C:\Users\Oleg\AppData\Local\ASCON\Pilot-ICE Enterprise\Development\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -82,15 +82,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-    <COMReference Include="Kompas6Constants">
-      <Guid>{75C9F5D0-B5B8-4526-8681-9903C567D2ED}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="Kompas6Constants3D">
       <Guid>{2CAF168C-7961-4B90-9DA2-701419BEEFE3}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -109,7 +100,7 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-    <COMReference Include="Prd2d_LIBRARY">
+    <COMReference Include="Pdf2d_LIBRARY">
       <Guid>{31EBF650-BD38-43EC-892B-1F8AC6C14430}</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>0</VersionMinor>

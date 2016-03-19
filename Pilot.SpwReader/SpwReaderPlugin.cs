@@ -1,10 +1,11 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using Ascon.Uln.KompasShell;
 
 
 namespace Ascon.Pilot.SDK.SpwReader
@@ -13,6 +14,7 @@ namespace Ascon.Pilot.SDK.SpwReader
     [Export(typeof(IObjectContextMenu))]
     public class SpwReaderPlugin : IObjectContextMenu, IMainMenu
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
         private readonly IFileProvider _fileProvider;
@@ -20,11 +22,13 @@ namespace Ascon.Pilot.SDK.SpwReader
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         // выбранный с помощью контекстного меню клиента объект
-        private IDataObject _selected; 
+        private IDataObject _selected;
         // задача для открытия и анализа файла спецификации
         private Task<SpwAnalyzer> _taskOpenSpwFile;
         // список объктов спецификации полученных в ходе парсинга
         private List<SpcObject> _listSpcObject;
+        private KomapsShell _komaps;
+        private bool _isKompasInit;
 
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
@@ -33,7 +37,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             _objectsRepository = repository;
             _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
-            //new SpwReaderSettings(personalSettings, repository);
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -74,7 +77,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_selected == null)
                 return;
             if (!CheckObjectsType(_selected))
-                return;;
+                return; ;
 
             var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
             menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
@@ -98,15 +101,15 @@ namespace Ascon.Pilot.SDK.SpwReader
         private static bool ParsingSectionName(string sectionName, string pattern)
         {
             sectionName = sectionName.ToLower();
-            return sectionName.Contains(pattern);          
+            return sectionName.Contains(pattern);
         }
 
-        private static bool IsSpwFileExtension(string name)
+        private static bool IsFileExtension(string name, string ext)
         {
             if (string.IsNullOrEmpty(name))
                 return false;
-            var ext = Path.GetExtension(name).ToLower();
-            return ext == ".spw";
+            var theExt = Path.GetExtension(name).ToLower();
+            return theExt == ext;
         }
 
         private bool CheckObjectsType(IDataObject selected)
@@ -126,7 +129,12 @@ namespace Ascon.Pilot.SDK.SpwReader
             var info = GetInformationByKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
+            _komaps = new KomapsShell();
+            string message;
+            _isKompasInit = _komaps.InitKompas(out message);
+            if (!_isKompasInit) Logger.Error(message);
             AddInformationToPilot(parent);
+            _komaps.Dispose();
         }
 
         private IFile GetFileFromPilotStorage(IDataObject selected)
@@ -134,7 +142,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (selected == null)
                 return null;
             var obj = _objectsRepository.GetCachedObject(selected.RelatedSourceFiles.FirstOrDefault());
-            var file = obj.Files.FirstOrDefault(f => IsSpwFileExtension(f.Name));
+            var file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".spw"));
             return file;
         }
 
@@ -165,7 +173,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             var children = parent.TypesByChildren;
             foreach (var obj in children)
             {
-                var currentObj =_objectsRepository.GetCachedObject(obj.Key);
+                var currentObj = _objectsRepository.GetCachedObject(obj.Key);
                 var attrName = string.Empty;
                 var attrMark = string.Empty;
                 foreach (var a in currentObj.Attributes)
@@ -188,14 +196,46 @@ namespace Ascon.Pilot.SDK.SpwReader
                             isMark = true;
                     }
                     if (isName && isMark)
+                    {
                         spcObj.IsSynchronized = true;
+                        spcObj.GlobalId = obj.Key;
+                    }
+
                 }
             }
         }
 
-        private void AddPdfFileToPilot(IObjectBuilder builder)
-        {
-            //builder.AddFile(fileName, )
+        private void AddPdfFileToPilot(IObjectBuilder building, SpcObject spcObject)
+        {         
+            if (!_isKompasInit) return;
+
+            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
+            if (doc == null) return;
+            var fullPath = doc.FileName;
+            if (!File.Exists(fullPath)) return;
+            var name = Path.GetFileNameWithoutExtension(fullPath);
+            var pdfFile = Path.GetTempFileName() + ".pdf";
+            string message;
+            var isConvert = _komaps.ConvertToPdf(fullPath, pdfFile, out message);
+            if (!isConvert)
+            {
+                Logger.Error(message);
+                return;
+            }
+            try
+            {
+                using (var fileStream = File.OpenRead(pdfFile))
+                {
+                    var array = new byte[fileStream.Length];
+                    fileStream.Read(array, 0, array.Length);
+                    fileStream.Position = 0;
+                    building.AddFile(name, fileStream, DateTime.Now, DateTime.Now, DateTime.Now);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Exception in AddPdfFileToPilot: {ex.Message}");
+            }
         }
 
         private void AddInformationToPilot(IDataObject parent)
@@ -220,8 +260,9 @@ namespace Ascon.Pilot.SDK.SpwReader
                     else
                         builder.SetAttribute(attr.TypeName, val);
                 }
-                _objectModifier.Apply();
                 spcObject.GlobalId = builder.DataObject.Id;
+                AddPdfFileToPilot(builder, spcObject);
+                _objectModifier.Apply();
             }
         }
 

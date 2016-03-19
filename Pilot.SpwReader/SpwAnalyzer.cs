@@ -7,31 +7,13 @@ namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpwAnalyzer
     {
+        private Specification _specification;
         private List<SpcSection> _spcSections;
         private List<SpcObject> _listSpcObject;
         private XDocument _xDoc;
 
         public bool Opened { get; private set; }
         public bool IsCompleted { get; private set; }
-
-        public SpwAnalyzer(string fileName)
-        {
-            IsCompleted = false;
-            var z = new ZFile();
-            if (!z.IsZip(fileName)) return;
-            z.ExtractFileToMemoryStream(fileName, "MetaInfo");
-            LoadFromMemoryStream(z.OutputMemStream);
-            if (!Opened) return;
-            try
-            {
-                RunParsingSpw();
-            }
-            catch
-            {
-                Opened = false;
-                IsCompleted = false;
-            }
-        }
 
         public SpwAnalyzer(Stream fileStream)
         {
