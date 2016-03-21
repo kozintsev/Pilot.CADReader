@@ -64,6 +64,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObjectLoader.cs" />
     <Compile Include="SpcDocument.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="SpwReaderPlugin.cs" />
