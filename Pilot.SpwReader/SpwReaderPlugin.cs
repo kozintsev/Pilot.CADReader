@@ -229,9 +229,9 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private void UpdatePilotObject(SpcObject spcObject)
         {
-            _loader.Load(spcObject.GlobalId, o =>
-            {
-                var builder = _objectModifier.Edit(o);
+            _objectsRepository.SubscribeObjects(new[] { spcObject.GlobalId } );
+            var dataObject = _objectsRepository.GetCachedObject(spcObject.GlobalId);
+            var builder = _objectModifier.Edit(dataObject);
                 foreach (var attr in spcObject.Columns)
                 {
                     var val = attr.Value;
@@ -257,7 +257,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                     //AddPdfFileToPilotObject(builder, fileName);
                 }
                 _objectModifier.Apply();
-            });
         }
 
         private void AddInformationToPilot(IDataObject parent)

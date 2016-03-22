@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObjectLoader.cs" />
+    <Compile Include="LoaderOfObjects.cs" />
     <Compile Include="SpcDocument.cs" />
     <Compile Include="Specification.cs" />
     <Compile Include="SpwReaderPlugin.cs" />
