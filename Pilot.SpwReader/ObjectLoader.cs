@@ -19,15 +19,16 @@ namespace Ascon.Pilot.SDK.SpwReader
             _sent = false;
             _onLoadedAction = onLoadedAction;
             _subscription = _repository.SubscribeObjects(new[] {id}).Subscribe(this);
+            //_repository.SubscribeObjects(new[] {id});
         }
 
         public void OnNext(IDataObject value)
         {
             if (_sent)
             {
-                    if (_subscription != null)
-                        _subscription.Dispose();
-      
+                if (_subscription != null)
+                    _subscription.Dispose();
+
                 return;
             }
 
