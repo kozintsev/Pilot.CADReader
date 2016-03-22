@@ -30,5 +30,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         public string SectionName { get; set; }
 
         public bool IsSynchronized { get; set; }
+
+        public string PdfDocument { get; set; }
     }
 }

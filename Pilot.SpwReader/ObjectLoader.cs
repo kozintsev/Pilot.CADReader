@@ -18,7 +18,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _sent = false;
             _onLoadedAction = onLoadedAction;
-            _subscription = _repository.SubscribeObjects(new[] {id}).Subscribe(this);
+            _subscription = _repository.SubscribeObjects(new[] { id }).Subscribe(this);
         }
 
         public void OnNext(IDataObject value)
@@ -27,12 +27,13 @@ namespace Ascon.Pilot.SDK.SpwReader
             {
                 if (_subscription != null)
                     _subscription.Dispose();
+
                 return;
             }
 
-            if (value.State != DataState.Loaded) 
+            if (value.State != DataState.Loaded)
                 return;
-            
+
             _onLoadedAction(value);
             _sent = true;
         }
