@@ -19,6 +19,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         private readonly IObjectsRepository _objectsRepository;
         private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
+        private readonly ObjectLoader _loader;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         // выбранный с помощью контекстного меню клиента объект
@@ -38,6 +39,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             _objectsRepository = repository;
             _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
+            _loader = new ObjectLoader(repository);
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -135,7 +137,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
             var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
-            SynchronizeCheck(parent);
             AddInformationToPilot(parent);
             _komaps.ExitKompas();
         }
@@ -226,16 +227,58 @@ namespace Ascon.Pilot.SDK.SpwReader
             builder.AddFile(pdfFile);
         }
 
+        private void UpdatePilotObject(SpcObject spcObject)
+        {
+            _loader.Load(spcObject.GlobalId, o =>
+            {
+                var builder = _objectModifier.Edit(o);
+                foreach (var attr in spcObject.Columns)
+                {
+                    var val = attr.Value;
+                    if (string.IsNullOrEmpty(attr.TypeName) || string.IsNullOrEmpty(val)) continue;
+                    // очишаем значение от служебных символов и выражений
+                    val = ValueTextClear(val);
+                    // в качестве наименование передаётся внутренее имя (а не то которое отображается)
+                    int i;
+                    if (int.TryParse(val, out i))
+                        builder.SetAttribute(attr.TypeName, i);
+                    else
+                        builder.SetAttribute(attr.TypeName, val);
+                }
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
+                if (doc != null)
+                {
+                    var fileName = doc.FileName;
+                    string[] paths = { fileName };
+                    var storageObjects = _objectsRepository.GetStorageObjects(paths);
+                    var storageObject = storageObjects.FirstOrDefault();
+                    if (storageObject != null)
+                        builder.AddSourceFileRelation(storageObject.DataObject.Id);
+                    //AddPdfFileToPilotObject(builder, fileName);
+                }
+                _objectModifier.Apply();
+            });
+        }
+
         private void AddInformationToPilot(IDataObject parent)
         {
+            SynchronizeCheck(parent);
             foreach (var spcObject in _listSpcObject)
             {
                 if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
                 var t = GetTypeBySectionName(spcObject.SectionName);
                 if (t == null) continue;
-                if (spcObject.IsSynchronized) continue;
-                var builder = _objectModifier.Create(parent, t);
-                spcObject.GlobalId = builder.DataObject.Id;
+                IObjectBuilder builder;
+                if (!spcObject.IsSynchronized)
+                {
+                    builder = _objectModifier.Create(parent, t);
+                    spcObject.GlobalId = builder.DataObject.Id;
+                }
+                else
+                {
+                    UpdatePilotObject(spcObject);
+                    continue;
+                }
                 foreach (var attr in spcObject.Columns)
                 {
                     var val = attr.Value;
