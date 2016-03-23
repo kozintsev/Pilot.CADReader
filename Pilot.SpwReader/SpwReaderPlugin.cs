@@ -245,20 +245,28 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_dataObjects.Count == 0)
                 return;
             var obj = _dataObjects.FirstOrDefault(o => spcObject.GlobalId == o.Id);
+            var needToChange = false;
             var builder = _objectModifier.Edit(obj);
-            //foreach (var attr in spcObject.Columns)
-            //{
-            //    var val = attr.Value;
-            //    if (string.IsNullOrEmpty(attr.TypeName) || string.IsNullOrEmpty(val)) continue;
-            //    // очишаем значение от служебных символов и выражений
-            //    val = ValueTextClear(val);
-            //    // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-            //    int i;
-            //    if (int.TryParse(val, out i))
-            //        builder.SetAttribute(attr.TypeName, i);
-            //    else
-            //        builder.SetAttribute(attr.TypeName, val);
-            //}
+            foreach (var spcColumn in spcObject.Columns)
+            {
+                var val = spcColumn.Value;
+                if (string.IsNullOrEmpty(spcColumn.TypeName) || string.IsNullOrEmpty(val)) continue;
+                // очишаем значение от служебных символов и выражений
+                val = ValueTextClear(val);
+                // проверка нужно ли изменять объект
+                foreach (var attrObj in obj.Attributes)
+                {
+                    if (attrObj.Key != spcColumn.TypeName) continue;
+                    if (attrObj.Value.ToString() != spcColumn.Value)
+                        needToChange = true;
+                }
+
+                int i;
+                if (int.TryParse(val, out i))
+                    builder.SetAttribute(spcColumn.TypeName, i);
+                else
+                    builder.SetAttribute(spcColumn.TypeName, val);
+            }
             //var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
             //if (doc != null)
             //{
@@ -270,7 +278,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             //        builder.AddSourceFileRelation(storageObject.DataObject.Id);
             //    //AddPdfFileToPilotObject(builder, fileName);
             //}
-            _objectModifier.Apply();
+            if (needToChange) _objectModifier.Apply();
 
         }
 
