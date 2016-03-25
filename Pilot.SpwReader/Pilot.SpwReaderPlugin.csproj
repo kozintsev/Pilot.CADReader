@@ -64,6 +64,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalculatorMd5Checksum.cs" />
+    <Compile Include="DataObjectsWrapper.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="LoaderOfObjects.cs" />
     <Compile Include="SpcDocument.cs" />
