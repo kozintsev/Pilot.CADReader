@@ -228,6 +228,8 @@ namespace Ascon.Pilot.SDK.SpwReader
                             var colunmValue = ValueTextClear(column.Value);
                             if ((column.TypeName == "name") && (colunmValue == attrNameValue))
                                 isName = true;
+                                // todo здесь может быть проблема с объектами без обозначения и с дублирующими объектами
+                                // необходимо тестирование и исследование
                             if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
                                 isMark = true;
                         }
@@ -374,7 +376,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     return itype;
                 if (ParsingSectionName(sectionName, "стандарт") && title == "Стандартное изделие")
                     return itype;
-                if (ParsingSectionName(sectionName, "прочи") && title == "Прочее изделие")
+                if (ParsingSectionName(sectionName, "проч") && title == "Прочее изделие")
                     return itype;
                 if (ParsingSectionName(sectionName, "материал") && title == "Материал")
                     return itype;
