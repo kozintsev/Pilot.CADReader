@@ -256,14 +256,13 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             if (_dataObjects.Count == 0)
                 return;
+            var needToChange = false;
             var obj = _dataObjects.FirstOrDefault(o => spcObject.GlobalId == o.Id);
             if (obj == null)
                 return;
             var builder = _objectModifier.Edit(obj);
             foreach (var spcColumn in spcObject.Columns)
             {
-
-                var needToChange = false;
                 var spcColVal = ValueTextClear(spcColumn.Value);
                 // проверка нужно ли изменять объект
                 foreach (var attrObj in obj.Attributes)
@@ -288,9 +287,8 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var fileName = doc.FileName;
                 if (fileFromPilot != null)
                 {
-                    // TODO протестить алгоритм md5
+                    // md5 в нижнем регистре расчитывается и возвращается пилотом
                     var fileNameMd5 = CalculatorMd5Checksum.Go(fileName);
-                    string test = fileFromPilot.Md5;
                     if (fileFromPilot.Md5 != fileNameMd5)
                     {
                         needToChange = true;
@@ -304,7 +302,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                 }
             }
             if (needToChange) _objectModifier.Apply();
-
         }
 
         private void CreateNewObjectsToPilot(IDataObject parent, SpcObject spcObject)

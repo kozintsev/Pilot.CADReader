@@ -14,7 +14,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var fileData = new byte[fs.Length];
                 fs.Read(fileData, 0, (int)fs.Length);
                 var checkSum = md5.ComputeHash(fileData);
-                var result = BitConverter.ToString(checkSum).Replace("-", string.Empty);
+                var result = BitConverter.ToString(checkSum).Replace("-", string.Empty).ToLower();
                 return result;
             }
         }
