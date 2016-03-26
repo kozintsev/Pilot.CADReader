@@ -197,7 +197,6 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private void SynchronizeCheck(IDataObject parent)
         {
-            bool isName = false, isMark = false;
             var children = parent.TypesByChildren;
             var loader = new LoaderOfObjects(_objectsRepository);
             _dataObjects.Clear();
@@ -207,27 +206,26 @@ namespace Ascon.Pilot.SDK.SpwReader
                 {
                     if (obj.Id == _selected.Id)
                         continue;
-                    var attrName = string.Empty;
-                    var attrMark = string.Empty;
+                    var attrNameValue = string.Empty;
+                    var attrMarkValue = string.Empty;
                     foreach (var a in obj.Attributes)
                     {
                         if (a.Key == "name")
-                            attrName = a.Value.ToString();
+                            attrNameValue = a.Value.ToString();
                         if (a.Key == "mark")
-                            attrMark = a.Value.ToString();
+                            attrMarkValue = a.Value.ToString();
                     }
-                    if (string.IsNullOrEmpty(attrName) && string.IsNullOrEmpty(attrMark))
-                        return;
                     foreach (var spcObj in _listSpcObject)
                     {
-                        foreach (var column in spcObj.Columns.Select(col => ValueTextClear(col.Value)))
+                        bool isName = false, isMark = false;
+                        foreach (var column in spcObj.Columns)
                         {
-                            if (column == attrName)
+                            var colunmValue = ValueTextClear(column.Value);
+                            if ((column.TypeName == "name") && (colunmValue == attrNameValue))
                                 isName = true;
-                            if (column == attrMark)
+                            if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
                                 isMark = true;
                         }
-                        // TODO вот здесь вероятно есть ошибка
                         if (isName && isMark)
                         {
                             spcObj.IsSynchronized = true;
@@ -259,15 +257,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_dataObjects.Count == 0)
                 return;
             var obj = _dataObjects.FirstOrDefault(o => spcObject.GlobalId == o.Id);
-            var needToChange = false;
             if (obj == null)
                 return;
             var builder = _objectModifier.Edit(obj);
             foreach (var spcColumn in spcObject.Columns)
             {
-                var spcColVal = spcColumn.Value;
-                if (string.IsNullOrEmpty(spcColumn.TypeName) || string.IsNullOrEmpty(spcColVal)) continue;
-                spcColVal = ValueTextClear(spcColVal);
+
+                var needToChange = false;
+                var spcColVal = ValueTextClear(spcColumn.Value);
                 // проверка нужно ли изменять объект
                 foreach (var attrObj in obj.Attributes)
                 {
@@ -292,7 +289,9 @@ namespace Ascon.Pilot.SDK.SpwReader
                 if (fileFromPilot != null)
                 {
                     // TODO протестить алгоритм md5
-                    if (fileFromPilot.Md5 != CalculatorMd5Checksum.Go(fileName))
+                    var fileNameMd5 = CalculatorMd5Checksum.Go(fileName);
+                    string test = fileFromPilot.Md5;
+                    if (fileFromPilot.Md5 != fileNameMd5)
                     {
                         needToChange = true;
                         string[] paths = { fileName };
