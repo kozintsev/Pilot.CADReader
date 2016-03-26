@@ -24,6 +24,8 @@ namespace Ascon.Pilot.SDK.SpwReader
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         private const string SpwExt = ".spw";
         private const string SourceDocExt = ".cdw";
+        private const string PilotTypeAssembly = "assembly";
+        private const string PilotTypeDocument = "document";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         // задача для открытия и анализа файла спецификации
@@ -44,6 +46,9 @@ namespace Ascon.Pilot.SDK.SpwReader
             _pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
+#if DEBUG
+            Logger.Info("Start plugin. Logger work!");
+#endif
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -122,10 +127,10 @@ namespace Ascon.Pilot.SDK.SpwReader
         private bool CheckObjectsType(IDataObject selected)
         {
             var isCheck = false;
-            if (selected.Type.Name != "document") return false;
+            if (selected.Type.Name != PilotTypeDocument) return false;
             _loader.Load(selected.ParentId, parent =>
             {
-                isCheck = parent.Type.Name == "assembly";
+                isCheck = parent.Type.Name == PilotTypeAssembly;
             });
             return isCheck;
         }
@@ -140,16 +145,16 @@ namespace Ascon.Pilot.SDK.SpwReader
             var info = GetInformationFromKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
-            //_komaps = new KomapsShell();
-            //string message;
-            //_isKompasInit = _komaps.InitKompas(out message);
-            //if (!_isKompasInit) Logger.Error(message);
+            _komaps = new KomapsShell();
+            string message;
+            _isKompasInit = _komaps.InitKompas(out message);
+            if (!_isKompasInit) Logger.Error(message);
             _loader.Load(_selected.ParentId, parent =>
             {
                 SynchronizeCheck(parent);
                 AddInformationToPilot(parent);
             });
-            //_komaps.ExitKompas();
+            _komaps.ExitKompas();
         }
 
         private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
@@ -279,7 +284,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                     }
                 }
             }
-
             var fileFromPilot = GetFileFromPilotStorage(obj.RelatedSourceFiles.FirstOrDefault(), SourceDocExt);
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
             if (doc != null)
@@ -332,7 +336,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var storageObject = storageObjects.FirstOrDefault();
                 if (storageObject != null)
                     builder.AddSourceFileRelation(storageObject.DataObject.Id);
-                //AddPdfFileToPilotObject(builder, fileName);
+                AddPdfFileToPilotObject(builder, fileName);
             }
             _objectModifier.Apply();
         }
