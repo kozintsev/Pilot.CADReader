@@ -14,7 +14,7 @@ namespace Ascon.Uln.KompasShell
 {
     public class KomapsShell
     {
-        #region Custom declarations        
+        #region Custom declarations
         private ksDocument2D _doc2D;
         private _Application _kompasApp;
         private KompasObject _kompasObj;
@@ -37,7 +37,7 @@ namespace Ascon.Uln.KompasShell
                 _kompasObj = (KompasObject)Activator.CreateInstance(t);               
                 _kompasApp = (_Application)_kompasObj.ksGetApplication7();                
                 if (_kompasApp == null)
-                    return false; 
+                    return false;
             }
             catch
             {

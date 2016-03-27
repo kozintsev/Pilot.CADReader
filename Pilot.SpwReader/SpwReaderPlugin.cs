@@ -147,6 +147,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!info.Result.IsCompleted) return;
             _komaps = new KomapsShell();
             string message;
+            // FIXME: нужно обрабатывать ситуацию если лицензия на компас не получена
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
             _loader.Load(_selected.ParentId, parent =>
@@ -228,8 +229,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                             var colunmValue = ValueTextClear(column.Value);
                             if ((column.TypeName == "name") && (colunmValue == attrNameValue))
                                 isName = true;
-                                // todo здесь может быть проблема с объектами без обозначения и с дублирующими объектами
-                                // необходимо тестирование и исследование
+                                // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
                             if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
                                 isMark = true;
                         }
@@ -244,19 +244,21 @@ namespace Ascon.Pilot.SDK.SpwReader
             });
         }
 
-        private void AddPdfFileToPilotObject(IObjectBuilder builder, string fileName)
+        private string AddPdfFileToPilotObject(IObjectBuilder builder, string fileName, bool isTest = false)
         {
-            if (!_isKompasInit) return;
-            if (!File.Exists(fileName)) return;
+            if (!_isKompasInit) return string.Empty;
+            if (!File.Exists(fileName)) return string.Empty;
             var pdfFile = Path.GetTempFileName() + ".pdf";
             string message;
+            // FIXME: необходимо обрабатывать ситуацию когда конвертирование невозможно
             var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
             if (!isConvert)
             {
                 Logger.Error(message);
-                return;
+                return string.Empty;
             }
-            builder.AddFile(pdfFile);
+            if (!isTest) builder.AddFile(pdfFile);
+            return pdfFile;
         }
 
         private void UpdatePilotObject(SpcObject spcObject)
@@ -286,27 +288,21 @@ namespace Ascon.Pilot.SDK.SpwReader
                     }
                 }
             }
-            var fileFromPilot = GetFileFromPilotStorage(obj.RelatedSourceFiles.FirstOrDefault(), SourceDocExt);
+            // получаем pdf файл из Обозревателя
+            var fileFromPilot = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".pdf"));
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
-            if (doc != null)
+            if (doc != null && fileFromPilot != null)
             {
-                var fileName = doc.FileName;
-                if (fileFromPilot != null)
+                var pdfFile = AddPdfFileToPilotObject(builder, doc.FileName, true);
+                // md5 в нижнем регистре расчитывается и возвращается пилотом
+                var fileNameMd5 = CalculatorMd5Checksum.Go(pdfFile);
+                if (fileFromPilot.Md5 != fileNameMd5)
                 {
-                    // md5 в нижнем регистре расчитывается и возвращается пилотом
-                    var fileNameMd5 = CalculatorMd5Checksum.Go(fileName);
-                    if (fileFromPilot.Md5 != fileNameMd5)
-                    {
-                        needToChange = true;
-                        string[] paths = { fileName };
-                        var storageObjects = _objectsRepository.GetStorageObjects(paths);
-                        var storageObject = storageObjects.FirstOrDefault();
-                        if (storageObject != null)
-                            builder.AddSourceFileRelation(storageObject.DataObject.Id);
-                        AddPdfFileToPilotObject(builder, fileName);
-                    }
+                    needToChange = true;
+                    builder.AddFile(pdfFile);
                 }
             }
+            //TODO: внесмотря на проекрку выдаётся ошибка, если изменился только чертёж
             if (needToChange) _objectModifier.Apply();
         }
 
