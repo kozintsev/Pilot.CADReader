@@ -20,7 +20,7 @@ namespace Ascon.Uln.KompasShell
         private KompasObject _kompasObj;
         #endregion
 
-        public List<string> Log { get; }
+        public List<string> Log;
 
         public KomapsShell()
         {

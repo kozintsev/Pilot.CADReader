@@ -27,14 +27,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_sent)
             {
                 if (_subscription != null)
-                    try
-                    {
                         _subscription.Dispose();
-                    }
-                    catch
-                    {
-                        
-                    }
                 return;
             }
 

@@ -35,11 +35,21 @@ namespace Ascon.Pilot.SDK.SpwReader
         }
 
 
-        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-        public List<SpcObject> GetListSpcObject => _listSpcObject;
+        public List<SpcObject> GetListSpcObject
+        {
+            get
+            {
+                return _listSpcObject;
+            }
+        }
 
-        // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-        public List<SpcSection> GetListSpcSection => _spcSections;
+        public List<SpcSection> GetListSpcSection
+        {
+            get
+            {
+                return _spcSections;
+            }
+        }
 
         private void RunParsingSpw()
         {
