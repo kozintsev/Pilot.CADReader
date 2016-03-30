@@ -28,4 +28,4 @@ https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Configuration-pilot-dd.pil
 
 https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/pilot-dd.zip - база данных для системы Pilot-ICE (содержит специализированную конфигурацию)
 
-
+https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Promo.avi - видеоролик демонстрирующий работу

@@ -1,9 +1,10 @@
-﻿using NLog;
-using System;
+﻿using System;
+using NLog;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Ascon.Uln.KompasShell;
 
@@ -19,8 +20,13 @@ namespace Ascon.Pilot.SDK.SpwReader
         private readonly IObjectsRepository _objectsRepository;
         private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
+        private readonly ObjectLoader _loader;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
+        private const string SpwExt = ".spw";
+        private const string SourceDocExt = ".cdw";
+        private const string PilotTypeAssembly = "assembly";
+        private const string PilotTypeDocument = "document";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         // задача для открытия и анализа файла спецификации
@@ -29,6 +35,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         private List<SpcObject> _listSpcObject;
         private KomapsShell _komaps;
         private bool _isKompasInit;
+        private List<IDataObject> _dataObjects;
 
 
         [ImportingConstructor]
@@ -38,6 +45,12 @@ namespace Ascon.Pilot.SDK.SpwReader
             _objectsRepository = repository;
             _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
+            _loader = new ObjectLoader(repository);
+            _dataObjects = new List<IDataObject>();
+            _listSpcObject = new List<SpcObject>();
+#if DEBUG
+            Logger.Info("Start plugin. Logger work!");
+#endif
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -115,40 +128,80 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private bool CheckObjectsType(IDataObject selected)
         {
-            if (selected.Type.Name != "document") return false;
-            var parent = _objectsRepository.GetCachedObject(selected.ParentId);
-            return parent.Type.Name == "assembly";
+            var isCheck = false;
+            if (selected.Type.Name != PilotTypeDocument) return false;
+            _loader.Load(selected.ParentId, parent =>
+            {
+                isCheck = parent.Type.Name == PilotTypeAssembly;
+            });
+            return isCheck;
         }
 
         private void SetInformationOnMenuClick(IDataObject selected)
         {
             if (!CheckObjectsType(selected))
                 return;
-
-            var file = GetFileFromPilotStorage(selected);
+            _listSpcObject.Clear();
+            var file = GetFileFromPilotStorage(selected, SpwExt);
             if (file == null) return;
             var info = GetInformationFromKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
+            var kompasConverterTask = new Task(KompasConvert);
+            kompasConverterTask.Start();
+            kompasConverterTask.Wait();
+            IDataObject parent = null;
+            _loader.Load(_selected.ParentId, o =>
+            {
+                parent = o;
+            });
+            Thread.Sleep(100);
+            if (parent == null) return;
+            //SynchronizeCheck(parent);
+            AddInformationToPilot(parent);
+            
+        }
+
+        private void KompasConvert()
+        {
             _komaps = new KomapsShell();
             string message;
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
+<<<<<<< HEAD
             var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
             //SynchronizeCheck(parent);
             AddInformationToPilot(parent);
+=======
+            foreach (var spcObject in _listSpcObject)
+            {
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+                if (doc != null)
+                {
+                    var fileName = doc.FileName;
+                    if (!File.Exists(fileName)) continue;
+                    var pdfFile = Path.GetTempFileName() + ".pdf";
+                    var isConvert =_komaps.ConvertToPdf(fileName, pdfFile, out message);
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        continue;
+                    }
+                    spcObject.PdfDocument = pdfFile;
+                }
+            }
+>>>>>>> refs/remotes/origin/develop
             _komaps.ExitKompas();
         }
 
-        private IFile GetFileFromPilotStorage(IDataObject selected)
+        private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
         {
             if (selected == null)
                 return null;
             IFile file = null;
-            var loader = new ObjectLoader(_objectsRepository);
-            loader.Load(selected.RelatedSourceFiles.FirstOrDefault(), obj =>
+            _loader.Load(selected.RelatedSourceFiles.FirstOrDefault(), obj =>
             {
-                file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".spw"));
+                file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ext));
             });
             return file;
         }
@@ -177,9 +230,11 @@ namespace Ascon.Pilot.SDK.SpwReader
         private void SynchronizeCheck(IDataObject parent)
         {
             var children = parent.TypesByChildren;
-            _objectsRepository.SubscribeObjects(children.Keys);
-            foreach (var obj in children)
+            var loader = new LoaderOfObjects(_objectsRepository);
+            _dataObjects.Clear();
+            loader.Load(children.Keys, objects =>
             {
+<<<<<<< HEAD
                 var currentObj = _objectsRepository.GetCachedObject(obj.Key);
                 if (currentObj.Id == _selected.Id)
                     continue;
@@ -203,29 +258,124 @@ namespace Ascon.Pilot.SDK.SpwReader
                         // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
                         if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
                             isMark = true;
-                    }
-                    if (isName && isMark)
+=======
+                foreach (var obj in objects)
+                {
+                    if (obj.Id == _selected.Id)
+                        continue;
+                    var attrNameValue = string.Empty;
+                    var attrMarkValue = string.Empty;
+                    foreach (var a in obj.Attributes)
                     {
-                        spcObj.IsSynchronized = true;
-                        spcObj.GlobalId = currentObj.Id;
+                        if (a.Key == "name")
+                            attrNameValue = a.Value.ToString();
+                        if (a.Key == "mark")
+                            attrMarkValue = a.Value.ToString();
+>>>>>>> refs/remotes/origin/develop
+                    }
+                    foreach (var spcObj in _listSpcObject)
+                    {
+                        bool isName = false, isMark = false;
+                        foreach (var column in spcObj.Columns)
+                        {
+                            var colunmValue = ValueTextClear(column.Value);
+                            if ((column.TypeName == "name") && (colunmValue == attrNameValue))
+                                isName = true;
+                                // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
+                            if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
+                                isMark = true;
+                        }
+                        if (isName && isMark)
+                        {
+                            spcObj.IsSynchronized = true;
+                            spcObj.GlobalId = obj.Id;
+                            _dataObjects.Add(obj);
+                        }
+                    }
+                }
+            });
+        }
+
+        private void UpdatePilotObject(SpcObject spcObject)
+        {
+            if (_dataObjects.Count == 0)
+                return;
+            var needToChange = false;
+            var obj = _dataObjects.FirstOrDefault(o => spcObject.GlobalId == o.Id);
+            if (obj == null)
+                return;
+            var builder = _objectModifier.Edit(obj);
+            foreach (var spcColumn in spcObject.Columns)
+            {
+                var spcColVal = ValueTextClear(spcColumn.Value);
+                // проверка нужно ли изменять объект
+                foreach (var attrObj in obj.Attributes)
+                {
+                    if (attrObj.Key != spcColumn.TypeName) continue;
+                    if (attrObj.Value.ToString() != spcColVal)
+                    {
+                        needToChange = true;
+                        int i;
+                        if (int.TryParse(spcColVal, out i))
+                            builder.SetAttribute(spcColumn.TypeName, i);
+                        else
+                            builder.SetAttribute(spcColumn.TypeName, spcColVal);
                     }
                 }
             }
+            // получаем pdf файл из Обозревателя
+            var fileFromPilot = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".pdf"));
+            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+            if (doc != null && fileFromPilot != null)
+            {
+                var pdfFile = spcObject.PdfDocument;
+                // md5 в нижнем регистре расчитывается и возвращается пилотом
+                var fileNameMd5 = CalculatorMd5Checksum.Go(pdfFile);
+                if (fileFromPilot.Md5 != fileNameMd5)
+                {
+                    needToChange = true;
+                    builder.AddFile(pdfFile);
+                }
+            }
+            //TODO: внесмотря на проекрку выдаётся ошибка, если изменился только чертёж
+            if (needToChange) _objectModifier.Apply();
         }
 
-        private void AddPdfFileToPilotObject(IObjectBuilder builder, string fileName)
+        private void CreateNewObjectsToPilot(IDataObject parent, SpcObject spcObject)
         {
-            if (!_isKompasInit) return;
-            if (!File.Exists(fileName)) return;
-            var pdfFile = Path.GetTempFileName() + ".pdf";
-            string message;
-            var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-            if (!isConvert)
+            var t = GetTypeBySectionName(spcObject.SectionName);
+            if (t == null) return;
+            var builder = _objectModifier.Create(parent, t);
+            spcObject.GlobalId = builder.DataObject.Id;
+            foreach (var attr in spcObject.Columns)
             {
-                Logger.Error(message);
-                return;
+                var val = attr.Value;
+                if (string.IsNullOrEmpty(attr.TypeName) || string.IsNullOrEmpty(val)) continue;
+                // очишаем значение от служебных символов и выражений
+                val = ValueTextClear(val);
+                // в качестве наименование передаётся внутренее имя (а не то которое отображается)
+                int i;
+                if (int.TryParse(val, out i))
+                    builder.SetAttribute(attr.TypeName, i);
+                else
+                    builder.SetAttribute(attr.TypeName, val);
             }
-            builder.AddFile(pdfFile);
+            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+            if (doc != null)
+            {
+                var fileName = doc.FileName;
+                string[] paths = { fileName };
+                var storageObjects = _objectsRepository.GetStorageObjects(paths);
+                var storageObject = storageObjects.FirstOrDefault();
+                if (storageObject != null)
+                    builder.AddSourceFileRelation(storageObject.DataObject.Id);
+                if (File.Exists(spcObject.PdfDocument))
+                {
+                    builder.AddFile(spcObject.PdfDocument);
+                };
+                
+            }
+            _objectModifier.Apply();
         }
 
         private void AddInformationToPilot(IDataObject parent)
@@ -233,36 +383,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var spcObject in _listSpcObject)
             {
                 if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
-                var t = GetTypeBySectionName(spcObject.SectionName);
-                if (t == null) continue;
-                if (spcObject.IsSynchronized) continue;
-                var builder = _objectModifier.Create(parent, t);
-                spcObject.GlobalId = builder.DataObject.Id;
-                foreach (var attr in spcObject.Columns)
+                if (!spcObject.IsSynchronized)
                 {
-                    var val = attr.Value;
-                    if (string.IsNullOrEmpty(attr.TypeName) || string.IsNullOrEmpty(val)) continue;
-                    // очишаем значение от служебных символов и выражений
-                    val = ValueTextClear(val);
-                    // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-                    int i;
-                    if (int.TryParse(val, out i))
-                        builder.SetAttribute(attr.TypeName, i);
-                    else
-                        builder.SetAttribute(attr.TypeName, val);
+                    CreateNewObjectsToPilot(parent, spcObject);
                 }
-                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, ".cdw"));
-                if (doc != null)
+                else
                 {
-                    var fileName = doc.FileName;
-                    string[] paths = { fileName };
-                    var storageObjects = _objectsRepository.GetStorageObjects(paths);
-                    var storageObject = storageObjects.FirstOrDefault();
-                    if (storageObject != null)
-                        builder.AddSourceFileRelation(storageObject.DataObject.Id);
-                    AddPdfFileToPilotObject(builder, fileName);
+                    UpdatePilotObject(spcObject);
                 }
-                _objectModifier.Apply();
             }
         }
 
@@ -283,7 +411,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     return itype;
                 if (ParsingSectionName(sectionName, "стандарт") && title == "Стандартное изделие")
                     return itype;
-                if (ParsingSectionName(sectionName, "прочи") && title == "Прочее изделие")
+                if (ParsingSectionName(sectionName, "проч") && title == "Прочее изделие")
                     return itype;
                 if (ParsingSectionName(sectionName, "материал") && title == "Материал")
                     return itype;

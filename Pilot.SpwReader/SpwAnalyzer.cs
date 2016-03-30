@@ -35,7 +35,10 @@ namespace Ascon.Pilot.SDK.SpwReader
         }
 
 
+<<<<<<< HEAD
         // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+=======
+>>>>>>> refs/remotes/origin/develop
         public List<SpcObject> GetListSpcObject
         {
             get
@@ -44,7 +47,10 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
+<<<<<<< HEAD
         // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+=======
+>>>>>>> refs/remotes/origin/develop
         public List<SpcSection> GetListSpcSection
         {
             get

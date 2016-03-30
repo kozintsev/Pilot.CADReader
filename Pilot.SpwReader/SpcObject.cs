@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
@@ -32,5 +33,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         public bool IsSynchronized { get; set; }
 
         public string PdfDocument { get; set; }
+
     }
 }
