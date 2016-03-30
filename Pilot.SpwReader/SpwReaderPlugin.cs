@@ -157,7 +157,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             });
             Thread.Sleep(100);
             if (parent == null) return;
-            //SynchronizeCheck(parent);
+            SynchronizeCheck(parent);
             AddInformationToPilot(parent);
             
         }
@@ -171,19 +171,17 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var spcObject in _listSpcObject)
             {
                 var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
-                if (doc != null)
+                if (doc == null) continue;
+                var fileName = doc.FileName;
+                if (!File.Exists(fileName)) continue;
+                var pdfFile = Path.GetTempFileName() + ".pdf";
+                var isConvert =_komaps.ConvertToPdf(fileName, pdfFile, out message);
+                if (!isConvert)
                 {
-                    var fileName = doc.FileName;
-                    if (!File.Exists(fileName)) continue;
-                    var pdfFile = Path.GetTempFileName() + ".pdf";
-                    var isConvert =_komaps.ConvertToPdf(fileName, pdfFile, out message);
-                    if (!isConvert)
-                    {
-                        Logger.Error(message);
-                        continue;
-                    }
-                    spcObject.PdfDocument = pdfFile;
+                    Logger.Error(message);
+                    continue;
                 }
+                spcObject.PdfDocument = pdfFile;
             }
             _komaps.ExitKompas();
         }

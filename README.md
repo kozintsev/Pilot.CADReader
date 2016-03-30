@@ -26,6 +26,8 @@ http://ascon.ru/ - официальный сайт компании АСКОН, 
 
 https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Configuration-pilot-dd.pilotcfg специализированная конфигурация для Pilot-ICE.
 
-https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/pilot-dd.zip - база данных для системы Pilot-ICE (содержит специализированную конфигурацию)
+https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/pilot-dd.zip - база данных для системы Pilot-ICE (содержит специализированную конфигурацию и плагин)
 
 https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Promo.avi - видеоролик демонстрирующий работу
+
+https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Ascon.Pilot.SDK.SpwReader.zip - плагин
