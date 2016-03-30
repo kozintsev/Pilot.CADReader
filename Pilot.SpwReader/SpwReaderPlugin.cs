@@ -135,7 +135,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
             var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
-            SynchronizeCheck(parent);
+            //SynchronizeCheck(parent);
             AddInformationToPilot(parent);
             _komaps.ExitKompas();
         }
@@ -176,30 +176,32 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private void SynchronizeCheck(IDataObject parent)
         {
-            bool isName = false, isMark = false;
             var children = parent.TypesByChildren;
             _objectsRepository.SubscribeObjects(children.Keys);
             foreach (var obj in children)
             {
                 var currentObj = _objectsRepository.GetCachedObject(obj.Key);
-                var attrName = string.Empty;
-                var attrMark = string.Empty;
+                if (currentObj.Id == _selected.Id)
+                    continue;
+                var attrNameValue = string.Empty;
+                var attrMarkValue = string.Empty;
                 foreach (var a in currentObj.Attributes)
                 {
                     if (a.Key == "name")
-                        attrName = a.Value.ToString();
+                        attrNameValue = a.Value.ToString();
                     if (a.Key == "mark")
-                        attrMark = a.Value.ToString();
+                        attrMarkValue = a.Value.ToString();
                 }
-                if (string.IsNullOrEmpty(attrName) && string.IsNullOrEmpty(attrMark))
-                    return;
                 foreach (var spcObj in _listSpcObject)
                 {
-                    foreach (var column in spcObj.Columns.Select(col => ValueTextClear(col.Value)))
+                    bool isName = false, isMark = false;
+                    foreach (var column in spcObj.Columns)
                     {
-                        if (column == attrName)
+                        var colunmValue = ValueTextClear(column.Value);
+                        if ((column.TypeName == "name") && (colunmValue == attrNameValue))
                             isName = true;
-                        if (column == attrMark)
+                        // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
+                        if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
                             isMark = true;
                     }
                     if (isName && isMark)
