@@ -176,8 +176,9 @@ namespace Ascon.Pilot.SDK.SpwReader
                     if (!isConvert)
                     {
                         Logger.Error(message);
-                        spcObject.PdfDocument = pdfFile;
+                        continue;
                     }
+                    spcObject.PdfDocument = pdfFile;
                 }
             }
             _komaps.ExitKompas();
