@@ -91,8 +91,8 @@ namespace Ascon.Uln.KompasShell
             }
             result = string.Empty;
             return true;
-        }         
-
+        }
+        
         public bool ConvertToPdf(string fileName, string outFileName, out string result)
         {
             result = string.Empty;

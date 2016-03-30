@@ -145,16 +145,41 @@ namespace Ascon.Pilot.SDK.SpwReader
             var info = GetInformationFromKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
-            _komaps = new KomapsShell();
-            string message;
-            // FIXME: нужно обрабатывать ситуацию если лицензия на компас не получена
-            _isKompasInit = _komaps.InitKompas(out message);
-            if (!_isKompasInit) Logger.Error(message);
+
+            var kompasConvert = new Task(KompasConvert);
+            kompasConvert.Start();
+            kompasConvert.Wait();
+
             _loader.Load(_selected.ParentId, parent =>
             {
                 SynchronizeCheck(parent);
                 AddInformationToPilot(parent);
             });
+            
+        }
+
+        private void KompasConvert()
+        {
+            _komaps = new KomapsShell();
+            string message;
+            _isKompasInit = _komaps.InitKompas(out message);
+            if (!_isKompasInit) Logger.Error(message);
+            foreach (var spcObject in _listSpcObject)
+            {
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+                if (doc != null)
+                {
+                    var fileName = doc.FileName;
+                    if (!File.Exists(fileName)) continue;
+                    var pdfFile = Path.GetTempFileName() + ".pdf";
+                    var isConvert =_komaps.ConvertToPdf(fileName, pdfFile, out message);
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        spcObject.PdfDocument = pdfFile;
+                    }
+                }
+            }
             _komaps.ExitKompas();
         }
 
@@ -164,16 +189,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                 return null;
             IFile file = null;
             _loader.Load(selected.RelatedSourceFiles.FirstOrDefault(), obj =>
-            {
-                file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ext));
-            });
-            return file;
-        }
-
-        private IFile GetFileFromPilotStorage(Guid id, string ext)
-        {
-            IFile file = null;
-            _loader.Load(id, obj =>
             {
                 file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ext));
             });
@@ -244,23 +259,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             });
         }
 
-        private string AddPdfFileToPilotObject(IObjectBuilder builder, string fileName, bool isTest = false)
-        {
-            if (!_isKompasInit) return string.Empty;
-            if (!File.Exists(fileName)) return string.Empty;
-            var pdfFile = Path.GetTempFileName() + ".pdf";
-            string message;
-            // FIXME: необходимо обрабатывать ситуацию когда конвертирование невозможно
-            var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-            if (!isConvert)
-            {
-                Logger.Error(message);
-                return string.Empty;
-            }
-            if (!isTest) builder.AddFile(pdfFile);
-            return pdfFile;
-        }
-
         private void UpdatePilotObject(SpcObject spcObject)
         {
             if (_dataObjects.Count == 0)
@@ -293,7 +291,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
             if (doc != null && fileFromPilot != null)
             {
-                var pdfFile = AddPdfFileToPilotObject(builder, doc.FileName, true);
+                var pdfFile = spcObject.PdfDocument;
                 // md5 в нижнем регистре расчитывается и возвращается пилотом
                 var fileNameMd5 = CalculatorMd5Checksum.Go(pdfFile);
                 if (fileFromPilot.Md5 != fileNameMd5)
@@ -334,7 +332,11 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var storageObject = storageObjects.FirstOrDefault();
                 if (storageObject != null)
                     builder.AddSourceFileRelation(storageObject.DataObject.Id);
-                AddPdfFileToPilotObject(builder, fileName);
+                if (File.Exists(spcObject.PdfDocument))
+                {
+                    builder.AddFile(spcObject.PdfDocument);
+                };
+                
             }
             _objectModifier.Apply();
         }
