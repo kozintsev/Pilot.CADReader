@@ -168,11 +168,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             string message;
             _isKompasInit = _komaps.InitKompas(out message);
             if (!_isKompasInit) Logger.Error(message);
-<<<<<<< HEAD
-            var parent = _objectsRepository.GetCachedObject(_selected.ParentId);
-            //SynchronizeCheck(parent);
-            AddInformationToPilot(parent);
-=======
             foreach (var spcObject in _listSpcObject)
             {
                 var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
@@ -190,7 +185,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                     spcObject.PdfDocument = pdfFile;
                 }
             }
->>>>>>> refs/remotes/origin/develop
             _komaps.ExitKompas();
         }
 
@@ -234,31 +228,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             _dataObjects.Clear();
             loader.Load(children.Keys, objects =>
             {
-<<<<<<< HEAD
-                var currentObj = _objectsRepository.GetCachedObject(obj.Key);
-                if (currentObj.Id == _selected.Id)
-                    continue;
-                var attrNameValue = string.Empty;
-                var attrMarkValue = string.Empty;
-                foreach (var a in currentObj.Attributes)
-                {
-                    if (a.Key == "name")
-                        attrNameValue = a.Value.ToString();
-                    if (a.Key == "mark")
-                        attrMarkValue = a.Value.ToString();
-                }
-                foreach (var spcObj in _listSpcObject)
-                {
-                    bool isName = false, isMark = false;
-                    foreach (var column in spcObj.Columns)
-                    {
-                        var colunmValue = ValueTextClear(column.Value);
-                        if ((column.TypeName == "name") && (colunmValue == attrNameValue))
-                            isName = true;
-                        // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
-                        if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
-                            isMark = true;
-=======
                 foreach (var obj in objects)
                 {
                     if (obj.Id == _selected.Id)
@@ -271,7 +240,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                             attrNameValue = a.Value.ToString();
                         if (a.Key == "mark")
                             attrMarkValue = a.Value.ToString();
->>>>>>> refs/remotes/origin/develop
                     }
                     foreach (var spcObj in _listSpcObject)
                     {

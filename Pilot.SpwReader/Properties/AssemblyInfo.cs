@@ -33,8 +33,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.*")]
-<<<<<<< HEAD
-[assembly: AssemblyFileVersion("1.0.75.3")]
-=======
-[assembly: AssemblyFileVersion("1.0.92.5")]
->>>>>>> refs/remotes/origin/develop
+[assembly: AssemblyFileVersion("1.0.98.5")]
