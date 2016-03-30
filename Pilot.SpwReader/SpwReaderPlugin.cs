@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Ascon.Uln.KompasShell;
 
@@ -46,6 +47,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             _pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
+            _listSpcObject = new List<SpcObject>();
 #if DEBUG
             Logger.Info("Start plugin. Logger work!");
 #endif
@@ -139,22 +141,24 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             if (!CheckObjectsType(selected))
                 return;
-
+            _listSpcObject.Clear();
             var file = GetFileFromPilotStorage(selected, SpwExt);
             if (file == null) return;
             var info = GetInformationFromKompas(file);
             if (info == null) return;
             if (!info.Result.IsCompleted) return;
-
-            var kompasConvert = new Task(KompasConvert);
-            kompasConvert.Start();
-            kompasConvert.Wait();
-
-            _loader.Load(_selected.ParentId, parent =>
+            var kompasConverterTask = new Task(KompasConvert);
+            kompasConverterTask.Start();
+            kompasConverterTask.Wait();
+            IDataObject parent = null;
+            _loader.Load(_selected.ParentId, o =>
             {
-                SynchronizeCheck(parent);
-                AddInformationToPilot(parent);
+                parent = o;
             });
+            Thread.Sleep(100);
+            if (parent == null) return;
+            //SynchronizeCheck(parent);
+            AddInformationToPilot(parent);
             
         }
 
