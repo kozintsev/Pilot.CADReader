@@ -48,9 +48,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
             _listSpcObject = new List<SpcObject>();
-#if DEBUG
-            Logger.Info("Start plugin. Logger work!");
-#endif
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -91,7 +88,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_selected == null)
                 return;
             if (!CheckObjectsType(_selected))
-                return; ;
+                return;
 
             var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
             menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
@@ -297,7 +294,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 var pdfFile = spcObject.PdfDocument;
                 // md5 в нижнем регистре расчитывается и возвращается пилотом
                 var fileNameMd5 = CalculatorMd5Checksum.Go(pdfFile);
-                if (fileFromPilot.Md5 != fileNameMd5)
+                if (!string.IsNullOrEmpty(fileNameMd5) && fileFromPilot.Md5 != fileNameMd5)
                 {
                     needToChange = true;
                     builder.AddFile(pdfFile);

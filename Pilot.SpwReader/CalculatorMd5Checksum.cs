@@ -8,15 +8,28 @@ namespace Ascon.Pilot.SDK.SpwReader
     {
         public static string Go(string path)
         {
-            var fs = File.OpenRead(path);
+            if (path == null)
+                return null;
+            try
             {
-                MD5 md5 = new MD5CryptoServiceProvider();
-                var fileData = new byte[fs.Length];
-                fs.Read(fileData, 0, (int)fs.Length);
-                var checkSum = md5.ComputeHash(fileData);
-                var result = BitConverter.ToString(checkSum).Replace("-", string.Empty).ToLower();
-                return result;
+                if (!File.Exists(path))
+                    return null;
+                var fs = File.OpenRead(path);
+                {
+                    MD5 md5 = new MD5CryptoServiceProvider();
+                    var fileData = new byte[fs.Length];
+                    fs.Read(fileData, 0, (int)fs.Length);
+                    var checkSum = md5.ComputeHash(fileData);
+                    var result = BitConverter.ToString(checkSum).Replace("-", string.Empty).ToLower();
+                    return result;
+                }
             }
+            catch (Exception)
+            {
+
+                return null;
+            }
+            
         }
     }
 }
