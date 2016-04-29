@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Ascon.Uln.KompasShell;
+// ReSharper disable InconsistentNaming
 
 
 namespace Ascon.Pilot.SDK.SpwReader
@@ -21,12 +22,14 @@ namespace Ascon.Pilot.SDK.SpwReader
         private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
         private readonly ObjectLoader _loader;
+        private readonly List<IDataObject> _dataObjects;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
-        private const string SpwExt = ".spw";
-        private const string SourceDocExt = ".cdw";
-        private const string PilotTypeAssembly = "assembly";
-        private const string PilotTypeDocument = "document";
+        private const string SPW_EXT = ".spw";
+        private const string SOURCE_DOC_EXT = ".cdw";
+        private const string PILOT_TYPE_ASSEMBLY = "assembly";
+        private const string PILOT_TYPE_DOCUMENT = "document";
+        private const string PILOT_PROJET = "project";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         // задача для открытия и анализа файла спецификации
@@ -35,9 +38,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         private List<SpcObject> _listSpcObject;
         private KomapsShell _komaps;
         private bool _isKompasInit;
-        private List<IDataObject> _dataObjects;
-
-
+        
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
         {
@@ -126,10 +127,11 @@ namespace Ascon.Pilot.SDK.SpwReader
         private bool CheckObjectsType(IDataObject selected)
         {
             var isCheck = false;
-            if (selected.Type.Name != PilotTypeDocument) return false;
+            if (selected.Type.Name == PILOT_PROJET) return true;
+            if (selected.Type.Name != PILOT_TYPE_DOCUMENT) return false;
             _loader.Load(selected.ParentId, parent =>
             {
-                isCheck = parent.Type.Name == PilotTypeAssembly;
+                isCheck = parent.Type.Name == PILOT_TYPE_ASSEMBLY;
             });
             return isCheck;
         }
@@ -139,7 +141,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!CheckObjectsType(selected))
                 return;
             _listSpcObject.Clear();
-            var file = GetFileFromPilotStorage(selected, SpwExt);
+            var file = GetFileFromPilotStorage(selected, SPW_EXT);
             if (file == null) return;
             var info = GetInformationFromKompas(file);
             if (info == null) return;
@@ -167,7 +169,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (!_isKompasInit) Logger.Error(message);
             foreach (var spcObject in _listSpcObject)
             {
-                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
                 if (doc == null) continue;
                 var fileName = doc.FileName;
                 if (!File.Exists(fileName)) continue;
@@ -288,7 +290,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
             // получаем pdf файл из Обозревателя
             var fileFromPilot = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".pdf"));
-            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
             if (doc != null && fileFromPilot != null)
             {
                 var pdfFile = spcObject.PdfDocument;
@@ -323,7 +325,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 else
                     builder.SetAttribute(attr.TypeName, val);
             }
-            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SourceDocExt));
+            var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
             if (doc != null)
             {
                 var fileName = doc.FileName;
