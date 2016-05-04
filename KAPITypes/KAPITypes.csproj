@@ -32,7 +32,7 @@
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>C:\Users\Oleg\AppData\Local\ASCON\Pilot-ICE Enterprise\Development\</OutputPath>
+    <OutputPath>..\..\..\..\AppData\Local\ASCON\Pilot-ICE Enterprise\Development\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>

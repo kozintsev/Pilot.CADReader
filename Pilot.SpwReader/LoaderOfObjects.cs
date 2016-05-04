@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class LoaderOfObjects : IObserver<IDataObject>
+    class LoaderOfObjects : IObserver<IDataObject>, IObserver<IStorageDataObject>
     {
         private readonly IObjectsRepository _repository;
         private  int _count;
@@ -33,6 +33,11 @@ namespace Ascon.Pilot.SDK.SpwReader
             if (_list.Count != _count)
                 return;
             _onLoadedAction(_list);
+        }
+
+        public void OnNext(IStorageDataObject value)
+        {
+            
         }
 
         public void OnCompleted()

@@ -79,8 +79,8 @@
     <Compile Include="SpwReaderPlugin.cs" />
     <Compile Include="ExtractZipFile.cs" />
     <Compile Include="IconLoader.cs" />
-    <Compile Include="MessageBox.xaml.cs">
-      <DependentUpon>MessageBox.xaml</DependentUpon>
+    <Compile Include="AboutPluginBox.xaml.cs">
+      <DependentUpon>AboutPluginBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyDescription.cs" />
@@ -91,6 +91,7 @@
     <Compile Include="SpcObject.cs" />
     <Compile Include="SpcSection.cs" />
     <Compile Include="SpwAnalyzer.cs" />
+    <Compile Include="StorageAnalayzer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -106,7 +107,7 @@
     <Resource Include="Resources\menu_icon.svg" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MessageBox.xaml">
+    <Page Include="AboutPluginBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

@@ -1,11 +1,10 @@
-﻿using System;
-using NLog;
+﻿using NLog;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 using Ascon.Uln.KompasShell;
 // ReSharper disable InconsistentNaming
 
@@ -27,9 +26,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         private const string SPW_EXT = ".spw";
         private const string SOURCE_DOC_EXT = ".cdw";
-        private const string PILOT_TYPE_ASSEMBLY = "assembly";
-        private const string PILOT_TYPE_DOCUMENT = "document";
-        private const string PILOT_PROJET = "project";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
         // задача для открытия и анализа файла спецификации
@@ -67,7 +63,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     SetInformationOnMenuClick(_selected);
                     break;
                 case ABOUT_PROGRAM_MENU:
-                    new MessageBox().Show();
+                    new AboutPluginBox().Show();
                     break;
             }
         }
@@ -88,11 +84,11 @@ namespace Ascon.Pilot.SDK.SpwReader
             _selected = dataObjects.FirstOrDefault();
             if (_selected == null)
                 return;
-            if (!CheckObjectsType(_selected))
+            if (!_selected.Type.IsMountable)
                 return;
 
             var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
-            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию из спецификации", icon, insertIndex);
+            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию с диска", icon, insertIndex);
         }
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
@@ -124,40 +120,53 @@ namespace Ascon.Pilot.SDK.SpwReader
             return theExt == ext;
         }
 
-        private bool CheckObjectsType(IDataObject selected)
-        {
-            var isCheck = false;
-            if (selected.Type.Name == PILOT_PROJET) return true;
-            if (selected.Type.Name != PILOT_TYPE_DOCUMENT) return false;
-            _loader.Load(selected.ParentId, parent =>
-            {
-                isCheck = parent.Type.Name == PILOT_TYPE_ASSEMBLY;
-            });
-            return isCheck;
-        }
-
         private void SetInformationOnMenuClick(IDataObject selected)
         {
-            if (!CheckObjectsType(selected))
-                return;
             _listSpcObject.Clear();
-            var file = GetFileFromPilotStorage(selected, SPW_EXT);
-            if (file == null) return;
-            var info = GetInformationFromKompas(file);
-            if (info == null) return;
-            if (!info.Result.IsCompleted) return;
-            var kompasConverterTask = new Task(KompasConvert);
-            kompasConverterTask.Start();
-            kompasConverterTask.Wait();
-            IDataObject parent = null;
-            _loader.Load(_selected.ParentId, o =>
+            var guids = ChildrenFilters.GetChildrenForPilotStorage(selected, _objectsRepository);
+            var test = guids.ToList();
+
+            var storage = new StorageAnalayzer(_objectsRepository);
+            
+            IFile file = null;
+            _loader.Load(selected.RelatedSourceFiles.FirstOrDefault(), obj =>
             {
-                parent = o;
+                file = obj.Files.FirstOrDefault();
             });
-            Thread.Sleep(100);
-            if (parent == null) return;
-            SynchronizeCheck(parent);
-            AddInformationToPilot(parent);
+            var f = new FileWrapper(file);
+            
+            var loader = new LoaderOfObjects(_objectsRepository);
+            loader.Load(guids.ToList(), list =>
+            {
+                foreach (var obj in list)
+                {
+                    var n = obj.DisplayName;
+                    var t = obj.Type.Name;
+                    var d = new DataObjectWrapper(obj, _objectsRepository);
+                    foreach (var item in obj.Files)
+                    {
+                        var name = item.Name;
+                    }
+                    
+                }
+            });
+            //var file = GetFileFromPilotStorage(selected, SPW_EXT);
+            //if (file == null) return;
+            //var info = GetInformationFromKompas(file);
+            //if (info == null) return;
+            //if (!info.Result.IsCompleted) return;
+            //var kompasConverterTask = new Task(KompasConvert);
+            //kompasConverterTask.Start();
+            //kompasConverterTask.Wait();
+            //IDataObject parent = null;
+            //_loader.Load(selected.ParentId, o =>
+            //{
+            //    parent = o;
+            //});
+            //Thread.Sleep(100);
+            //if (parent == null) return;
+            //SynchronizeCheck(parent);
+            //AddInformationToPilot(parent);
             
         }
 
