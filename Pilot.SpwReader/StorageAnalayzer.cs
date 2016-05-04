@@ -25,7 +25,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var obj in objs)
             {
                 // проекты
-                var wr = new DataObjectWrapper(obj.DataObject, _repository);   
+                var wr = new DataObjectWrapper(obj.DataObject, _repository);  
             }
             foreach (var dir in dirs)
             {
