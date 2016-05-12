@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+// ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
     class StorageAnalayzer
     {
+        private const string SPW_EXT = "*.spw";
         private readonly string _storagePath;
         private readonly IObjectsRepository _repository;
 
@@ -15,24 +17,26 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _storagePath = repository.GetStoragePath();
             _repository = repository;
-            GetInformation();
         }
 
-        private void GetInformation()
+        public string GetProjectFolderByPilotStorage(IDataObject dataObject)
         {
             var dirs = Directory.GetDirectories(_storagePath);
             var objs = _repository.GetStorageObjects(dirs);
             foreach (var obj in objs)
             {
-                // проекты
-                var wr = new DataObjectWrapper(obj.DataObject, _repository);  
+                if (obj.DataObject.Id == dataObject.Id)
+                    return obj.Path;
             }
-            foreach (var dir in dirs)
-            {
-                Directory.GetDirectories(dir);
-                Directory.GetFiles(dir);
-                Directory.GetFiles(dir, "*.*", SearchOption.AllDirectories);
-            }
+            return null;
+        }
+
+        public string[] GetFilesSpw(string folder)
+        {
+            if (string.IsNullOrEmpty(folder))
+                return null;
+            var files = Directory.GetFiles(folder, SPW_EXT, SearchOption.AllDirectories);
+            return files;
         }
     }
 }
