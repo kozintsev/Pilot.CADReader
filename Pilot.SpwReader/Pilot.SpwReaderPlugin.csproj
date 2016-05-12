@@ -72,6 +72,7 @@
   <ItemGroup>
     <Compile Include="CalculatorMd5Checksum.cs" />
     <Compile Include="DataObjectsWrapper.cs" />
+    <Compile Include="KompasConverter.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="LoaderOfObjects.cs" />
     <Compile Include="Spc\SpcDocument.cs" />

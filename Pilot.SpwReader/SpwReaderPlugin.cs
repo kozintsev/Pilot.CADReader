@@ -28,6 +28,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         private IDataObject _selected;
         private KomapsShell _komaps;
         private bool _isKompasInit;
+        private List<SpcObject> _listSpcObject;
 
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
@@ -121,6 +122,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var fileSpw in filesSpw)
             {
                 var spc = GetInformationFromKompas(fileSpw);
+                var kompasConverterTask = new Task<KompasConverter>(() =>
+                {
+                    var k = new KompasConverter(spc.ListSpcObjects);
+                    k.KompasConvertToPdf();
+                    return k;
+                });
+                kompasConverterTask.Start();
+                kompasConverterTask.Wait();
                 listSpec.Add(spc);
             }
 
@@ -144,29 +153,29 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         }
 
-        private void KompasConvert(List<SpcObject> listSpcObject)
-        {
-            _komaps = new KomapsShell();
-            string message;
-            _isKompasInit = _komaps.InitKompas(out message);
-            if (!_isKompasInit) Logger.Error(message);
-            foreach (var spcObject in listSpcObject)
-            {
-                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
-                if (doc == null) continue;
-                var fileName = doc.FileName;
-                if (!File.Exists(fileName)) continue;
-                var pdfFile = Path.GetTempFileName() + ".pdf";
-                var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-                if (!isConvert)
-                {
-                    Logger.Error(message);
-                    continue;
-                }
-                spcObject.PdfDocument = pdfFile;
-            }
-            _komaps.ExitKompas();
-        }
+        //private void KompasConvert()
+        //{
+        //    _komaps = new KomapsShell();
+        //    string message;
+        //    _isKompasInit = _komaps.InitKompas(out message);
+        //    if (!_isKompasInit) Logger.Error(message);
+        //    foreach (var spcObject in _listSpcObject)
+        //    {
+        //        var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
+        //        if (doc == null) continue;
+        //        var fileName = doc.FileName;
+        //        if (!File.Exists(fileName)) continue;
+        //        var pdfFile = Path.GetTempFileName() + ".pdf";
+        //        var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
+        //        if (!isConvert)
+        //        {
+        //            Logger.Error(message);
+        //            continue;
+        //        }
+        //        spcObject.PdfDocument = pdfFile;
+        //    }
+        //    _komaps.ExitKompas();
+        //}
 
         private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
         {
