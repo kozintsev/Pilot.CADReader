@@ -122,14 +122,14 @@ namespace Ascon.Pilot.SDK.SpwReader
             foreach (var fileSpw in filesSpw)
             {
                 var spc = GetInformationFromKompas(fileSpw);
-                var kompasConverterTask = new Task<KompasConverter>(() =>
-                {
-                    var k = new KompasConverter(spc.ListSpcObjects);
-                    k.KompasConvertToPdf();
-                    return k;
-                });
-                kompasConverterTask.Start();
-                kompasConverterTask.Wait();
+                //var kompasConverterTask = new Task<KompasConverter>(() =>
+                //{
+                //    var k = new KompasConverter(spc.ListSpcObjects);
+                //    k.KompasConvertToPdf();
+                //    return k;
+                //});
+                //kompasConverterTask.Start();
+                //kompasConverterTask.Wait();
                 listSpec.Add(spc);
             }
 

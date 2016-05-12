@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Ascon.Pilot.SDK.SpwReader.Spc
 {
@@ -23,7 +24,23 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
 
         public string Id { get; set; }
 
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                var column = Columns.FirstOrDefault(prop => prop.Name == "Наименование");
+                return column != null ? column.Value : null;
+            }
+        }
+
+        public string Designation
+        {
+            get
+            {
+                var column = Columns.FirstOrDefault(prop => prop.Name == "Обозначение");
+                return column != null ? column.Value : null;
+            }
+        }
 
         public int SectionNumber { get; set; }
 
