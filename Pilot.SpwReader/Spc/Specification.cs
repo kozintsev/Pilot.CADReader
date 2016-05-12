@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.SpwReader.Spc
 {
     class Specification
     {
@@ -11,6 +11,8 @@ namespace Ascon.Pilot.SDK.SpwReader
         public Specification Parent { get; set; }
 
         public List<SpcObject> ListSpcObjects { get; set; }
+
+        public List<SpcProp> ListSpcProps  { get; set; }
 
         public Specification()
         {

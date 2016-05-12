@@ -2,12 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Ascon.Pilot.SDK.SpwReader.Spc;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class SpwAnalyzer
+    class SpwAnalyzer : Specification
     {
-        private Specification _specification;
         private List<SpcSection> _spcSections;
         private List<SpcObject> _listSpcObject;
         private XDocument _xDoc;
@@ -33,7 +33,6 @@ namespace Ascon.Pilot.SDK.SpwReader
                 IsCompleted = false;
             }
         }
-
 
         public List<SpcObject> GetListSpcObject
         {

@@ -74,8 +74,9 @@
     <Compile Include="DataObjectsWrapper.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="LoaderOfObjects.cs" />
-    <Compile Include="SpcDocument.cs" />
-    <Compile Include="Specification.cs" />
+    <Compile Include="Spc\SpcDocument.cs" />
+    <Compile Include="Spc\Specification.cs" />
+    <Compile Include="Spc\SpcProp.cs" />
     <Compile Include="SpwReaderPlugin.cs" />
     <Compile Include="ExtractZipFile.cs" />
     <Compile Include="IconLoader.cs" />
@@ -87,9 +88,9 @@
     <Compile Include="SpwReaderSettings.cs" />
     <Compile Include="SettingsFeature.cs" />
     <Compile Include="SettingsFeatureKeys.cs" />
-    <Compile Include="SpcColumn.cs" />
-    <Compile Include="SpcObject.cs" />
-    <Compile Include="SpcSection.cs" />
+    <Compile Include="Spc\SpcColumn.cs" />
+    <Compile Include="Spc\SpcObject.cs" />
+    <Compile Include="Spc\SpcSection.cs" />
     <Compile Include="SpwAnalyzer.cs" />
     <Compile Include="StorageAnalayzer.cs" />
   </ItemGroup>

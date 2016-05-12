@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
+
 // ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.SpwReader

@@ -4,10 +4,9 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Navigation;
+using Ascon.Pilot.SDK.SpwReader.Spc;
 using Ascon.Uln.KompasShell;
 // ReSharper disable InconsistentNaming
-
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
@@ -18,7 +17,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
-        private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
         private readonly ObjectLoader _loader;
         private readonly List<IDataObject> _dataObjects;
@@ -28,9 +26,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         private const string SOURCE_DOC_EXT = ".cdw";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
-        // задача для открытия и анализа файла спецификации
-        // список объктов спецификации полученных в ходе парсинга
-        //private List<SpcObject> _listSpcObject;
         private KomapsShell _komaps;
         private bool _isKompasInit;
 
@@ -39,7 +34,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            _fileProvider = fileProvider;
             _pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
