@@ -54,39 +54,32 @@ namespace Ascon.Pilot.SDK.SpwReader
                 string id = null, val = null;
                 foreach (var attr in prop.Attributes())
                 {
-                    if (attr.Name == "id")
-                    {
-                        id = attr.Value;
-                    }
-                    if (attr.Name == "value")
-                    {
-                        val = attr.Value;
-                    }
+                    if (attr.Name == "id") id = attr.Value;   
+                    if (attr.Name == "value") val = attr.Value;
                 }
                 var propertyDescriptions = _xDoc.Descendants("propertyDescription");
                 foreach (var propertyDescription in propertyDescriptions)
                 {
-                    string id2 = null, name = null;
+                    string id2 = null, name = null, typeValue = null, 
+                        natureId = null, unitId = null;
                     foreach (var attr in propertyDescription.Attributes())
                     {
-                        if (attr.Name == "id")
-                        {
-                            id2 = attr.Value;
-                        }
-                        if (attr.Name == "name")
-                        {
-                            name = attr.Value;
-                        }
+                        if (attr.Name == "id") id2 = attr.Value;               
+                        if (attr.Name == "name") name = attr.Value;
+                        if (attr.Name == "typeValue") typeValue = attr.Value;
+                        if (attr.Name == "natureId") natureId = attr.Value;
+                        if (attr.Name == "unitId") unitId = attr.Value;
                     }
-                    if (id != null && id == id2)
+                    if (id == null || id != id2) continue;
+                    var spcProp = new SpcProp
                     {
-                        var spcProp = new SpcProp
-                        {
-                            Name = name,
-                            Value = val
-                        };
-                        ListSpcProps.Add(spcProp);
-                    }
+                        Name = name,
+                        Value = val,
+                        TypeValue = typeValue,
+                        NatureId = natureId,
+                        UnitId = unitId
+                    };
+                    ListSpcProps.Add(spcProp);
                 }
             }
 
