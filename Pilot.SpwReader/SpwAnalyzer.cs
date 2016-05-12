@@ -8,8 +8,6 @@ namespace Ascon.Pilot.SDK.SpwReader
 {
     class SpwAnalyzer : Specification
     {
-        private List<SpcSection> _spcSections;
-        //private List<SpcObject> _listSpcObject;
         private XDocument _xDoc;
 
         public bool Opened { get; private set; }
@@ -34,22 +32,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        //public List<SpcObject> GetListSpcObject
-        //{
-        //    get
-        //    {
-        //        return _listSpcObject;
-        //    }
-        //}
-
-        public List<SpcSection> GetListSpcSection
-        {
-            get
-            {
-                return _spcSections;
-            }
-        }
-
         public Specification GetSpecification
         {
             get
@@ -62,7 +44,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             if (_xDoc == null)
                 return;
-            _spcSections = new List<SpcSection>();
+            SpcSections = new List<SpcSection>();
             ListSpcProps = new List<SpcProp>();
             ListSpcObjects = new List<SpcObject>();
 
@@ -128,7 +110,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     isNumber = true;
                 }
                 if (isName && isNumber)
-                    _spcSections.Add(spcSection);
+                    SpcSections.Add(spcSection);
                 isName = false;
                 isNumber = false;
             }
@@ -200,7 +182,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             {
                 // определяем наименование секции спецификации 
                 var o = spcObject;
-                foreach (var spcSection in _spcSections.Where(spcSection => o.SectionNumber == spcSection.Number))
+                foreach (var spcSection in SpcSections.Where(spcSection => o.SectionNumber == spcSection.Number))
                 {
                     spcObject.SectionName = spcSection.Name;
                 }

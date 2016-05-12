@@ -22,19 +22,18 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
                 return spcProp != null ? spcProp.Value : null;
             }
         }
+        
         public string CurrentPath { get; set; }
+        
         public Specification Children { get; set; }
+        
         public Specification Parent { get; set; }
 
-        public List<SpcObject> ListSpcObjects { get; set; }
+        public List<SpcObject> ListSpcObjects { get; protected set; }
 
-        public List<SpcProp> ListSpcProps  { get; set; }
+        public List<SpcProp> ListSpcProps  { get; protected set; }
 
-        public Specification()
-        {
-            ListSpcObjects = new List<SpcObject>();
-            ListSpcObjects.Clear();
-        }
+        public List<SpcSection> SpcSections { get; protected set; }
 
     }
 }
