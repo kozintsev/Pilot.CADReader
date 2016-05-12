@@ -9,7 +9,7 @@ namespace Ascon.Pilot.SDK.SpwReader
     class SpwAnalyzer : Specification
     {
         private List<SpcSection> _spcSections;
-        private List<SpcObject> _listSpcObject;
+        //private List<SpcObject> _listSpcObject;
         private XDocument _xDoc;
 
         public bool Opened { get; private set; }
@@ -34,14 +34,13 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        public List<SpcObject> GetListSpcObject
-        {
-            get
-            {
-                return _listSpcObject;
-            }
-        }
-
+        //public List<SpcObject> GetListSpcObject
+        //{
+        //    get
+        //    {
+        //        return _listSpcObject;
+        //    }
+        //}
 
         public List<SpcSection> GetListSpcSection
         {
@@ -51,11 +50,63 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
+        public Specification GetSpecification
+        {
+            get
+            {
+                return this;
+            }
+        }
+
         private void RunParsingSpw()
         {
             if (_xDoc == null)
                 return;
             _spcSections = new List<SpcSection>();
+            ListSpcProps = new List<SpcProp>();
+            ListSpcObjects = new List<SpcObject>();
+
+            var properties = _xDoc.Descendants("property");
+            foreach (var prop in properties)
+            {
+                string id = null, val = null;
+                foreach (var attr in prop.Attributes())
+                {
+                    if (attr.Name == "id")
+                    {
+                        id = attr.Value;
+                    }
+                    if (attr.Name == "value")
+                    {
+                        val = attr.Value;
+                    }
+                }
+                var propertyDescriptions = _xDoc.Descendants("propertyDescription");
+                foreach (var propertyDescription in propertyDescriptions)
+                {
+                    string id2 = null, name = null;
+                    foreach (var attr in propertyDescription.Attributes())
+                    {
+                        if (attr.Name == "id")
+                        {
+                            id2 = attr.Value;
+                        }
+                        if (attr.Name == "name")
+                        {
+                            name = attr.Value;
+                        }
+                    }
+                    if (id != null && id == id2)
+                    {
+                        var spcProp = new SpcProp
+                        {
+                            Name = name,
+                            Value = val
+                        };
+                        ListSpcProps.Add(spcProp);
+                    }
+                }
+            }
 
             var sections = _xDoc.Descendants("section");
             bool isName = false, isNumber = false;
@@ -82,8 +133,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 isNumber = false;
             }
 
-            var spcObjects = _xDoc.Descendants("spcObjects");
-            _listSpcObject = new List<SpcObject>();
+            var spcObjects = _xDoc.Descendants("spcObjects");      
             foreach (var e in spcObjects)
             {
                 foreach (var o in e.Elements())
@@ -134,7 +184,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                         }
                     }
                     // добавляем в список объект спецификации
-                    _listSpcObject.Add(spcObject);
+                    ListSpcObjects.Add(spcObject);
                 }
                 // парсинг объектов завершён
             }
@@ -146,10 +196,11 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private void JointSpcNameAndSpcObj()
         {
-            foreach (var spcObject in _listSpcObject)
+            foreach (var spcObject in ListSpcObjects)
             {
                 // определяем наименование секции спецификации 
-                foreach (var spcSection in _spcSections.Where(spcSection => spcObject.SectionNumber == spcSection.Number))
+                var o = spcObject;
+                foreach (var spcSection in _spcSections.Where(spcSection => o.SectionNumber == spcSection.Number))
                 {
                     spcObject.SectionName = spcSection.Name;
                 }

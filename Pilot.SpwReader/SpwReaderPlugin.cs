@@ -182,7 +182,6 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         private Specification GetInformationFromKompas(string filename)
         {
-            var spc = new Specification { CurrentPath = filename };
             using (var inputStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
             {
                 var ms = new MemoryStream();
@@ -194,7 +193,8 @@ namespace Ascon.Pilot.SDK.SpwReader
                 taskOpenSpwFile.Wait();
                 if (!taskOpenSpwFile.Result.IsCompleted)
                     return null;
-                spc.ListSpcObjects = taskOpenSpwFile.Result.GetListSpcObject;
+                var spc = taskOpenSpwFile.Result.GetSpecification;
+                spc.CurrentPath = filename;
                 return spc;
             }
         }
