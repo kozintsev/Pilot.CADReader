@@ -2,61 +2,12 @@
 {
     class PropertyDescription
     {
-        private int id;
-        private string name;
-        private string typeValue;
-        private string natureId;
+        public int Id { get; set; }
 
-        public int Id
-        {
-            get
-            {
-                return id;
-            }
+        public string Name { get; set; }
 
-            set
-            {
-                id = value;
-            }
-        }
+        public string TypeValue { get; set; }
 
-        public string Name
-        {
-            get
-            {
-                return name;
-            }
-
-            set
-            {
-                name = value;
-            }
-        }
-
-        public string TypeValue
-        {
-            get
-            {
-                return typeValue;
-            }
-
-            set
-            {
-                typeValue = value;
-            }
-        }
-
-        public string NatureId
-        {
-            get
-            {
-                return natureId;
-            }
-
-            set
-            {
-                natureId = value;
-            }
-        }
+        public string NatureId { get; set; }
     }
 }
