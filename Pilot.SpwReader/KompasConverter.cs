@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Ascon.Pilot.SDK.SpwReader.Spc;
 using Ascon.Uln.KompasShell;
 using NLog;
@@ -17,6 +15,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         private bool _isKompasInit;
         private readonly List<SpcObject> _listSpcObject;
         private const string SOURCE_DOC_EXT = ".cdw";
+        private const string PDF_EXT = ".pdf";
 
         public KompasConverter(List<SpcObject> listSpcObject)
         {
@@ -35,7 +34,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 if (doc == null) continue;
                 var fileName = doc.FileName;
                 if (!File.Exists(fileName)) continue;
-                var pdfFile = Path.GetTempFileName() + ".pdf";
+                var pdfFile = Path.GetTempFileName() + PDF_EXT;
                 var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
                 if (!isConvert)
                 {

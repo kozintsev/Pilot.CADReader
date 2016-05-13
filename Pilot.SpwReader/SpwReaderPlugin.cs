@@ -1,11 +1,10 @@
-﻿using NLog;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ascon.Pilot.SDK.SpwReader.Spc;
-using Ascon.Uln.KompasShell;
+
 // ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.SpwReader
@@ -14,21 +13,18 @@ namespace Ascon.Pilot.SDK.SpwReader
     [Export(typeof(IObjectContextMenu))]
     public class SpwReaderPlugin : IObjectContextMenu, IMainMenu
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
+        private readonly IFileProvider _fileProvider;
         private readonly IEnumerable<IType> _pilotTypes;
         private readonly ObjectLoader _loader;
         private readonly List<IDataObject> _dataObjects;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
-        private const string SPW_EXT = ".spw";
         private const string SOURCE_DOC_EXT = ".cdw";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
-        private KomapsShell _komaps;
-        private bool _isKompasInit;
-        private List<SpcObject> _listSpcObject;
+       
 
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
@@ -38,6 +34,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             _pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
+            _fileProvider = fileProvider;
         }
 
         public void BuildMenu(IMenuHost menuHost)
@@ -153,30 +150,6 @@ namespace Ascon.Pilot.SDK.SpwReader
 
         }
 
-        //private void KompasConvert()
-        //{
-        //    _komaps = new KomapsShell();
-        //    string message;
-        //    _isKompasInit = _komaps.InitKompas(out message);
-        //    if (!_isKompasInit) Logger.Error(message);
-        //    foreach (var spcObject in _listSpcObject)
-        //    {
-        //        var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
-        //        if (doc == null) continue;
-        //        var fileName = doc.FileName;
-        //        if (!File.Exists(fileName)) continue;
-        //        var pdfFile = Path.GetTempFileName() + ".pdf";
-        //        var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-        //        if (!isConvert)
-        //        {
-        //            Logger.Error(message);
-        //            continue;
-        //        }
-        //        spcObject.PdfDocument = pdfFile;
-        //    }
-        //    _komaps.ExitKompas();
-        //}
-
         private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
         {
             if (selected == null)
@@ -208,26 +181,27 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        //private Task<SpwAnalyzer> GetInformationFromKompas(IFile file)
-        //{
-        //    var inputStream = _fileProvider.OpenRead(file);
-        //    if (inputStream == null)
-        //        return null;
-        //    if (!_fileProvider.Exists(file.Id))
-        //        return null;
-        //    var ms = new MemoryStream();
-        //    inputStream.Seek(0, SeekOrigin.Begin);
-        //    inputStream.CopyTo(ms);
-        //    ms.Position = 0;
+        private Specification GetInformationFromKompas(IFile file)
+        {
+            var inputStream = _fileProvider.OpenRead(file);
+            if (inputStream == null)
+                return null;
+            if (!_fileProvider.Exists(file.Id))
+                return null;
+            var ms = new MemoryStream();
+            inputStream.Seek(0, SeekOrigin.Begin);
+            inputStream.CopyTo(ms);
+            ms.Position = 0;
 
-        //    _taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
-        //    _taskOpenSpwFile.Start();
-        //    _taskOpenSpwFile.Wait();
-        //    if (!_taskOpenSpwFile.Result.IsCompleted)
-        //        return null;
-        //    _listSpcObject = _taskOpenSpwFile.Result.GetListSpcObject;
-        //    return _taskOpenSpwFile;
-        //}
+            var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+            taskOpenSpwFile.Start();
+            taskOpenSpwFile.Wait();
+            if (!taskOpenSpwFile.Result.IsCompleted)
+                return null;
+            var spc = taskOpenSpwFile.Result.GetSpecification;
+            spc.File = file;
+            return spc;
+        }
 
         private void SynchronizeCheck(IDataObject parent, List<SpcObject> listSpcObject)
         {

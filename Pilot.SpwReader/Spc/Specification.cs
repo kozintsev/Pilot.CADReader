@@ -35,5 +35,7 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
 
         public List<SpcSection> SpcSections { get; protected set; }
 
+        public IFile File { get; set; }
+
     }
 }
