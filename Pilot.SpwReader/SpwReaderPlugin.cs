@@ -4,14 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ascon.Pilot.SDK.SpwReader.Spc;
-
 // ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
     [Export(typeof(IMainMenu))]
     [Export(typeof(IObjectContextMenu))]
-    public class SpwReaderPlugin : IObjectContextMenu, IMainMenu
+    [Export(typeof(IStorageContextMenu))]
+    public class SpwReaderPlugin : IMainMenu, IObjectContextMenu, IStorageContextMenu
     {
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
@@ -25,7 +25,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
        
-
         [ImportingConstructor]
         public SpwReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
         {
@@ -56,6 +55,11 @@ namespace Ascon.Pilot.SDK.SpwReader
                     new AboutPluginBox().Show();
                     break;
             }
+        }
+
+        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
+        {
+            //todo: подумать какие могут быть нужны команды для работы с файлами
         }
 
         public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
