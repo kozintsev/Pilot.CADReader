@@ -32,12 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ascon.Pilot.SDK, Version=16.0.12.23910, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ascon.Pilot.SDK.16.0.12.0\lib\net40-Client\Ascon.Pilot.SDK.dll</HintPath>
+    <Reference Include="Ascon.Pilot.SDK, Version=16.0.15.24811, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ascon.Pilot.SDK.16.0.15.0\lib\net40-Client\Ascon.Pilot.SDK.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Ascon.Pilot.Theme, Version=16.0.12.23910, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ascon.Pilot.SDK.16.0.12.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
+    <Reference Include="Ascon.Pilot.Theme, Version=16.0.15.24811, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ascon.Pilot.SDK.16.0.15.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.8.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
