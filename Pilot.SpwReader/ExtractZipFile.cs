@@ -6,15 +6,7 @@ namespace Ascon.Pilot.SDK.SpwReader
 {
     public class ZFile
     {
-        private MemoryStream outputMemStream;
-        public MemoryStream OutputMemStream
-        {
-            get
-            {
-                return outputMemStream;
-            }
-        }
-
+        public MemoryStream OutputMemStream { get; private set; }
 
         public bool IsZip(Stream fileStream)
         {
@@ -32,12 +24,12 @@ namespace Ascon.Pilot.SDK.SpwReader
                 {
                     entry.Extract(ms);  // extract uncompressed content into a memorystream
                     // the application can now access the MemoryStream here
-                    outputMemStream = ms;
+                    OutputMemStream = ms;
                 }
             }
             catch
             {
-                outputMemStream = null;
+                OutputMemStream = null;
             }
         }
     }

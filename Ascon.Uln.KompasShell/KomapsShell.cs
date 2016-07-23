@@ -12,7 +12,7 @@ using Pdf2d_LIBRARY;
 
 namespace Ascon.Uln.KompasShell
 {
-    public class KomapsShell
+    public class KomapsShell : IDisposable
     {
         #region Custom declarations
         private ksDocument2D _doc2D;
@@ -171,12 +171,9 @@ namespace Ascon.Uln.KompasShell
         #region Реализаця интерфейса IDisposable
         public void Dispose()
         {
-            if (_kompasObj != null)
-            {
-                Marshal.ReleaseComObject(_kompasObj);
-                GC.SuppressFinalize(_kompasObj);
-                _kompasObj = null;
-            }
+            if (_kompasObj == null) return;
+            Marshal.ReleaseComObject(_kompasObj);
+            _kompasObj = null;
         }
         #endregion
 

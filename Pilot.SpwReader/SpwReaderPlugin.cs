@@ -291,7 +291,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     builder.AddFile(pdfFile);
                 }
             }
-            //TODO: внесмотря на проекрку выдаётся ошибка, если изменился только чертёж
+            //TODO: внесмотря на провекрку выдаётся ошибка, если изменился только чертёж
             if (needToChange) _objectModifier.Apply();
         }
 
