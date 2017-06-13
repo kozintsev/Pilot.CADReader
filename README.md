@@ -21,13 +21,13 @@
 
 ## Ссылки:
 
-http://pilotems.com/ru/ - Pilot-ICE — система нового поколения для управления проектной организацией
+[http://pilotems.com/ru/](http://pilotems.com/ru/ "Pilot-ICE — система нового поколения для управления проектной организацией") 
 
-http://kompas.ru/ - официальный сайт САПР КОМПАС
+[http://kompas.ru/](http://kompas.ru/ "Официальный сайт САПР КОМПАС")
 
 http://ascon.ru/ - официальный сайт компании АСКОН, разработчика КОМПАС и Pilot-ICE
 
-https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/Configuration-pilot-dd.pilotcfg специализированная конфигурация для Pilot-ICE.
+https://www.dropbox.com/s/6ed7shh4phem4cv/Configuration-pilot-dd.pilotcfg?dl=0 специализированная конфигурация для Pilot-ICE.
 
 https://dl.dropboxusercontent.com/u/54495412/Pilot-DD/pilot-dd.zip - база данных для системы Pilot-ICE (содержит специализированную конфигурацию и плагин)
 
