@@ -15,8 +15,14 @@
 
 ## Технические требования:
 
-- Pilot-ICE версия 16.0.6.23076 от 15.03.2016 или выше
+- Pilot-ICE версия 16.0.19 или выше
 - КОМПАС-График или КОМПАС-3D V16 или выше
+
+## Если Вам понравился проект, то вы его можете поддержать:
+
+- Yandex.Money: [Donate](https://money.yandex.ru/to/410015409987387)
+
+[Страница для сбора пожертвований](http://yasobe.ru/na/pilotkompas "http://yasobe.ru/na/pilotkompas - Страница для сбора пожертвований") 
 
 
 ## Ссылки:
@@ -34,3 +40,4 @@
 [Promo.avi](https://www.dropbox.com/s/58crpyphmoxcl2r/Promo.avi?dl=0 "Promo.avi") - видеоролик демонстрирующий работу
 
 [Ascon.Pilot.SDK.SpwReader.zip](https://www.dropbox.com/s/nhrl9g14fe5wbw1/Ascon.Pilot.SDK.SpwReader.zip?dl=0) - плагин
+
