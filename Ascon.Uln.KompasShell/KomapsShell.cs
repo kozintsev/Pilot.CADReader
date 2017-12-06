@@ -10,6 +10,7 @@ using KompasAPI7;
 using Pdf2d_LIBRARY;
 
 
+
 namespace Ascon.Uln.KompasShell
 {
     public class KomapsShell : IDisposable
@@ -103,26 +104,30 @@ namespace Ascon.Uln.KompasShell
             object valueOfRegistry = null;
             try
             {
-                var registryKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).
-                    OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d");
-                if (registryKey != null)
+                using (var registryKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).
+                    OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d"))
                 {
-                    valueOfRegistry = registryKey.GetValue(@"Path");
-                }                
-                if (valueOfRegistry == null)
-                {
-                    registryKey =
-                        RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64).
-                    OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d");
                     if (registryKey != null)
                     {
                         valueOfRegistry = registryKey.GetValue(@"Path");
-                    }                    
+                    }
                     if (valueOfRegistry == null)
                     {
-                        result = "Error: Не зарегистрирован модуль конвертера документов КОМПАС в формат PDF";
-                        AddLog(result);
-                        return false;
+                        using (var registryKey64 =
+                            RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64).
+                                OpenSubKey(@"SOFTWARE\ASCON\KOMPAS-3D\Converters\Pdf2d"))
+                        {
+                            if (registryKey64 != null)
+                            {
+                                valueOfRegistry = registryKey64.GetValue(@"Path");
+                            }
+                            if (valueOfRegistry == null)
+                            {
+                                result = "Error: Не зарегистрирован модуль конвертера документов КОМПАС в формат PDF";
+                                AddLog(result);
+                                return false;
+                            }
+                        }
                     }
                 }
                 pathOfConverter = valueOfRegistry as string;
@@ -167,6 +172,17 @@ namespace Ascon.Uln.KompasShell
             }
             return false;
         }
+
+        public bool PrintToXps(string fileName, string outFileName)
+        {
+            // fKompasPrint - TRUE исполь­зуем принтер Компас,
+            // -FALSE - умол­чательный принтер Windows.
+        
+            _kompasObj.ksPrintKompasDocumentEx(fileName, null, 1, false);
+            return false;
+        }
+
+        
 
         #region Реализаця интерфейса IDisposable
         public void Dispose()
