@@ -8,21 +8,34 @@ namespace Pilot.SpwReaderPlugin.Tests
     [DeploymentItem(@"TestSourceFiles\")]
     public class TestKompas
     {
+        public string StartupPath = Directory.GetParent(@"./").FullName;
+
         [TestMethod]
-        public void TestPrinterFile()
+        public void TestPrintXpsFile()
         {
             using (var kompas = new KomapsShell())
             {
-                var startupPath = System.IO.Directory.GetParent(@"./").FullName;
                 const string path = @"\Spc.spw";
                 string result;
                 kompas.InitKompas(out result);
-                kompas.PrintToXps(startupPath + path, @"spc.xps");
-                //var b = File.Exists(path);
-                //if (File.Exists(path))
-                //    kompas.ConvertToPdf(startupPath + path, startupPath + @"\spc.pdf", out result);
+                kompas.PrintToXps(StartupPath + path, @"spc.xps");
+                Assert.IsTrue(File.Exists(StartupPath + @"\spc.xps"), "Xps file not found");
             }
             
+        }
+
+        [TestMethod]
+        public void TestConvertToPdfFile()
+        {
+            using (var kompas = new KomapsShell())
+            {
+                const string path = @"\Spc.spw";
+                string result;
+                kompas.InitKompas(out result);
+                kompas.ConvertToPdf(StartupPath + path, StartupPath + @"\spc.pdf", out result);
+                Assert.IsTrue(File.Exists(StartupPath + @"\spc.pdf"), "Pdf file not found");
+            }
+
         }
     }
 }
