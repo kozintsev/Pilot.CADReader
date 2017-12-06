@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="TestChecksum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestKompas.cs" />
     <Compile Include="TestPrinterHelper.cs.cs" />
   </ItemGroup>
   <ItemGroup>

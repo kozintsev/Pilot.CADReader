@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 // Библиотеки подключаются из каталога c:\Program Files\ASCON\KOMPAS-3D V16\SDK\C#\Common\
 using Kompas6API5;
+using Kompas6Constants;
 using KompasAPI7;
 using Pdf2d_LIBRARY;
 
@@ -129,8 +130,8 @@ namespace Ascon.Uln.KompasShell
                             }
                         }
                     }
+                    pathOfConverter = valueOfRegistry as string;
                 }
-                pathOfConverter = valueOfRegistry as string;
             }
             catch
             {
@@ -177,9 +178,19 @@ namespace Ascon.Uln.KompasShell
         {
             // fKompasPrint - TRUE исполь­зуем принтер Компас,
             // -FALSE - умол­чательный принтер Windows.
-        
-            _kompasObj.ksPrintKompasDocumentEx(fileName, null, 1, false);
-            return false;
+            var printJob = _kompasApp.PrintJob;
+            if (printJob != null)
+            {
+                var b = printJob.AddSheets(fileName, null, ksSheetsRangeEnum.ksAllSheets);
+                //printJob.ShowPreviewWindow();
+                b = printJob.Execute(outFileName);
+            }
+
+            var p = PrinterHelper.GetDefaultPrinterName();
+            PrinterHelper.SetPilotXpDefault();
+            var r = _kompasObj.ksPrintKompasDocumentEx(fileName, null, 1, false);
+            PrinterHelper.SetDefaultPrinter(p);
+            return r != 0;
         }
 
         
