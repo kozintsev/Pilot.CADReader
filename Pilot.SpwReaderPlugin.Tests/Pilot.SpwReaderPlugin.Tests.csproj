@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pilot.SpwReaderPlugin.Tests</RootNamespace>
     <AssemblyName>Pilot.SpwReaderPlugin.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="TestChecksum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestPrinterHelper.cs.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TestSourceFiles\Spc.spw">
@@ -54,6 +55,12 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ascon.Uln.KompasShell\Ascon.Uln.KompasShell.csproj">
+      <Project>{9559fa73-b821-4647-9500-173689865ee2}</Project>
+      <Name>Ascon.Uln.KompasShell</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

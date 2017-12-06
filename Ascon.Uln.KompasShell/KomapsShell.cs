@@ -1,4 +1,4 @@
-﻿// Для работы с API Компас Разработал Козинцев О.В. 2013 - 2016
+﻿// Для работы с API Компас Разработал Козинцев О.В. 2013 - 2017
 using System;
 using System.Collections.Generic;
 using Microsoft.Win32;

@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KAPITypes", "KAPITypes\KAPI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.SpwReaderPlugin.Tests", "Pilot.SpwReaderPlugin.Tests\Pilot.SpwReaderPlugin.Tests.csproj", "{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrinterHelper", "PrinterHelper\PrinterHelper.csproj", "{20B26E3B-ECD8-4FFA-B4C9-085613371313}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,10 +39,6 @@ Global
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20B26E3B-ECD8-4FFA-B4C9-085613371313}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20B26E3B-ECD8-4FFA-B4C9-085613371313}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20B26E3B-ECD8-4FFA-B4C9-085613371313}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20B26E3B-ECD8-4FFA-B4C9-085613371313}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
