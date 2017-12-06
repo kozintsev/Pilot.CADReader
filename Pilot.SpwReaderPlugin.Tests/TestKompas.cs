@@ -17,10 +17,10 @@ namespace Pilot.SpwReaderPlugin.Tests
                 const string path = @"\Spc.spw";
                 string result;
                 kompas.InitKompas(out result);
-                //kompas.PrintToXps(path, @"spc.xps");
-                var b = File.Exists(path);
-                if (File.Exists(path))
-                    kompas.ConvertToPdf(startupPath + path, startupPath + @"\spc.pdf", out result);
+                kompas.PrintToXps(startupPath + path, @"spc.xps");
+                //var b = File.Exists(path);
+                //if (File.Exists(path))
+                //    kompas.ConvertToPdf(startupPath + path, startupPath + @"\spc.pdf", out result);
             }
             
         }

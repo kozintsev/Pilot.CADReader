@@ -178,12 +178,17 @@ namespace Ascon.Uln.KompasShell
         {
             // fKompasPrint - TRUE исполь­зуем принтер Компас,
             // -FALSE - умол­чательный принтер Windows.
+            var doc = _kompasApp.Documents.Open(fileName, true, true);
+            _kompasApp.Visible = true;
+            var sheets = doc.LayoutSheets;
+            var c = sheets.Count;
+            var t = sheets.Type;
             var printJob = _kompasApp.PrintJob;
             if (printJob != null)
             {
-                var b = printJob.AddSheets(fileName, null, ksSheetsRangeEnum.ksAllSheets);
-                //printJob.ShowPreviewWindow();
-                b = printJob.Execute(outFileName);
+                var b = printJob.AddSheets(fileName, sheets, ksSheetsRangeEnum.ksAllSheets);
+                printJob.ShowPreviewWindow();
+                b = printJob.Execute("Pilot XPS");
             }
 
             var p = PrinterHelper.GetDefaultPrinterName();
