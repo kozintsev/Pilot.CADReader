@@ -16,10 +16,10 @@ namespace Pilot.SpwReaderPlugin.Tests
             using (var kompas = new KomapsShell())
             {
                 const string path = @"\Spc.spw";
-                string result;
-                kompas.InitKompas(out result);
+                kompas.InitKompas(out var result);
                 kompas.PrintToXps(StartupPath + path, @"spc.xps");
                 Assert.IsTrue(File.Exists(StartupPath + @"\spc.xps"), "Xps file not found");
+                Assert.IsTrue(string.IsNullOrEmpty(result));
             }
             
         }
@@ -30,10 +30,10 @@ namespace Pilot.SpwReaderPlugin.Tests
             using (var kompas = new KomapsShell())
             {
                 const string path = @"\Spc.spw";
-                string result;
-                kompas.InitKompas(out result);
+                kompas.InitKompas(out var result);
                 kompas.ConvertToPdf(StartupPath + path, StartupPath + @"\spc.pdf", out result);
                 Assert.IsTrue(File.Exists(StartupPath + @"\spc.pdf"), "Pdf file not found");
+                Assert.IsTrue(string.IsNullOrEmpty(result));
             }
 
         }
