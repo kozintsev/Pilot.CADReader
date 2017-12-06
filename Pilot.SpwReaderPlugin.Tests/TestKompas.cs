@@ -17,7 +17,7 @@ namespace Pilot.SpwReaderPlugin.Tests
             {
                 const string path = @"\Spc.spw";
                 kompas.InitKompas(out var result);
-                kompas.PrintToXps(StartupPath + path, @"spc.xps");
+                kompas.PrintToXps(StartupPath + path);
                 Assert.IsTrue(File.Exists(StartupPath + @"\spc.xps"), "Xps file not found");
                 Assert.IsTrue(string.IsNullOrEmpty(result));
             }

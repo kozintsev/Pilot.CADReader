@@ -174,7 +174,7 @@ namespace Ascon.Uln.KompasShell
             return false;
         }
 
-        public bool PrintToXps(string fileName, string outFileName)
+        public bool PrintToXps(string fileName)
         {
             var doc = _kompasApp.Documents.Open(fileName, true, true);
             _kompasApp.Visible = true;
