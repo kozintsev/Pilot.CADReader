@@ -58,6 +58,7 @@ namespace Pilot.SpwReaderPlugin.Tests
         [TestMethod]
         public void TestPrintSpwToXpsFile()
         {
+            ClearFolder();
             using (var kompas = new KomapsShell())
             {
                 const string path = @"\078.505.9.0100.00.SPW";
