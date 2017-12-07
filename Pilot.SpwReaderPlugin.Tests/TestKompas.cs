@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ascon.Uln.KompasShell;
@@ -21,17 +22,8 @@ namespace Pilot.SpwReaderPlugin.Tests
             return length > 0;
         }
 
-        [TestMethod]
-        public void TestPrintSpwToXpsFile()
+        public bool IsXpsFile()
         {
-            using (var kompas = new KomapsShell())
-            {
-                const string path = @"\078.505.9.0100.00.SPW";
-                kompas.InitKompas(out var result);
-                kompas.PrintToXps(StartupPath + path);
-                Assert.IsTrue(string.IsNullOrEmpty(result));
-            }
-            var isFile = false;
             var files = Directory.GetFiles(PilotPrinterFolder);
             foreach (var file in files)
             {
@@ -40,12 +32,41 @@ namespace Pilot.SpwReaderPlugin.Tests
                     var length = new FileInfo(file).Length;
                     if (length > 0)
                     {
-                        isFile = true;
-                        break;
+                        return true;
                     }
                 }
             }
-            Assert.IsTrue(isFile, "Tmp xps file not found");
+            return false;
+        }
+
+        public void ClearFolder()
+        {
+            var files = Directory.GetFiles(PilotPrinterFolder);
+            foreach (var file in files)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestPrintSpwToXpsFile()
+        {
+            using (var kompas = new KomapsShell())
+            {
+                const string path = @"\Spc.spw";
+                kompas.InitKompas(out var result);
+                kompas.PrintToXps(StartupPath + path);
+                kompas.ExitKompas();
+                Assert.IsTrue(string.IsNullOrEmpty(result));
+            }
+            Assert.IsTrue(IsXpsFile(), "Tmp xps file not found");
         }
 
         [TestMethod]
@@ -56,6 +77,7 @@ namespace Pilot.SpwReaderPlugin.Tests
                 const string path = @"\Spc.spw";
                 kompas.InitKompas(out var result);
                 kompas.ConvertToPdf(StartupPath + path, StartupPath + @"\spc.pdf", out result);
+                kompas.ExitKompas();
                 Assert.IsTrue(string.IsNullOrEmpty(result));
             }
             Assert.IsTrue(File.Exists(StartupPath + @"\spc.pdf"), "Pdf file not found");

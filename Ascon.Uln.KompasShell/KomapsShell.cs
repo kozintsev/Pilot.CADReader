@@ -174,13 +174,15 @@ namespace Ascon.Uln.KompasShell
 
         public bool PrintToXps(string fileName)
         {
-            OpenFileKompas(fileName, out var result, false);
+            if ( ! OpenFileKompas(fileName, out var result, false))
+                return false;
             var p = PrinterHelper.GetDefaultPrinterName();
             PrinterHelper.SetPilotXpDefault();
             // fKompasPrint - TRUE исполь­зуем принтер Компас,
             // -FALSE - умол­чательный принтер Windows.
             var r = _kompasObj.ksPrintKompasDocumentEx(fileName, null, 1, false);
             PrinterHelper.SetDefaultPrinter(p);
+            _doc2D.ksCloseDocument();
             return r != 0;
         }
 
@@ -189,6 +191,8 @@ namespace Ascon.Uln.KompasShell
         #region Реализаця интерфейса IDisposable
         public void Dispose()
         {
+            Log.Clear();
+            Log = null;
             if (_kompasObj == null) return;
             Marshal.ReleaseComObject(_kompasObj);
             _kompasObj = null;

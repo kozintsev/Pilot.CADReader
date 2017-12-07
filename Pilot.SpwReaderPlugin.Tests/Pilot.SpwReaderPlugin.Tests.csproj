@@ -50,6 +50,13 @@
     <Compile Include="TestPrinterHelper.cs.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TestSourceFiles\078.505.0.0102.00.A3.CDW">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestSourceFiles\078.505.9.0100.00.SPW">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestSourceFiles\Spc.md5" />
     <None Include="TestSourceFiles\Spc.spw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
