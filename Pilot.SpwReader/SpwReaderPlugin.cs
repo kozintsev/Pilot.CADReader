@@ -36,7 +36,6 @@ namespace Ascon.Pilot.SDK.SpwReader
             _fileProvider = fileProvider;
         }
         
-
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
         /// </summary>
@@ -267,7 +266,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 string[] paths = { fileName };
                 var storageObjects = _objectsRepository.GetStorageObjects(paths);
                 var storageObject = storageObjects.FirstOrDefault();
-                builder.
+                
                 if (storageObject != null)
                     builder.AddSourceFileRelation(storageObject.DataObject.Id);
                 if (File.Exists(spcObject.PdfDocument))

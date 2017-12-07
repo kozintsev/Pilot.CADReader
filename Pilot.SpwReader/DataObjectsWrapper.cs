@@ -26,10 +26,9 @@ namespace Ascon.Pilot.SDK.SpwReader
             State = dataObject.State;
             SynchronizationState = dataObject.SynchronizationState;
             Files = new ReadOnlyCollection<FileWrapper>(dataObject.Files.Select(f => new FileWrapper(f)).ToList());
-            Access = new Dictionary<int, AccessWrapper>(dataObject.Access.ToDictionary(f => f.Key, f => new AccessWrapper(f.Value)));
-            IsDeleted = dataObject.IsDeleted;
+            Access = new ReadOnlyCollection<AccessWrapper>(dataObject.Access2.Select(f => new AccessWrapper(f)).ToList());
             IsSecret = dataObject.IsSecret;
-            IsInRecycleBin = dataObject.IsInRecycleBin;
+            StateInfo = new ObjectStateInfo(dataObject.ObjectStateInfo);
         }
 
         public Guid Id { get; private set; }
@@ -44,10 +43,25 @@ namespace Ascon.Pilot.SDK.SpwReader
         public DataState State { get; private set; }
         public SynchronizationState SynchronizationState { get; private set; }
         public ReadOnlyCollection<FileWrapper> Files { get; private set; }
-        public IDictionary<int, AccessWrapper> Access { get; private set; }
+        public ReadOnlyCollection<AccessWrapper> Access { get; private set; }
         public bool IsSecret { get; private set; }
-        public bool IsDeleted { get; private set; }
-        public bool IsInRecycleBin { get; private set; }
+        public IStateInfo StateInfo { get; private set; }
+    }
+
+    internal class ObjectStateInfo : IStateInfo
+    {
+        public ObjectStateInfo(IStateInfo objectStateInfo)
+        {
+            State = objectStateInfo.State;
+            Date = objectStateInfo.Date;
+            PersonId = objectStateInfo.PersonId;
+            PositionId = objectStateInfo.PositionId;
+        }
+
+        public ObjectState State { get; private set; }
+        public DateTime Date { get; private set; }
+        public int PersonId { get; private set; }
+        public int PositionId { get; private set; }
     }
 
     internal class FileWrapper
@@ -226,17 +240,18 @@ namespace Ascon.Pilot.SDK.SpwReader
         public ReadOnlyCollection<int> Children { get; private set; }
     }
 
+
     internal class AccessWrapper
     {
-        public AccessWrapper(IAccess access)
+        public AccessWrapper(IAccessRecord accessRecord)
         {
-            if (access == null)
+            if (accessRecord == null)
                 return;
 
-            AccessLevel = access.AccessLevel;
-            ValidThrough = access.ValidThrough;
-            IsInheritable = access.IsInheritable;
-            IsInherited = access.IsInherited;
+            AccessLevel = accessRecord.Access.AccessLevel;
+            ValidThrough = accessRecord.Access.ValidThrough;
+            IsInheritable = accessRecord.Access.IsInheritable;
+            IsInherited = accessRecord.Access.IsInherited;
         }
         public AccessLevel AccessLevel { get; private set; }
         public DateTime ValidThrough { get; private set; }
