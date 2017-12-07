@@ -20,16 +20,16 @@ namespace Ascon.Uln.KompasShell
         {
             const string pilotXps = "Pilot XPS";
             var printers = PrinterSettings.InstalledPrinters.Cast<string>().ToArray();
+            if (!printers.Any(printer => printer.Equals(pilotXps))) return;
+            SetDefaultPrinter(pilotXps);
+        }
 
-            foreach (var printer in printers)
-            {
-                if (printer.Equals(pilotXps))
-                {
-                    //var p = new PrinterSettings {PrinterName = pilotXps};
-                    SetDefaultPrinter(pilotXps);
-                    return;
-                }
-            }
+        public static void SetMicrosoftXpDefault()
+        {
+            const string printerName = "Microsoft XPS Document Writer";
+            var printers = PrinterSettings.InstalledPrinters.Cast<string>().ToArray();
+            if (!printers.Any(printer => printer.Equals(printerName))) return;
+            SetDefaultPrinter(printerName);
         }
 
 

@@ -66,7 +66,7 @@ namespace Ascon.Uln.KompasShell
             }
         }
 
-        public bool OpenFileKompas(string fileName, out string result)
+        public bool OpenFileKompas(string fileName, out string result, bool visual = true)
         {
             var fileopen = false;
             if (_kompasObj != null)
@@ -79,11 +79,9 @@ namespace Ascon.Uln.KompasShell
                     AddLog(result);
                     return false;
                 }
-
-                _kompasObj.Visible = true;
+                _kompasObj.Visible = visual;
                 var err = _kompasObj.ksReturnResult();
                 if (err != 0) _kompasObj.ksResultNULL();
-
             }
             else
             {
@@ -176,18 +174,7 @@ namespace Ascon.Uln.KompasShell
 
         public bool PrintToXps(string fileName)
         {
-            var doc = _kompasApp.Documents.Open(fileName, true, true);
-            _kompasApp.Visible = true;
-            var sheets = doc.LayoutSheets;
-            var c = sheets.Count;
-            var t = sheets.Type;
-            var printJob = _kompasApp.PrintJob;
-            if (printJob != null)
-            {
-                var b = printJob.AddSheets(fileName, sheets, ksSheetsRangeEnum.ksAllSheets);
-                printJob.ShowPreviewWindow();
-                b = printJob.Execute("Pilot XPS");
-            }
+            OpenFileKompas(fileName, out var result, false);
             var p = PrinterHelper.GetDefaultPrinterName();
             PrinterHelper.SetPilotXpDefault();
             // fKompasPrint - TRUE исполь­зуем принтер Компас,
