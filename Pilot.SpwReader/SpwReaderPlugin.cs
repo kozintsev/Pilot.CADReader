@@ -3,15 +3,15 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Ascon.Pilot.SDK.Menu;
 using Ascon.Pilot.SDK.SpwReader.Spc;
 // ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    [Export(typeof(IMainMenu))]
-    [Export(typeof(IObjectContextMenu))]
-    [Export(typeof(IStorageContextMenu))]
-    public class SpwReaderPlugin : IMainMenu, IObjectContextMenu, IStorageContextMenu
+    [Export(typeof(IMenu<MainViewContext>))]
+    [Export(typeof(IMenu<ObjectsViewContext>))]
+    public class SpwReaderPlugin : IMenu<MainViewContext>, IMenu<ObjectsViewContext>
     {
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
@@ -35,55 +35,8 @@ namespace Ascon.Pilot.SDK.SpwReader
             _dataObjects = new List<IDataObject>();
             _fileProvider = fileProvider;
         }
+        
 
-        public void BuildMenu(IMenuHost menuHost)
-        {
-            var menuItem = menuHost.GetItems().First();
-            menuHost.AddSubItem(menuItem, ABOUT_PROGRAM_MENU, "О интеграции с КОМПАС", null, 0);
-            menuHost.AddItem(ABOUT_PROGRAM_MENU, "О интеграции с КОМПАС", null, 1);
-        }
-
-        public void OnMenuItemClick(string itemName)
-        {
-            // ReSharper disable once SwitchStatementMissingSomeCases
-            switch (itemName)
-            {
-                case ADD_INFORMATION_TO_PILOT:
-                    SetInformationOnMenuClick(_selected);
-                    break;
-                case ABOUT_PROGRAM_MENU:
-                    new AboutPluginBox().Show();
-                    break;
-            }
-        }
-
-        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IStorageDataObject> selection)
-        {
-            //todo: подумать какие могут быть нужны команды для работы с файлами
-        }
-
-        public void BuildContextMenu(IMenuHost menuHost, IEnumerable<IDataObject> selection, bool isContext)
-        {
-            if (isContext)
-                return;
-
-            var dataObjects = selection.ToArray();
-            if (dataObjects.Count() != 1)
-                return;
-
-            var itemNames = menuHost.GetItems().ToList();
-            const string indexItemName = "SetInfo";
-            var insertIndex = itemNames.IndexOf(indexItemName) + 1;
-
-            _selected = dataObjects.FirstOrDefault();
-            if (_selected == null)
-                return;
-            if (!_selected.Type.IsMountable)
-                return;
-
-            var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
-            menuHost.AddItem(ADD_INFORMATION_TO_PILOT, "Д_обавить информацию с диска", icon, insertIndex);
-        }
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
         /// </summary>
@@ -133,25 +86,18 @@ namespace Ascon.Pilot.SDK.SpwReader
                 kompasConverterTask.Wait();
                 listSpec.Add(spc);
             }
+            IDataObject parent = null;
+            _loader.Load(selected.ParentId, o =>
+            {
+                parent = o;
+            });
+            if (parent == null) return;
 
-            //var file = GetFileFromPilotStorage(selected, SPW_EXT);
-            //if (file == null) return;
-            //var info = GetInformationFromKompas(file);
-            //if (info == null) return;
-            //if (!info.Result.IsCompleted) return;
-            //var kompasConverterTask = new Task(KompasConvert);
-            //kompasConverterTask.Start();
-            //kompasConverterTask.Wait();
-            //IDataObject parent = null;
-            //_loader.Load(selected.ParentId, o =>
-            //{
-            //    parent = o;
-            //});
-            //Thread.Sleep(100);
-            //if (parent == null) return;
-            //SynchronizeCheck(parent);
-            //AddInformationToPilot(parent);
-
+            foreach (var spc in listSpec)
+            {
+                SynchronizeCheck(parent, spc.ListSpcObjects);
+                AddInformationToPilot(parent, spc.ListSpcObjects);
+            }
         }
 
         private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
@@ -321,6 +267,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 string[] paths = { fileName };
                 var storageObjects = _objectsRepository.GetStorageObjects(paths);
                 var storageObject = storageObjects.FirstOrDefault();
+                builder.
                 if (storageObject != null)
                     builder.AddSourceFileRelation(storageObject.DataObject.Id);
                 if (File.Exists(spcObject.PdfDocument))
@@ -373,6 +320,47 @@ namespace Ascon.Pilot.SDK.SpwReader
                     return itype;
             }
             return null;
+        }
+
+        public void Build(IMenuBuilder builder, ObjectsViewContext context)
+        {
+            if (context.SelectedObjects.Count() != 1)
+                return;
+
+            var dataObjects = context.SelectedObjects.ToArray();
+            if (dataObjects.Length != 1)
+                return;
+
+            _selected = dataObjects.FirstOrDefault();
+            if (_selected == null)
+                return;
+            if (!_selected.Type.IsMountable)
+                return;
+
+            var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
+            builder.AddItem(ADD_INFORMATION_TO_PILOT, 1)
+                   .WithHeader("Д_обавить информацию с диска")
+                   .WithIcon(icon);
+        }
+
+        public void OnMenuItemClick(string name, ObjectsViewContext context)
+        {
+            if (name == ADD_INFORMATION_TO_PILOT)
+                SetInformationOnMenuClick(context.SelectedObjects.FirstOrDefault());
+            
+        }
+
+        public void Build(IMenuBuilder builder, MainViewContext context)
+        {
+            var menuItem = builder.ItemNames.First();
+            var item = builder.GetItem(menuItem).AddItem(ABOUT_PROGRAM_MENU, 0).WithHeader("О интеграции с КОМПАС");
+            item.WithSubmenu().AddItem(ABOUT_PROGRAM_MENU, 1).WithHeader("О интеграции с КОМПАС");
+        }
+
+        public void OnMenuItemClick(string name, MainViewContext context)
+        {
+            if (name == ABOUT_PROGRAM_MENU)
+                new AboutPluginBox().Show();
         }
     }
 }

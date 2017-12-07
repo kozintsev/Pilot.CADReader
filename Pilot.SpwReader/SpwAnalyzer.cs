@@ -6,7 +6,7 @@ using Ascon.Pilot.SDK.SpwReader.Spc;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class SpwAnalyzer : Specification
+    internal class SpwAnalyzer : Specification
     {
         private XDocument _xDoc;
 
@@ -97,8 +97,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                     }
                     if (attr.Name != "number") continue;
                     var strnum = attr.Value;
-                    var number = 0;
-                    if (int.TryParse(strnum, out number))
+                    if (int.TryParse(strnum, out var number))
                         spcSection.Number = number;
                     isNumber = true;
                 }
@@ -123,8 +122,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                         {
                             foreach (var strnum in from attr in context.Attributes() where attr.Name == "number" select attr.Value)
                             {
-                                int number;
-                                if (int.TryParse(strnum, out number))
+                                if (int.TryParse(strnum, out var number))
                                     spcObject.SectionNumber = number;
                             }
                         }

@@ -3,7 +3,7 @@
     /// <summary>
     /// Пример name="Формат" typeName="format" type="1" number="1" blockNumber="0" value="A1" modified="0"
     /// </summary>
-    class SpcColumn
+    internal class SpcColumn
     {
         /// <summary>
         /// Пример name="Формат" или name="Наименование" 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Ascon.Pilot.SDK.SpwReader.Spc
 {
-    class SpcObject
+    internal class SpcObject
     {
         public List<SpcColumn> Columns;
 

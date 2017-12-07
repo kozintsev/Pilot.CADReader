@@ -8,7 +8,7 @@ using NLog;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class KompasConverter
+    internal class KompasConverter
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private KomapsShell _komaps;
@@ -25,8 +25,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         public void KompasConvertToPdf()
         {
             _komaps = new KomapsShell();
-            string message;
-            _isKompasInit = _komaps.InitKompas(out message);
+            _isKompasInit = _komaps.InitKompas(out var message);
             if (!_isKompasInit) Logger.Error(message);
             foreach (var spcObject in _listSpcObject)
             {

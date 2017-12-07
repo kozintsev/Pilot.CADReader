@@ -5,12 +5,11 @@ using System.ComponentModel;
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class SpwReaderSettings : INotifyPropertyChanged,  IObserver<KeyValuePair<string, string>>, IObserver<IDataObject>
+    internal class SpwReaderSettings : INotifyPropertyChanged,  IObserver<KeyValuePair<string, string>>, IObserver<IDataObject>
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly IObjectsRepository _repository;
-        private string settings;
 
         public SpwReaderSettings(IPersonalSettings personalSettings, IObjectsRepository repository)
         {
@@ -18,10 +17,7 @@ namespace Ascon.Pilot.SDK.SpwReader
              personalSettings.SubscribeSetting(SettingsFeatureKeys.FeatureKey).Subscribe(this);
         }
 
-        public string Settings
-        {
-            get { return settings; }
-        }
+        public string Settings { get; private set; }
 
         public void OnCompleted()
         {
@@ -42,7 +38,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             if (value.Key == SettingsFeatureKeys.FeatureKey)
             {
-                settings = value.Value.ToString();
+                Settings = value.Value;
             }
         }
     }

@@ -71,6 +71,21 @@ namespace Pilot.SpwReaderPlugin.Tests
         }
 
         [TestMethod]
+        public void TestPrintCdwOneFormatToXpsFile()
+        {
+            ClearFolder();
+            using (var kompas = new KomapsShell())
+            {
+                const string path = @"\078.505.0.0102.00.A3.CDW";
+                kompas.InitKompas(out var result);
+                kompas.PrintToXps(StartupPath + path);
+                kompas.ExitKompas();
+                Assert.IsTrue(string.IsNullOrEmpty(result));
+            }
+            Assert.IsTrue(IsXpsFile(), "Tmp xps file not found");
+        }
+
+        [TestMethod]
         public void TestConvertToPdfFile()
         {
             using (var kompas = new KomapsShell())

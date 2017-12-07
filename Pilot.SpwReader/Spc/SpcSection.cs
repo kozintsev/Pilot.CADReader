@@ -1,6 +1,6 @@
 ﻿namespace Ascon.Pilot.SDK.SpwReader.Spc
 {
-    class SpcSection
+    internal class SpcSection
     {
         public int Number { get; set; }
 

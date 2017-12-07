@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Ascon.Pilot.SDK.SpwReader.Spc
 {
-    class Specification
+    internal class Specification
     {
         public string Name
         {
