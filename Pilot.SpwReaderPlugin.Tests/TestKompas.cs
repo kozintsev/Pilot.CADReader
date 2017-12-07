@@ -60,7 +60,7 @@ namespace Pilot.SpwReaderPlugin.Tests
         {
             using (var kompas = new KomapsShell())
             {
-                const string path = @"\Spc.spw";
+                const string path = @"\078.505.9.0100.00.SPW";
                 kompas.InitKompas(out var result);
                 kompas.PrintToXps(StartupPath + path);
                 kompas.ExitKompas();

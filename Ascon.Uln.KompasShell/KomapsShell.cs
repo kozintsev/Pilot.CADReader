@@ -174,8 +174,7 @@ namespace Ascon.Uln.KompasShell
 
         public bool PrintToXps(string fileName)
         {
-            if ( ! OpenFileKompas(fileName, out var result, false))
-                return false;
+            OpenFileKompas(fileName, out var result, false);
             var p = PrinterHelper.GetDefaultPrinterName();
             PrinterHelper.SetPilotXpDefault();
             // fKompasPrint - TRUE исполь­зуем принтер Компас,
