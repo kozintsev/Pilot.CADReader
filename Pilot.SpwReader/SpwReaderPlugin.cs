@@ -31,7 +31,8 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            _pilotTypes = _objectsRepository.GetTypes();
+            //todo: fixme
+            //_pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
             _fileProvider = fileProvider;
@@ -378,8 +379,7 @@ namespace Ascon.Pilot.SDK.SpwReader
         public void Build(IMenuBuilder builder, MainViewContext context)
         {
             var menuItem = builder.ItemNames.First();
-            var item = builder.GetItem(menuItem).AddItem(ABOUT_PROGRAM_MENU, 0).WithHeader("О интеграции с КОМПАС");
-            item.WithSubmenu().AddItem(ABOUT_PROGRAM_MENU, 1).WithHeader("О интеграции с КОМПАС");
+            builder.GetItem(menuItem).AddItem(ABOUT_PROGRAM_MENU, 1).WithHeader("О интеграции с КОМПАС");
         }
 
         public void OnMenuItemClick(string name, MainViewContext context)
