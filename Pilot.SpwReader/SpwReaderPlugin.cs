@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
@@ -71,10 +72,12 @@ namespace Ascon.Pilot.SDK.SpwReader
             var listSpec = new List<Specification>();
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
+            if (path == null) return;
             var filesSpw = storage.GetFilesSpw(path);
             foreach (var fileSpw in filesSpw)
             {
                 var spc = GetInformationFromKompas(fileSpw);
+                if (spc == null) continue;
                 var kompasConverterTask = new Task<KompasConverter>(() =>
                 {
                     var k = new KompasConverter(spc.ListSpcObjects);
@@ -111,6 +114,11 @@ namespace Ascon.Pilot.SDK.SpwReader
             return file;
         }
 
+        /// <summary>
+        /// Метод получает информацию из спецификации и возвращает экземпляр класса Specification
+        /// </summary>
+        /// <param name="filename">Имя файла</param>
+        /// <returns>Объект спецификации</returns>
         private Specification GetInformationFromKompas(string filename)
         {
             using (var inputStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
@@ -253,8 +261,7 @@ namespace Ascon.Pilot.SDK.SpwReader
                 // очишаем значение от служебных символов и выражений
                 val = ValueTextClear(val);
                 // в качестве наименование передаётся внутренее имя (а не то которое отображается)
-                int i;
-                if (int.TryParse(val, out i))
+                if (int.TryParse(val, out var i))
                     builder.SetAttribute(attr.TypeName, i);
                 else
                     builder.SetAttribute(attr.TypeName, val);
@@ -266,14 +273,34 @@ namespace Ascon.Pilot.SDK.SpwReader
                 string[] paths = { fileName };
                 var storageObjects = _objectsRepository.GetStorageObjects(paths);
                 var storageObject = storageObjects.FirstOrDefault();
-                
+
                 if (storageObject != null)
-                    builder.AddSourceFileRelation(storageObject.DataObject.Id);
+                {
+                    //Create relations
+                    var relationId = Guid.NewGuid();
+                    var relationName = relationId.ToString();
+                    const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+                    var selectedRealtion = new Relation
+                    {
+                        Id = relationId,
+                        Type = relationType,
+                        Name = storageObject.DataObject.DisplayName,
+                        TargetId = storageObject.DataObject.Id
+                    };
+                    var chosenRelation = new Relation
+                    {
+                        Id = relationId,
+                        Type = relationType,
+                        Name = relationName,
+                        TargetId = builder.DataObject.Id
+                    };
+                    _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+                    _objectModifier.Apply();
+                }
                 if (File.Exists(spcObject.PdfDocument))
                 {
                     builder.AddFile(spcObject.PdfDocument);
                 };
-
             }
             _objectModifier.Apply();
         }
@@ -346,7 +373,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             if (name == ADD_INFORMATION_TO_PILOT)
                 SetInformationOnMenuClick(context.SelectedObjects.FirstOrDefault());
-            
         }
 
         public void Build(IMenuBuilder builder, MainViewContext context)

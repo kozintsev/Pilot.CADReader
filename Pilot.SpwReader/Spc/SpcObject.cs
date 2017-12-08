@@ -50,5 +50,7 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
 
         public string PdfDocument { get; set; }
 
+        public string XpsDocument { get; set; }
+
     }
 }

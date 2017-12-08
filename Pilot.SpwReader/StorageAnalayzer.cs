@@ -4,7 +4,7 @@
 
 namespace Ascon.Pilot.SDK.SpwReader
 {
-    class StorageAnalayzer
+    internal class StorageAnalayzer
     {
         private const string SPW_EXT = "*.spw";
         private readonly string _storagePath;
