@@ -17,7 +17,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
         private readonly IFileProvider _fileProvider;
-        private readonly IEnumerable<IType> _pilotTypes;
         private readonly ObjectLoader _loader;
         private readonly List<IDataObject> _dataObjects;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
@@ -31,8 +30,6 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            //todo: fixme
-            //_pilotTypes = _objectsRepository.GetTypes();
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
             _fileProvider = fileProvider;
@@ -326,7 +323,8 @@ namespace Ascon.Pilot.SDK.SpwReader
         {
             // ReSharper disable once RedundantAssignment
             var title = string.Empty;
-            foreach (var itype in _pilotTypes)
+            var pilotTypes = _objectsRepository.GetTypes();
+            foreach (var itype in pilotTypes)
             {
                 title = itype.Title;
                 if (ParsingSectionName(sectionName, "документ") && title == "Документ")
