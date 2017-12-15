@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Ascon.Pilot.SDK.CadReader.Analyzer;
 using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Pilot.SDK.Menu;
 
@@ -365,7 +366,7 @@ namespace Ascon.Pilot.SDK.CadReader
 
             var icon = IconLoader.GetIcon(@"/Resources/menu_icon.svg");
             builder.AddItem(ADD_INFORMATION_TO_PILOT, 1)
-                   .WithHeader("Д_обавить информацию из КОМПАС-3D")
+                   .WithHeader("Д_обавить информацию из файлов")
                    .WithIcon(icon);
         }
 

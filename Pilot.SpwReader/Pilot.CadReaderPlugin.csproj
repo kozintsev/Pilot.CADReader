@@ -93,7 +93,7 @@
     <Compile Include="Spc\SpcColumn.cs" />
     <Compile Include="Spc\SpcObject.cs" />
     <Compile Include="Spc\SpcSection.cs" />
-    <Compile Include="SpwAnalyzer.cs" />
+    <Compile Include="Analyzer\SpwAnalyzer.cs" />
     <Compile Include="StorageAnalayzer.cs" />
   </ItemGroup>
   <ItemGroup>
