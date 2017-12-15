@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     internal class DataObjectWrapper
     {

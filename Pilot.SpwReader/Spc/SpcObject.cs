@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Ascon.Pilot.SDK.SpwReader.Spc
+namespace Ascon.Pilot.SDK.CadReader.Spc
 {
     internal class SpcObject
     {
@@ -29,7 +29,7 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
             get
             {
                 var column = Columns.FirstOrDefault(prop => prop.Name == "Наименование");
-                return column != null ? column.Value : null;
+                return column?.Value;
             }
         }
 
@@ -38,7 +38,7 @@ namespace Ascon.Pilot.SDK.SpwReader.Spc
             get
             {
                 var column = Columns.FirstOrDefault(prop => prop.Name == "Обозначение");
-                return column != null ? column.Value : null;
+                return column?.Value;
             }
         }
 

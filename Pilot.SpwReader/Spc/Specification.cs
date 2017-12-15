@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Ascon.Pilot.SDK.SpwReader.Spc
+namespace Ascon.Pilot.SDK.CadReader.Spc
 {
     internal class Specification
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ascon.Uln.KompasShell;
 
-namespace Pilot.SpwReaderPlugin.Tests
+namespace Pilot.CadReaderPlugin.Tests
 {
     [TestClass]
     [DeploymentItem(@"TestSourceFiles\")]

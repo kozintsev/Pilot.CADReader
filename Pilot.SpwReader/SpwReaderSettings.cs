@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     internal class SpwReaderSettings : INotifyPropertyChanged,  IObserver<KeyValuePair<string, string>>, IObserver<IDataObject>
     {

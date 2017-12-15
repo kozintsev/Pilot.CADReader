@@ -3,7 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     class IconLoader
     {

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Ascon.Pilot.SDK.SpwReader.Spc;
+using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Uln.KompasShell;
 using NLog;
 // ReSharper disable InconsistentNaming
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     internal class KompasConverter
     {

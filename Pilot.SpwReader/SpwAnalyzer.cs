@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using Ascon.Pilot.SDK.SpwReader.Spc;
+using Ascon.Pilot.SDK.CadReader.Spc;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     internal class SpwAnalyzer : Specification
     {
@@ -32,13 +32,7 @@ namespace Ascon.Pilot.SDK.SpwReader
             }
         }
 
-        public Specification GetSpecification
-        {
-            get
-            {
-                return this;
-            }
-        }
+        public Specification GetSpecification => this;
 
         private void RunParsingSpw()
         {

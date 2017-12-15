@@ -1,4 +1,4 @@
-﻿namespace Ascon.Pilot.SDK.SpwReader
+﻿namespace Ascon.Pilot.SDK.CadReader
 {
     static class SettingsFeatureKeys
     {

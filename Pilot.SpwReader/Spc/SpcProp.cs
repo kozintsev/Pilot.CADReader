@@ -1,4 +1,4 @@
-﻿namespace Ascon.Pilot.SDK.SpwReader.Spc
+﻿namespace Ascon.Pilot.SDK.CadReader.Spc
 {
     /// <summary>
     /// Пример name="Масса" value="10.037" typeValue="double" 

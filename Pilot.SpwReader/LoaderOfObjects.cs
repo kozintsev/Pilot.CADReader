@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     class LoaderOfObjects : IObserver<IDataObject>, IObserver<IStorageDataObject>
     {

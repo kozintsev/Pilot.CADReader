@@ -1,4 +1,4 @@
-﻿namespace Ascon.Pilot.SDK.SpwReader.Spc
+﻿namespace Ascon.Pilot.SDK.CadReader.Spc
 {
     /// <summary>
     /// Пример name="Формат" typeName="format" type="1" number="1" blockNumber="0" value="A1" modified="0"

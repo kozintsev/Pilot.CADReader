@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Windows;
 
-namespace Ascon.Pilot.SDK.SpwReader
+namespace Ascon.Pilot.SDK.CadReader
 {
     /// <summary>
     /// Interaction logic for MessageBox.xaml

@@ -1,4 +1,4 @@
-﻿<Window x:Class="Ascon.Pilot.SDK.SpwReader.AboutPluginBox"
+﻿<Window x:Class="Ascon.Pilot.SDK.CadReader.AboutPluginBox"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -26,7 +26,7 @@
             <TextBlock Name ="VersionBlock" Text=""/>
             <TextBlock Text="Разработчик Козинцев Олег"/>
             <TextBlock>
-                <Hyperlink NavigateUri="mailto:o.kozintsev@gmail.com?subject=Pilot.SpwReaderPlugin" RequestNavigate="OnHyperlinkRequestNavigateClick">e-mail: o.kozintsev@gmail.com</Hyperlink>
+                <Hyperlink NavigateUri="mailto:o.kozintsev@gmail.com?subject=Pilot.CadReaderPlugin" RequestNavigate="OnHyperlinkRequestNavigateClick">e-mail: o.kozintsev@gmail.com</Hyperlink>
             </TextBlock>
             <TextBlock Text=""/>
             <Button x:Name="BtnClose" Content="Close" 

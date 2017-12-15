@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Pilot.SpwReaderPlugin.Tests
+namespace Pilot.CadReaderPlugin.Tests
 {
     [TestClass]
     [DeploymentItem(@"TestSourceFiles\")]
@@ -28,10 +28,7 @@ namespace Pilot.SpwReaderPlugin.Tests
             const string path = @"Spc.spw";
             var isFile = File.Exists(path);
             Assert.IsTrue(isFile, "File not found");
-            if (!isFile) return;
             var md5Calculated = Go(path);
-            //Assert.AreNotEqual(md5Calculated.ToLower(), md5, "Invalid algorithm Calculator Md5 Checksum");
-            var b = (md5Calculated.ToLower() == md5);
             Assert.IsTrue(md5Calculated.ToLower() == md5, "Invalid algorithm Calculator Md5 Checksum");
         }
 
