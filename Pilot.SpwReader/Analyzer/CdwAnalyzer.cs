@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 using Ascon.Pilot.SDK.CadReader.Model;
 using Ascon.Pilot.SDK.CadReader.Spc;
@@ -92,11 +91,12 @@ namespace Ascon.Pilot.SDK.CadReader.Analyzer
                     }
                     if (attr.Name == "orientation")
                     {
-                        ds.Orientation = attr.Value;
+                        strnum = attr.Value;
+                        if (int.TryParse(strnum, out number))
+                            ds.Orientation = number;
                     }
                     if (attr.Name == "height")
                     {
-                        ds.Orientation = attr.Value;
                         strnum = attr.Value;
                         if (int.TryParse(strnum, out number))
                             ds.Height = number;
