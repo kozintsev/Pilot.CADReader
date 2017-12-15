@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.IO;
 // Библиотеки подключаются из каталога c:\Program Files\ASCON\KOMPAS-3D V16\SDK\C#\Common\
 using Kompas6API5;
-using Kompas6Constants;
 using KompasAPI7;
 using Pdf2d_LIBRARY;
 
@@ -182,8 +181,6 @@ namespace Ascon.Uln.KompasShell
             PrinterHelper.SetDefaultPrinter(p);
             return r != 0;
         }
-
-        
 
         #region Реализаця интерфейса IDisposable
         public void Dispose()
