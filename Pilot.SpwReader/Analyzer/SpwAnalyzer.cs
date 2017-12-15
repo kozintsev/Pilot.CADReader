@@ -101,7 +101,7 @@ namespace Ascon.Pilot.SDK.CadReader.Analyzer
                 isNumber = false;
             }
 
-            var spcObjects = _xDoc.Descendants("spcObjects");      
+            var spcObjects = _xDoc.Descendants("spcObjects");
             foreach (var e in spcObjects)
             {
                 foreach (var o in e.Elements())

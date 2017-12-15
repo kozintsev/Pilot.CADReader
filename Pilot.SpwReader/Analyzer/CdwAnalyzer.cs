@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Ascon.Pilot.SDK.CadReader.Model;
 using Ascon.Pilot.SDK.CadReader.Spc;
 
 namespace Ascon.Pilot.SDK.CadReader.Analyzer
@@ -11,6 +13,8 @@ namespace Ascon.Pilot.SDK.CadReader.Analyzer
 
         public bool Opened { get; private set; }
         public bool IsCompleted { get; private set; }
+        public List<SpcProp> Prop { get; private set; }
+        public Drawing Drawing { get; private set; }
 
         public CdwAnalyzer(Stream fileStream)
         {
@@ -35,6 +39,10 @@ namespace Ascon.Pilot.SDK.CadReader.Analyzer
         {
             if (_xDoc == null)
                 return;
+
+            Drawing = new Drawing();
+            Prop = new List<SpcProp>();
+
             var properties = _xDoc.Descendants("property");
             foreach (var prop in properties)
             {
@@ -66,90 +74,41 @@ namespace Ascon.Pilot.SDK.CadReader.Analyzer
                         NatureId = natureId,
                         UnitId = unitId
                     };
-                    //ListSpcProps.Add(spcProp);
+                    Prop.Add(spcProp);
                 }
             }
 
-            var sections = _xDoc.Descendants("section");
-            bool isName = false, isNumber = false;
-            foreach (var section in sections)
+            var sheets = _xDoc.Descendants("sheets");
+            foreach (var sheet in sheets)
             {
-                var spcSection = new SpcSection();
-                foreach (var attr in section.Attributes())
+                var ds = new DrawingSheet();
+                foreach (var attr in sheet.Attributes())
                 {
-                    if (attr.Name == "name")
+                    string strnum;
+                    int number;
+                    if (attr.Name == "format")
                     {
-                        spcSection.Name = attr.Value;
-                        isName = true;
+                        ds.Format = attr.Value;
                     }
-                    if (attr.Name != "number") continue;
-                    var strnum = attr.Value;
-                    if (int.TryParse(strnum, out var number))
-                        spcSection.Number = number;
-                    isNumber = true;
-                }
-                if (isName && isNumber)
-                    //SpcSections.Add(spcSection);
-                isName = false;
-                isNumber = false;
-            }
-
-            var spcObjects = _xDoc.Descendants("spcObjects");
-            foreach (var e in spcObjects)
-            {
-                foreach (var o in e.Elements())
-                {
-                    var spcObject = new SpcObject();
-                    foreach (var attr in o.Attributes().Where(attr => attr.Name == "id"))
-                        spcObject.Id = attr.Value;
-
-                    foreach (var context in o.Elements())
+                    if (attr.Name == "orientation")
                     {
-                        if (context.Name.ToString() == "section")
-                        {
-                            foreach (var strnum in from attr in context.Attributes() where attr.Name == "number" select attr.Value)
-                            {
-                                if (int.TryParse(strnum, out var number))
-                                    spcObject.SectionNumber = number;
-                            }
-                        }
-                        if (context.Name.ToString() == "columns")
-                        {
-                            foreach (var column in context.Elements())
-                            {
-                                var col = new SpcColumn();
-                                foreach (var attr in column.Attributes())
-                                {
-                                    if (attr.Name == "name")
-                                        col.Name = attr.Value;
-                                    if (attr.Name == "typeName")
-                                        col.TypeName = attr.Value;
-                                    if (attr.Name == "value")
-                                        col.Value = attr.Value;
-                                }
-                                // добавляем колонку спецификации в объект
-                                spcObject.Columns.Add(col);
-                            }
-                        }
-                        if (context.Name.ToString() != "documents") continue;
-                        foreach (var document in context.Elements())
-                        {
-                            var doc = new SpcDocument();
-                            foreach (var attr in document.Attributes().Where(attr => attr.Name == "fileName"))
-                            {
-                                doc.FileName = attr.Value;
-                            }
-                            // добавить документы связанные с объектом спецификации
-                            spcObject.Documents.Add(doc);
-                        }
+                        ds.Orientation = attr.Value;
                     }
-                    // добавляем в список объект спецификации
-                    //ListSpcObjects.Add(spcObject);
+                    if (attr.Name == "height")
+                    {
+                        ds.Orientation = attr.Value;
+                        strnum = attr.Value;
+                        if (int.TryParse(strnum, out number))
+                            ds.Height = number;
+                    }
+                    if (attr.Name != "width") continue;
+                    strnum = attr.Value;
+                    if (int.TryParse(strnum, out number))
+                        ds.Width = number;
                 }
-                // парсинг объектов завершён
+                Drawing.Sheets.Add(ds);
             }
             // все циклы завершены
-            // вызываем событие о завершении парсинга.
             IsCompleted = true;
         }
        
