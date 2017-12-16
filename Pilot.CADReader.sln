@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin", "Pilot.SpwReader\Pilot.CadReaderPlugin.csproj", "{1FF8C39F-4853-468E-B872-2440E98CC140}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin", "Pilot.CadReaderPlugin\Pilot.CadReaderPlugin.csproj", "{1FF8C39F-4853-468E-B872-2440E98CC140}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6E6CDB6-3205-4AA8-85F2-D0080E52C16E}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ascon.Uln.KompasShell", "As
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KAPITypes", "KAPITypes\KAPITypes.csproj", "{3B02F815-F2E7-45A2-B828-8AA4DA54D54F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin.Tests", "Pilot.SpwReaderPlugin.Tests\Pilot.CadReaderPlugin.Tests.csproj", "{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin.Tests", "Pilot.CadReaderPlugin.Tests\Pilot.CadReaderPlugin.Tests.csproj", "{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
