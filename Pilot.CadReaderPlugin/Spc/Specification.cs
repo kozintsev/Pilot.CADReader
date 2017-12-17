@@ -1,16 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class Specification
+    internal class Specification : GeneralProp
     {
         public string Name
         {
             get
             {
                 var spcProp = ListSpcProps.FirstOrDefault(prop => prop.Name == "Наименование");
-                return spcProp != null ? spcProp.Value : null;
+                return spcProp?.Value;
             }
         }
 
@@ -19,11 +20,11 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
             get
             {
                 var spcProp = ListSpcProps.FirstOrDefault(prop => prop.Name == "Обозначение");
-                return spcProp != null ? spcProp.Value : null;
+                return spcProp?.Value;
             }
         }
         
-        public string CurrentPath { get; set; }
+        public string FileName { get; set; }
         
         public Specification Children { get; set; }
         

@@ -78,7 +78,23 @@ namespace Ascon.Pilot.SDK.CadReader
             {
                 var spc = GetInformationFromKompas(fileSpw);
                 if (spc == null) continue;
-                var kompasConverterTask = new Task<KompasConverter>(() =>
+                listSpec.Add(spc);
+            }
+            // todo: необходимо построить дерево из спецификаций
+            // для объектов спецификациий формируем pdf, для спецификаций формируем xps
+            // формируем вторичное представление для спецификаций
+            var kompasConverterTask = new Task<KompasConverter>(() =>
+            {
+                var k = new KompasConverter(listSpec);
+                k.KompasConvertToXps();
+                return k;
+            });
+            kompasConverterTask.Start();
+            kompasConverterTask.Wait();
+
+            foreach (var spc in listSpec)
+            {
+                kompasConverterTask = new Task<KompasConverter>(() =>
                 {
                     var k = new KompasConverter(spc.ListSpcObjects);
                     k.KompasConvertToPdf();
@@ -86,20 +102,20 @@ namespace Ascon.Pilot.SDK.CadReader
                 });
                 kompasConverterTask.Start();
                 kompasConverterTask.Wait();
-                listSpec.Add(spc);
             }
+            // todo: переделать механизм загрузки данных + добавить спецификации с атрибутами и вторичкой в xps
             IDataObject parent = null;
             _loader.Load(selected.ParentId, o =>
             {
                 parent = o;
-            });
-            if (parent == null) return;
+                if (parent == null) return;
 
-            foreach (var spc in listSpec)
-            {
-                SynchronizeCheck(parent, spc.ListSpcObjects);
-                AddInformationToPilot(parent, spc.ListSpcObjects);
-            }
+                foreach (var spc in listSpec)
+                {
+                    SynchronizeCheck(parent, spc.ListSpcObjects);
+                    AddInformationToPilot(parent, spc.ListSpcObjects);
+                }
+            });       
         }
 
         private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
@@ -133,7 +149,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 if (!taskOpenSpwFile.Result.IsCompleted)
                     return null;
                 var spc = taskOpenSpwFile.Result.GetSpecification;
-                spc.CurrentPath = filename;
+                spc.FileName = filename;
                 return spc;
             }
         }

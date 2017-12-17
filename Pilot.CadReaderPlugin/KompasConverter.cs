@@ -16,14 +16,23 @@ namespace Ascon.Pilot.SDK.CadReader
         private KomapsShell _komaps;
         private bool _isKompasInit;
         private readonly List<SpcObject> _listSpcObject;
+        private readonly List<Specification> _listSpc;
         private const string SOURCE_DOC_EXT = ".cdw";
         private const string PDF_EXT = ".pdf";
         private const string XPS_EXT = ".xps";
 
         public KompasConverter(List<SpcObject> listSpcObject)
         {
+            _listSpc = null;
             _listSpcObject = listSpcObject;
             //c:\ProgramData\ASCON\Pilot_Print\tmp.xps
+            tmpXps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\tmp.xps");
+        }
+
+        public KompasConverter(List<Specification> listSpc)
+        {
+            _listSpcObject = null;
+            _listSpc = listSpc;
             tmpXps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\tmp.xps");
         }
 
@@ -43,39 +52,84 @@ namespace Ascon.Pilot.SDK.CadReader
             {
                 _isKompasInit = _komaps.InitKompas(out var message);
                 if (!_isKompasInit) Logger.Error(message);
-                foreach (var spcObject in _listSpcObject)
+
+                if (_listSpcObject != null)
                 {
-                    var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
-                    if (doc == null) continue;
-                    var fileName = doc.FileName;
-                    if (!File.Exists(fileName)) continue;
-                    if (type == PDF_EXT)
-                    {
-                        var pdfFile = Path.GetTempFileName() + PDF_EXT;
-                        var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-                        spcObject.PdfDocument = pdfFile;
-                        if (!isConvert)
-                        {
-                            Logger.Error(message);
-                            continue;
-                        }
-                    }
-                    if (type == XPS_EXT)
-                    {
-                        var isConvert = _komaps.PrintToXps(fileName);
-                        var xpsFile = Guid.NewGuid() + ".xps";
-                        File.Move(tmpXps, xpsFile);
-                        spcObject.XpsDocument = xpsFile;
-                        File.Delete(tmpXps);
-                        if (!isConvert)
-                        {
-                            Logger.Error(message);
-                            continue;
-                        }
-                    }
-                    
+                    DocConverter(type, message);
+                }
+                if(_listSpc != null)
+                {
+                    SpcConverter(type, message);
                 }
                 _komaps.ExitKompas();
+            }
+        }
+
+        private void DocConverter(string type, string message)
+        {
+            foreach (var spcObject in _listSpcObject)
+            {
+                var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
+                if (doc == null) continue;
+                var fileName = doc.FileName;
+                if (!File.Exists(fileName)) continue;
+                if (type == PDF_EXT)
+                {
+                    var pdfFile = Path.GetTempFileName() + PDF_EXT;
+                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
+                    spcObject.PdfDocument = pdfFile;
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        continue;
+                    }
+                }
+                if (type == XPS_EXT)
+                {
+                    var isConvert = _komaps.PrintToXps(fileName);
+                    var xpsFile = Guid.NewGuid() + ".xps";
+                    File.Move(tmpXps, xpsFile);
+                    spcObject.XpsDocument = xpsFile;
+                    File.Delete(tmpXps);
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        private void SpcConverter(string type, string message)
+        {
+            foreach(var spc in _listSpc)
+            {
+                var fileName = spc.FileName;
+                if (!File.Exists(fileName)) continue;
+                if (type == PDF_EXT)
+                {
+                    var pdfFile = Path.GetTempFileName() + PDF_EXT;
+                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
+                    spc.PdfDocument = pdfFile;
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        continue;
+                    }
+                }
+                if (type == XPS_EXT)
+                {
+                    var isConvert = _komaps.PrintToXps(fileName);
+                    var xpsFile = Guid.NewGuid() + ".xps";
+                    File.Move(tmpXps, xpsFile);
+                    spc.XpsDocument = xpsFile;
+                    File.Delete(tmpXps);
+                    if (!isConvert)
+                    {
+                        Logger.Error(message);
+                        continue;
+                    }
+                }
             }
         }
 

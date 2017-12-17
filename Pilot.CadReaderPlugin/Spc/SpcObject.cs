@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class SpcObject
+    internal class SpcObject : GeneralProp
     {
         public List<SpcColumn> Columns;
 
@@ -47,10 +47,5 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
         public string SectionName { get; set; }
 
         public bool IsSynchronized { get; set; }
-
-        public string PdfDocument { get; set; }
-
-        public string XpsDocument { get; set; }
-
     }
 }
