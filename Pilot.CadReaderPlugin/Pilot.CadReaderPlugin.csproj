@@ -78,6 +78,7 @@
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="LoaderOfObjects.cs" />
     <Compile Include="Spc\GeneralProp.cs" />
+    <Compile Include="Model\IGeneralProp.cs" />
     <Compile Include="Spc\SpcDocument.cs" />
     <Compile Include="Spc\Specification.cs" />
     <Compile Include="Spc\SpcProp.cs" />

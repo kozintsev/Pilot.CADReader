@@ -1,10 +1,11 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
+using Ascon.Pilot.SDK.CadReader.Model;
+
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class Specification : GeneralProp
+    internal class Specification : GeneralProp, IGeneralProp
     {
         public string Name
         {
@@ -37,6 +38,16 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
         public List<SpcSection> SpcSections { get; protected set; }
 
         public IFile File { get; set; }
+
+        public string GetName()
+        {
+            return Name;
+        }
+
+        public string GetDesignation()
+        {
+            return Designation;
+        }
 
     }
 }

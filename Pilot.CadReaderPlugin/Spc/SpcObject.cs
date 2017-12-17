@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using Ascon.Pilot.SDK.CadReader.Model;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class SpcObject : GeneralProp
+    internal class SpcObject : GeneralProp, IGeneralProp
     {
         public List<SpcColumn> Columns;
 
@@ -47,5 +48,15 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
         public string SectionName { get; set; }
 
         public bool IsSynchronized { get; set; }
+
+        public string GetName()
+        {
+            return Name;
+        }
+
+        public string GetDesignation()
+        {
+            return Designation;
+        }
     }
 }
