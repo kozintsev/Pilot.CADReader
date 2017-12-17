@@ -77,7 +77,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 {
                     var pdfFile = Path.GetTempFileName() + PDF_EXT;
                     var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-                    spcObject.PdfDocument = pdfFile;
+                    spcObject.PreviewDocument = pdfFile;
                     if (!isConvert)
                     {
                         Logger.Error(message);
@@ -89,7 +89,7 @@ namespace Ascon.Pilot.SDK.CadReader
                     var isConvert = _komaps.PrintToXps(fileName);
                     var xpsFile = Guid.NewGuid() + ".xps";
                     File.Move(tmpXps, xpsFile);
-                    spcObject.XpsDocument = xpsFile;
+                    spcObject.PreviewDocument = xpsFile;
                     File.Delete(tmpXps);
                     if (!isConvert)
                     {
@@ -110,7 +110,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 {
                     var pdfFile = Path.GetTempFileName() + PDF_EXT;
                     var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-                    spc.PdfDocument = pdfFile;
+                    spc.PreviewDocument = pdfFile;
                     if (!isConvert)
                     {
                         Logger.Error(message);
@@ -122,7 +122,7 @@ namespace Ascon.Pilot.SDK.CadReader
                     var isConvert = _komaps.PrintToXps(fileName);
                     var xpsFile = Guid.NewGuid() + ".xps";
                     File.Move(tmpXps, xpsFile);
-                    spc.XpsDocument = xpsFile;
+                    spc.PreviewDocument = xpsFile;
                     File.Delete(tmpXps);
                     if (!isConvert)
                     {

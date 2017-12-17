@@ -19,7 +19,9 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
             Documents.Clear();
             SectionName = string.Empty;
         }
-
+        /// <summary>
+        /// Идентификатор из Компас 3D
+        /// </summary>
         public string Id { get; set; }
 
         public string Name

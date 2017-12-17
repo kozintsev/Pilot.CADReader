@@ -248,7 +248,7 @@ namespace Ascon.Pilot.SDK.CadReader
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
             if (doc != null && fileFromPilot != null)
             {
-                var pdfFile = spcObject.PdfDocument;
+                var pdfFile = spcObject.PreviewDocument;
                 // md5 в нижнем регистре расчитывается и возвращается пилотом
                 var fileNameMd5 = CalculatorMd5Checksum.Go(pdfFile);
                 if (!string.IsNullOrEmpty(fileNameMd5) && fileFromPilot.Md5 != fileNameMd5)
@@ -270,9 +270,9 @@ namespace Ascon.Pilot.SDK.CadReader
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", spc.Designation);
 
-            if (File.Exists(spc.XpsDocument))
+            if (File.Exists(spc.PreviewDocument))
             {
-                string[] paths = { spc.XpsDocument };
+                string[] paths = { spc.PreviewDocument };
                 var storageObjects = _objectsRepository.GetStorageObjects(paths);
                 var storageObject = storageObjects.FirstOrDefault();
 
@@ -299,9 +299,9 @@ namespace Ascon.Pilot.SDK.CadReader
                     _objectModifier.CreateLink(selectedRealtion, chosenRelation);
                     _objectModifier.Apply();
                 }
-                if (File.Exists(spc.XpsDocument))
+                if (File.Exists(spc.PreviewDocument))
                 {
-                    builder.AddFile(spc.XpsDocument);
+                    builder.AddFile(spc.PreviewDocument);
                 };
             }
             _objectModifier.Apply();
@@ -356,9 +356,9 @@ namespace Ascon.Pilot.SDK.CadReader
                     _objectModifier.CreateLink(selectedRealtion, chosenRelation);
                     _objectModifier.Apply();
                 }
-                if (File.Exists(spcObject.PdfDocument))
+                if (File.Exists(spcObject.PreviewDocument))
                 {
-                    builder.AddFile(spcObject.PdfDocument);
+                    builder.AddFile(spcObject.PreviewDocument);
                 };
             }
             _objectModifier.Apply();

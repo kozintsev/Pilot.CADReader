@@ -24,7 +24,9 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
                 return spcProp?.Value;
             }
         }
-        
+        /// <summary>
+        /// Путь к файлу спецификации на диске
+        /// </summary>
         public string FileName { get; set; }
         
         public Specification Children { get; set; }
