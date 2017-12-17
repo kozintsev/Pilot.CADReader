@@ -261,6 +261,52 @@ namespace Ascon.Pilot.SDK.CadReader
             if (needToChange) _objectModifier.Apply();
         }
 
+        private void CreateNewSpcToPilot(IDataObject parent, Specification spc)
+        {
+            var t = GetTypeSpecification();
+            var builder = _objectModifier.Create(parent, t);
+            spc.GlobalId = builder.DataObject.Id;
+            
+            builder.SetAttribute("name", spc.Name);
+            builder.SetAttribute("mark", spc.Designation);
+
+            if (File.Exists(spc.XpsDocument))
+            {
+                string[] paths = { spc.XpsDocument };
+                var storageObjects = _objectsRepository.GetStorageObjects(paths);
+                var storageObject = storageObjects.FirstOrDefault();
+
+                if (storageObject != null)
+                {
+                    //Create relations
+                    var relationId = Guid.NewGuid();
+                    var relationName = relationId.ToString();
+                    const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+                    var selectedRealtion = new Relation
+                    {
+                        Id = relationId,
+                        Type = relationType,
+                        Name = storageObject.DataObject.DisplayName,
+                        TargetId = storageObject.DataObject.Id
+                    };
+                    var chosenRelation = new Relation
+                    {
+                        Id = relationId,
+                        Type = relationType,
+                        Name = relationName,
+                        TargetId = builder.DataObject.Id
+                    };
+                    _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+                    _objectModifier.Apply();
+                }
+                if (File.Exists(spc.XpsDocument))
+                {
+                    builder.AddFile(spc.XpsDocument);
+                };
+            }
+            _objectModifier.Apply();
+        }
+
         private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
         {
             var t = GetTypeBySectionName(spcObject.SectionName);
@@ -338,8 +384,25 @@ namespace Ascon.Pilot.SDK.CadReader
                 if (listDoc is Specification spc)
                 {
                     // todo: создаём документ спецификация в pilot (вторичное представление)
+                    if (spc.GlobalId == Guid.Empty)
+                    {
+                        CreateNewSpcToPilot(parent, spc);
+                    }
                 }
             }
+        }
+
+        private IType GetTypeSpecification()
+        {
+            var title = string.Empty;
+            var pilotTypes = _objectsRepository.GetTypes();
+            foreach (var itype in pilotTypes)
+            {
+                title = itype.Title;
+                if (itype.Name == "Specification")
+                    return itype;
+            }
+            return null;
         }
 
         private IType GetTypeBySectionName(string sectionName)
