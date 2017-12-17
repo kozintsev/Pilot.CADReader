@@ -1,6 +1,6 @@
 ﻿namespace Ascon.Pilot.SDK.CadReader.Model
 {
-    public interface IGeneralProp
+    public interface IGeneralDocEntity
     {
         string GetName();
         //void SetName(string value);
