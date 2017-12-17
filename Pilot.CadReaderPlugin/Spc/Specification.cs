@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using Ascon.Pilot.SDK.CadReader.Model;
-
+using System;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
@@ -49,5 +49,9 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
             return Designation;
         }
 
+        public void SetGlobalId(Guid value)
+        {
+            GlobalId = value;
+        }
     }
 }

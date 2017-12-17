@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Ascon.Pilot.SDK.CadReader
 {
@@ -39,7 +36,32 @@ namespace Ascon.Pilot.SDK.CadReader
 
         public void OnNext(IDataObject value)
         {
-            throw new NotImplementedException();
+            if (_created)
+                return;
+
+            if (value.State == DataState.Loaded && value.ObjectStateInfo.State == ObjectState.DeletedPermanently)
+            {
+                _onLoadedAction(value.Id);
+                return;
+            }
+            if (value.State == DataState.Loaded && value.ObjectStateInfo.State == ObjectState.InRecycleBin)
+            {
+                _created = true;
+                _onLoadedAction(value.Id);
+                return;
+            }
+
+            if (value.State == DataState.Loaded && value.ObjectStateInfo.State != ObjectState.DeletedPermanently && value.ObjectStateInfo.State != ObjectState.InRecycleBin)
+            {
+                _created = true;
+                _onLoadedAction(value.Id);
+                return;
+            }
+            if (value.State == DataState.NonExistent)
+            {
+                _created = true;
+                _onLoadedAction(value.Id);
+            }
         }
     }
 }

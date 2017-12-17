@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Ascon.Pilot.SDK.CadReader.Model;
+using System;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
@@ -11,8 +11,6 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
 
         public List<SpcDocument> Documents;
 
-        public Guid GlobalId { get; set; }
-
         public SpcObject()
         {
             Columns = new List<SpcColumn>();
@@ -20,7 +18,6 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
             Columns.Clear();
             Documents.Clear();
             SectionName = string.Empty;
-            IsSynchronized = false;
         }
 
         public string Id { get; set; }
@@ -47,8 +44,6 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
 
         public string SectionName { get; set; }
 
-        public bool IsSynchronized { get; set; }
-
         public string GetName()
         {
             return Name;
@@ -57,6 +52,11 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
         public string GetDesignation()
         {
             return Designation;
+        }
+
+        public void SetGlobalId(Guid value)
+        {
+            GlobalId = value;
         }
     }
 }

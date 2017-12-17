@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ascon.Pilot.SDK.CadReader.Analyzer;
+using Ascon.Pilot.SDK.CadReader.Model;
 using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Pilot.SDK.Menu;
 
@@ -109,11 +110,18 @@ namespace Ascon.Pilot.SDK.CadReader
             {
                 parent = o;
                 if (parent == null) return;
-
+                if (listSpec is IList<IGeneralDocEntity> iListSpec)
+                {
+                    SynchronizeCheck(parent, iListSpec);
+                    AddInformationToPilot(parent, iListSpec);
+                }
                 foreach (var spc in listSpec)
                 {
-                    SynchronizeCheck(parent, spc.ListSpcObjects);
-                    AddInformationToPilot(parent, spc.ListSpcObjects);
+                    if (spc.ListSpcObjects is IList<IGeneralDocEntity> iListObj)
+                    {
+                        SynchronizeCheck(parent, iListObj);
+                        AddInformationToPilot(parent, iListObj);
+                    }
                 }
             });       
         }
@@ -176,7 +184,7 @@ namespace Ascon.Pilot.SDK.CadReader
             return spc;
         }
 
-        private void SynchronizeCheck(IDataObject parent, List<SpcObject> listSpcObject)
+        private void SynchronizeCheck(IDataObject parent, IList<IGeneralDocEntity> listDoc)
         {
             var children = parent.TypesByChildren;
             var loader = new LoaderOfObjects(_objectsRepository);
@@ -187,39 +195,29 @@ namespace Ascon.Pilot.SDK.CadReader
                 {
                     if (obj.Id == _selected.Id)
                         continue;
-                    var attrNameValue = string.Empty;
                     var attrMarkValue = string.Empty;
                     foreach (var a in obj.Attributes)
                     {
-                        if (a.Key == "name")
-                            attrNameValue = a.Value.ToString();
                         if (a.Key == "mark")
                             attrMarkValue = a.Value.ToString();
                     }
-                    foreach (var spcObj in listSpcObject)
+                    foreach(var doc in listDoc)
                     {
-                        bool isName = false, isMark = false;
-                        foreach (var column in spcObj.Columns)
+                        var colunmValue = ValueTextClear(doc.GetDesignation());
+                        if (colunmValue == attrMarkValue)
                         {
-                            var colunmValue = ValueTextClear(column.Value);
-                            if ((column.TypeName == "name") && (colunmValue == attrNameValue))
-                                isName = true;
-                            // TODO: здесь может быть проблема с объектами без обозначения и с дублирующими объектами необходимо тестирование и исследование
-                            if ((column.TypeName == "mark") && (colunmValue == attrMarkValue) || attrMarkValue == string.Empty)
-                                isMark = true;
+                            doc.SetGlobalId(obj.Id);
                         }
-                        if (isName && isMark)
+                        else
                         {
-                            spcObj.IsSynchronized = true;
-                            spcObj.GlobalId = obj.Id;
-                            _dataObjects.Add(obj);
+                            doc.SetGlobalId(Guid.Empty);
                         }
                     }
                 }
             });
         }
 
-        private void UpdatePilotObject(SpcObject spcObject)
+        private void UpdateSpcObjByPilot(SpcObject spcObject)
         {
             if (_dataObjects.Count == 0)
                 return;
@@ -238,8 +236,7 @@ namespace Ascon.Pilot.SDK.CadReader
                     if (attrObj.Value.ToString() != spcColVal)
                     {
                         needToChange = true;
-                        int i;
-                        if (int.TryParse(spcColVal, out i))
+                        if (int.TryParse(spcColVal, out int i))
                             builder.SetAttribute(spcColumn.TypeName, i);
                         else
                             builder.SetAttribute(spcColumn.TypeName, spcColVal);
@@ -264,7 +261,7 @@ namespace Ascon.Pilot.SDK.CadReader
             if (needToChange) _objectModifier.Apply();
         }
 
-        private void CreateNewObjectsToPilot(IDataObject parent, SpcObject spcObject)
+        private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
         {
             var t = GetTypeBySectionName(spcObject.SectionName);
             if (t == null) return;
@@ -321,18 +318,26 @@ namespace Ascon.Pilot.SDK.CadReader
             _objectModifier.Apply();
         }
 
-        private void AddInformationToPilot(IDataObject parent, List<SpcObject> _listSpcObject)
+        private void AddInformationToPilot(IDataObject parent, IList<IGeneralDocEntity> listDoc)
         {
-            foreach (var spcObject in _listSpcObject)
+            foreach (var doc in listDoc)
             {
-                if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
-                if (!spcObject.IsSynchronized)
+                if (listDoc is SpcObject spcObject)
                 {
-                    CreateNewObjectsToPilot(parent, spcObject);
+                    if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
+
+                    if (spcObject.GlobalId == Guid.Empty)
+                    {
+                        CreateNewSpcObjToPilot(parent, spcObject);
+                    }
+                    else
+                    {
+                        UpdateSpcObjByPilot(spcObject);
+                    }
                 }
-                else
+                if (listDoc is Specification spc)
                 {
-                    UpdatePilotObject(spcObject);
+                    // todo: создаём документ спецификация в pilot (вторичное представление)
                 }
             }
         }
