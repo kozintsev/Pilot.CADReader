@@ -23,7 +23,6 @@ namespace Ascon.Pilot.SDK.CadReader
                     var result = BitConverter.ToString(checkSum).Replace("-", string.Empty).ToLower();
                     return result;
                 }
-
             }
             catch (Exception)
             {
