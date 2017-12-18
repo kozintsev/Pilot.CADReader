@@ -112,19 +112,17 @@ namespace Ascon.Pilot.SDK.CadReader
             //    kompasConverterTask.Wait();
             //}
             // todo: переделать механизм загрузки данных + добавить спецификации с атрибутами и вторичкой в xps
-            IDataObject parent = null;
-            _loader.Load(selected.ParentId, o =>
+            _loader.Load(selected.Id, projectId =>
             {
-                parent = o;
-                if (parent == null) return;
-                SynchronizeCheck(parent, listSpec);
-                AddInformationToPilot(parent, listSpec);
-                
+                if (projectId == null) return;
+                SynchronizeCheck(projectId, listSpec);
+                AddInformationToPilot(projectId, listSpec);
+
                 //foreach (var spc in listSpec)
                 //{
-                //    SynchronizeCheck(parent, spc.ListSpcObjects);
-                //    AddInformationToPilot(parent, spc.ListSpcObjects);
-                    
+                //    SynchronizeCheck(projectId, spc.ListSpcObjects);
+                //    AddInformationToPilot(projectId, spc.ListSpcObjects);
+
                 //}
             });
         }
@@ -161,6 +159,7 @@ namespace Ascon.Pilot.SDK.CadReader
             _dataObjects.Clear();
             loader.Load(children.Keys, objects =>
             {
+                var generalDocEntities = listDoc as IGeneralDocEntity[] ?? listDoc.ToArray();
                 foreach (var obj in objects)
                 {
                     if (obj.Id == _selected.Id)
@@ -171,7 +170,7 @@ namespace Ascon.Pilot.SDK.CadReader
                         if (a.Key == "mark")
                             attrMarkValue = a.Value.ToString();
                     }
-                    foreach(var doc in listDoc)
+                    foreach(var doc in generalDocEntities)
                     {
                         var colunmValue = ValueTextClear(doc.GetDesignation());
                         doc.SetGlobalId(colunmValue == attrMarkValue ? obj.Id : Guid.Empty);
@@ -230,42 +229,15 @@ namespace Ascon.Pilot.SDK.CadReader
             
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", ValueTextClear(spc.Designation));
+            
 
             if (File.Exists(spc.PreviewDocument))
             {
-                string[] paths = { spc.PreviewDocument };
-                var storageObjects = _objectsRepository.GetStorageObjects(paths);
-                var storageObject = storageObjects.FirstOrDefault();
-
-                if (storageObject != null)
-                {
-                    //Create relations
-                    var relationId = Guid.NewGuid();
-                    var relationName = relationId.ToString();
-                    const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-                    var selectedRealtion = new Relation
-                    {
-                        Id = relationId,
-                        Type = relationType,
-                        Name = storageObject.DataObject.DisplayName,
-                        TargetId = storageObject.DataObject.Id
-                    };
-                    var chosenRelation = new Relation
-                    {
-                        Id = relationId,
-                        Type = relationType,
-                        Name = relationName,
-                        TargetId = builder.DataObject.Id
-                    };
-                    _objectModifier.CreateLink(selectedRealtion, chosenRelation);
-                    _objectModifier.Apply();
-                }
-                if (File.Exists(spc.PreviewDocument))
-                {
-                    builder.AddFile(spc.PreviewDocument);
-                };
+                builder.AddFile(spc.PreviewDocument);
             }
             _objectModifier.Apply();
+
+            //todo: необходимо создать связь с исходным файлом
         }
 
         private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
@@ -294,35 +266,35 @@ namespace Ascon.Pilot.SDK.CadReader
                 var storageObjects = _objectsRepository.GetStorageObjects(paths);
                 var storageObject = storageObjects.FirstOrDefault();
 
-                if (storageObject != null)
-                {
-                    //Create relations
-                    var relationId = Guid.NewGuid();
-                    var relationName = relationId.ToString();
-                    const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-                    var selectedRealtion = new Relation
-                    {
-                        Id = relationId,
-                        Type = relationType,
-                        Name = storageObject.DataObject.DisplayName,
-                        TargetId = storageObject.DataObject.Id
-                    };
-                    var chosenRelation = new Relation
-                    {
-                        Id = relationId,
-                        Type = relationType,
-                        Name = relationName,
-                        TargetId = builder.DataObject.Id
-                    };
-                    _objectModifier.CreateLink(selectedRealtion, chosenRelation);
-                    _objectModifier.Apply();
-                }
                 if (File.Exists(spcObject.PreviewDocument))
                 {
                     builder.AddFile(spcObject.PreviewDocument);
+                }
+                _objectModifier.Apply();
+
+                if (storageObject == null) return;
+                //Create relations
+                var relationId = Guid.NewGuid();
+                var relationName = relationId.ToString();
+                const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+                var selectedRealtion = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = storageObject.DataObject.DisplayName,
+                    TargetId = storageObject.DataObject.Id
                 };
+                var chosenRelation = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = relationName,
+                    TargetId = builder.DataObject.Id
+                };
+                _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+                _objectModifier.Apply();
             }
-            _objectModifier.Apply();
+            
         }
 
         private void AddInformationToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
