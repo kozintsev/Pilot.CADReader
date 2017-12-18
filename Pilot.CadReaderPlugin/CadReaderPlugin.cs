@@ -263,7 +263,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 if (!string.IsNullOrEmpty(fileNameMd5) && fileFromPilot.Md5 != fileNameMd5)
                 {
                     needToChange = true;
-                    builder.AddFile(pdfFile);
+                    builder.CreateFileSnapshot("").AddFile(pdfFile);
                 }
             }
             //TODO: внесмотря на провекрку выдаётся ошибка, если изменился только чертёж
