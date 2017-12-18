@@ -25,18 +25,7 @@ namespace Pilot.CadReaderPlugin.Tests
         public bool IsXpsFile()
         {
             var files = Directory.GetFiles(PilotPrinterFolder);
-            foreach (var file in files)
-            {
-                if (file.Contains(".xps"))
-                {
-                    var length = new FileInfo(file).Length;
-                    if (length > 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return (from file in files where file.Contains(".xps") select new FileInfo(file).Length).Any(length => length > 0);
         }
 
         public void ClearFolder()

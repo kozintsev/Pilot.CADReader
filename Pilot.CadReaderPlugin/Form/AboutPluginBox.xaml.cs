@@ -2,12 +2,13 @@
 using System.Reflection;
 using System.Windows;
 
-namespace Ascon.Pilot.SDK.CadReader
+namespace Ascon.Pilot.SDK.CadReader.Form
 {
+    /// <inheritdoc cref="MessageBox.xaml" />
     /// <summary>
     /// Interaction logic for MessageBox.xaml
     /// </summary>
-    public partial class AboutPluginBox : Window
+    public partial class AboutPluginBox
     {
         public AboutPluginBox()
         {

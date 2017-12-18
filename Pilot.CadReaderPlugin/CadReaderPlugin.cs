@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Ascon.Pilot.SDK.CadReader.Analyzer;
+using Ascon.Pilot.SDK.CadReader.Form;
 using Ascon.Pilot.SDK.CadReader.Model;
 using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Pilot.SDK.Menu;
@@ -19,7 +20,6 @@ namespace Ascon.Pilot.SDK.CadReader
     {
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
-        private readonly IFileProvider _fileProvider;
         private readonly ObjectLoader _loader;
         private readonly List<IDataObject> _dataObjects;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
@@ -29,13 +29,12 @@ namespace Ascon.Pilot.SDK.CadReader
         private IDataObject _selected;
        
         [ImportingConstructor]
-        public CadReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings, IFileProvider fileProvider)
+        public CadReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings)
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
             _loader = new ObjectLoader(repository);
             _dataObjects = new List<IDataObject>();
-            _fileProvider = fileProvider;
         }
         
         /// <summary>
@@ -70,6 +69,8 @@ namespace Ascon.Pilot.SDK.CadReader
 
         private void SetInformationOnMenuClick(IDataObject selected)
         {
+            var logForm = new LogForm();
+            logForm.Show();
             var listSpec = new List<Specification>();
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
@@ -78,64 +79,53 @@ namespace Ascon.Pilot.SDK.CadReader
             foreach (var fileSpw in filesSpw)
             {
                 var spc = GetInformationFromKompas(fileSpw);
-                if (spc == null) continue;
+                if (spc == null)
+                {
+                    // скорее всего спецификация из ранних ниже КОМПАС-3D V16
+                    logForm.AddLog("Информация не может быть получена. Cкорее всего спецификация сделана в версии ниже КОМПАС-3D V16");
+                    continue;
+                }
                 listSpec.Add(spc);
             }
             // todo: необходимо построить дерево из спецификаций
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
             // формируем вторичное представление для спецификаций
-            var kompasConverterTask = new Task<KompasConverter>(() =>
-            {
-                var k = new KompasConverter(listSpec);
-                k.KompasConvertToXps();
-                return k;
-            });
-            kompasConverterTask.Start();
-            kompasConverterTask.Wait();
+            //var kompasConverterTask = new Task<KompasConverter>(() =>
+            //{
+            //    var k = new KompasConverter(listSpec);
+            //    k.KompasConvertToXps();
+            //    return k;
+            //});
+            //kompasConverterTask.Start();
+            //kompasConverterTask.Wait();
 
-            foreach (var spc in listSpec)
-            {
-                kompasConverterTask = new Task<KompasConverter>(() =>
-                {
-                    var k = new KompasConverter(spc.ListSpcObjects);
-                    k.KompasConvertToPdf();
-                    return k;
-                });
-                kompasConverterTask.Start();
-                kompasConverterTask.Wait();
-            }
+            //foreach (var spc in listSpec)
+            //{
+            //    kompasConverterTask = new Task<KompasConverter>(() =>
+            //    {
+            //        var k = new KompasConverter(spc.ListSpcObjects);
+            //        k.KompasConvertToPdf();
+            //        return k;
+            //    });
+            //    kompasConverterTask.Start();
+            //    kompasConverterTask.Wait();
+            //}
             // todo: переделать механизм загрузки данных + добавить спецификации с атрибутами и вторичкой в xps
             IDataObject parent = null;
             _loader.Load(selected.ParentId, o =>
             {
                 parent = o;
                 if (parent == null) return;
-                if (listSpec is IList<IGeneralDocEntity> iListSpec)
-                {
-                    SynchronizeCheck(parent, iListSpec);
-                    AddInformationToPilot(parent, iListSpec);
-                }
+                SynchronizeCheck(parent, listSpec);
+                AddInformationToPilot(parent, listSpec);
+                
                 foreach (var spc in listSpec)
                 {
-                    if (spc.ListSpcObjects is IList<IGeneralDocEntity> iListObj)
-                    {
-                        SynchronizeCheck(parent, iListObj);
-                        AddInformationToPilot(parent, iListObj);
-                    }
+                    SynchronizeCheck(parent, spc.ListSpcObjects);
+                    AddInformationToPilot(parent, spc.ListSpcObjects);
+                    
                 }
             });       
-        }
-
-        private IFile GetFileFromPilotStorage(IDataObject selected, string ext)
-        {
-            if (selected == null)
-                return null;
-            IFile file = null;
-            _loader.Load(selected.RelatedSourceFiles.FirstOrDefault(), obj =>
-            {
-                file = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ext));
-            });
-            return file;
         }
 
         /// <summary>
@@ -143,7 +133,7 @@ namespace Ascon.Pilot.SDK.CadReader
         /// </summary>
         /// <param name="filename">Имя файла</param>
         /// <returns>Объект спецификации</returns>
-        private Specification GetInformationFromKompas(string filename)
+        private static Specification GetInformationFromKompas(string filename)
         {
             using (var inputStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
             {
@@ -162,29 +152,8 @@ namespace Ascon.Pilot.SDK.CadReader
             }
         }
 
-        private Specification GetInformationFromKompas(IFile file)
-        {
-            var inputStream = _fileProvider.OpenRead(file);
-            if (inputStream == null)
-                return null;
-            if (!_fileProvider.Exists(file.Id))
-                return null;
-            var ms = new MemoryStream();
-            inputStream.Seek(0, SeekOrigin.Begin);
-            inputStream.CopyTo(ms);
-            ms.Position = 0;
 
-            var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
-            taskOpenSpwFile.Start();
-            taskOpenSpwFile.Wait();
-            if (!taskOpenSpwFile.Result.IsCompleted)
-                return null;
-            var spc = taskOpenSpwFile.Result.GetSpecification;
-            spc.File = file;
-            return spc;
-        }
-
-        private void SynchronizeCheck(IDataObject parent, IList<IGeneralDocEntity> listDoc)
+        private void SynchronizeCheck(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
         {
             var children = parent.TypesByChildren;
             var loader = new LoaderOfObjects(_objectsRepository);
@@ -204,14 +173,7 @@ namespace Ascon.Pilot.SDK.CadReader
                     foreach(var doc in listDoc)
                     {
                         var colunmValue = ValueTextClear(doc.GetDesignation());
-                        if (colunmValue == attrMarkValue)
-                        {
-                            doc.SetGlobalId(obj.Id);
-                        }
-                        else
-                        {
-                            doc.SetGlobalId(Guid.Empty);
-                        }
+                        doc.SetGlobalId(colunmValue == attrMarkValue ? obj.Id : Guid.Empty);
                     }
                 }
             });
@@ -233,14 +195,12 @@ namespace Ascon.Pilot.SDK.CadReader
                 foreach (var attrObj in obj.Attributes)
                 {
                     if (attrObj.Key != spcColumn.TypeName) continue;
-                    if (attrObj.Value.ToString() != spcColVal)
-                    {
-                        needToChange = true;
-                        if (int.TryParse(spcColVal, out int i))
-                            builder.SetAttribute(spcColumn.TypeName, i);
-                        else
-                            builder.SetAttribute(spcColumn.TypeName, spcColVal);
-                    }
+                    if (attrObj.Value.ToString() == spcColVal) continue;
+                    needToChange = true;
+                    if (int.TryParse(spcColVal, out var i))
+                        builder.SetAttribute(spcColumn.TypeName, i);
+                    else
+                        builder.SetAttribute(spcColumn.TypeName, spcColVal);
                 }
             }
             // получаем pdf файл из Обозревателя
@@ -268,7 +228,7 @@ namespace Ascon.Pilot.SDK.CadReader
             spc.GlobalId = builder.DataObject.Id;
             
             builder.SetAttribute("name", spc.Name);
-            builder.SetAttribute("mark", spc.Designation);
+            builder.SetAttribute("mark", ValueTextClear(spc.Designation));
 
             if (File.Exists(spc.PreviewDocument))
             {
@@ -364,11 +324,11 @@ namespace Ascon.Pilot.SDK.CadReader
             _objectModifier.Apply();
         }
 
-        private void AddInformationToPilot(IDataObject parent, IList<IGeneralDocEntity> listDoc)
+        private void AddInformationToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
         {
-            foreach (var doc in listDoc)
+            foreach (var docEntity in listDoc)
             {
-                if (listDoc is SpcObject spcObject)
+                if (docEntity is SpcObject spcObject)
                 {
                     if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
 
@@ -381,7 +341,7 @@ namespace Ascon.Pilot.SDK.CadReader
                         UpdateSpcObjByPilot(spcObject);
                     }
                 }
-                if (listDoc is Specification spc)
+                if (docEntity is Specification spc)
                 {
                     // todo: создаём документ спецификация в pilot (вторичное представление)
                     if (spc.GlobalId == Guid.Empty)
@@ -394,15 +354,8 @@ namespace Ascon.Pilot.SDK.CadReader
 
         private IType GetTypeSpecification()
         {
-            var title = string.Empty;
             var pilotTypes = _objectsRepository.GetTypes();
-            foreach (var itype in pilotTypes)
-            {
-                title = itype.Title;
-                if (itype.Name == "Specification")
-                    return itype;
-            }
-            return null;
+            return pilotTypes.FirstOrDefault(itype => itype.Name == "document");
         }
 
         private IType GetTypeBySectionName(string sectionName)
