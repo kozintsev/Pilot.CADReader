@@ -69,6 +69,10 @@
       <Project>{9559fa73-b821-4647-9500-173689865ee2}</Project>
       <Name>Ascon.Uln.KompasShell</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Pilot.CadReaderPlugin\Pilot.CadReaderPlugin.csproj">
+      <Project>{1ff8c39f-4853-468e-b872-2440e98cc140}</Project>
+      <Name>Pilot.CadReaderPlugin</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

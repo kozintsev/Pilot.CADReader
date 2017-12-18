@@ -10,10 +10,8 @@ namespace Pilot.CadReaderPlugin.Tests
         [TestMethod]
         public void TestGerDefaultPrinter()
         {
-            var printerName = PrinterHelper.GetDefaultPrinterName();
             PrinterHelper.SetPilotXpDefault();
-            printerName = PrinterHelper.GetDefaultPrinterName();
-            var b = string.Equals(printerName, "Pilot XPS");
+            var printerName = PrinterHelper.GetDefaultPrinterName();
             Assert.IsTrue(string.Equals(printerName, "Pilot XPS"), "Print XPS not found");
         }
 

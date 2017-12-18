@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Ascon.Pilot.SDK.CadReader;
 
 namespace Pilot.CadReaderPlugin.Tests
 {
@@ -9,18 +8,6 @@ namespace Pilot.CadReaderPlugin.Tests
     [DeploymentItem(@"TestSourceFiles\")]
     public class TestChecksum
     {
-        public static string Go(string path)
-        {
-            var fs = File.OpenRead(path);
-            {
-                MD5 md5 = new MD5CryptoServiceProvider();
-                var fileData = new byte[fs.Length];
-                fs.Read(fileData, 0, (int)fs.Length);
-                var checkSum = md5.ComputeHash(fileData);
-                var result = BitConverter.ToString(checkSum).Replace("-", string.Empty);
-                return result;
-            }
-        }
         [TestMethod]
         public void TestChecksumByPiltFile()
         {
@@ -28,7 +15,7 @@ namespace Pilot.CadReaderPlugin.Tests
             const string path = @"Spc.spw";
             var isFile = File.Exists(path);
             Assert.IsTrue(isFile, "File not found");
-            var md5Calculated = Go(path);
+            var md5Calculated = CalculatorMd5Checksum.Go(path);
             Assert.IsTrue(md5Calculated.ToLower() == md5, "Invalid algorithm Calculator Md5 Checksum");
         }
 
