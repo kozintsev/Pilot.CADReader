@@ -71,6 +71,7 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             var logForm = new LogForm();
             logForm.Show();
+            logForm.AddLog("Start!");
             var listSpec = new List<Specification>();
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
@@ -90,14 +91,14 @@ namespace Ascon.Pilot.SDK.CadReader
             // todo: необходимо построить дерево из спецификаций
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
             // формируем вторичное представление для спецификаций
-            //var kompasConverterTask = new Task<KompasConverter>(() =>
-            //{
-            //    var k = new KompasConverter(listSpec);
-            //    k.KompasConvertToXps();
-            //    return k;
-            //});
-            //kompasConverterTask.Start();
-            //kompasConverterTask.Wait();
+            var kompasConverterTask = new Task<KompasConverter>(() =>
+            {
+                var k = new KompasConverter(listSpec);
+                k.KompasConvertToXps();
+                return k;
+            });
+            kompasConverterTask.Start();
+            kompasConverterTask.Wait();
 
             //foreach (var spc in listSpec)
             //{
@@ -119,13 +120,13 @@ namespace Ascon.Pilot.SDK.CadReader
                 SynchronizeCheck(parent, listSpec);
                 AddInformationToPilot(parent, listSpec);
                 
-                foreach (var spc in listSpec)
-                {
-                    SynchronizeCheck(parent, spc.ListSpcObjects);
-                    AddInformationToPilot(parent, spc.ListSpcObjects);
+                //foreach (var spc in listSpec)
+                //{
+                //    SynchronizeCheck(parent, spc.ListSpcObjects);
+                //    AddInformationToPilot(parent, spc.ListSpcObjects);
                     
-                }
-            });       
+                //}
+            });
         }
 
         /// <summary>

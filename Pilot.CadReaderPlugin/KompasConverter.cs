@@ -13,6 +13,7 @@ namespace Ascon.Pilot.SDK.CadReader
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static string tmpXps;
+        private static string PilotPrinterFolder;
         private KomapsShell _komaps;
         private bool _isKompasInit;
         private readonly List<SpcObject> _listSpcObject;
@@ -25,15 +26,21 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             _listSpc = null;
             _listSpcObject = listSpcObject;
-            //c:\ProgramData\ASCON\Pilot_Print\tmp.xps
-            tmpXps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\tmp.xps");
+            Init();
         }
 
         public KompasConverter(List<Specification> listSpc)
         {
             _listSpcObject = null;
             _listSpc = listSpc;
-            tmpXps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\tmp.xps");
+            Init();
+        }
+
+        private static void Init()
+        {
+            //c:\ProgramData\ASCON\Pilot_Print\tmp.xps
+            PilotPrinterFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\");
+            tmpXps = Path.Combine(PilotPrinterFolder, "tmp.xps");
         }
 
         public void KompasConvertToPdf()
@@ -120,10 +127,10 @@ namespace Ascon.Pilot.SDK.CadReader
                 if (type == XPS_EXT)
                 {
                     var isConvert = _komaps.PrintToXps(fileName);
-                    var xpsFile = Guid.NewGuid() + ".xps";
+                    var xpsFile = Path.Combine(PilotPrinterFolder, Guid.NewGuid() + ".xps");
                     File.Move(tmpXps, xpsFile);
                     spc.PreviewDocument = xpsFile;
-                    File.Delete(tmpXps);
+                    //File.Delete(tmpXps);
                     if (!isConvert)
                     {
                         Logger.Error(message);
