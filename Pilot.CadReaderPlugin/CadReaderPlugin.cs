@@ -219,7 +219,7 @@ namespace Ascon.Pilot.SDK.CadReader
                     var fileNameMd5 = CalculatorMd5Checksum.Go(xpsFile);
                     if (!string.IsNullOrEmpty(fileNameMd5) && fileFromPilot.Md5 != fileNameMd5)
                     {
-                        builder.AddFile(xpsFile);
+                        builder.CreateFileSnapshot("").AddFile(xpsFile);
                         needToChange = true;
                     }
                 }
@@ -236,6 +236,7 @@ namespace Ascon.Pilot.SDK.CadReader
             if (obj == null)
                 return;
             var builder = _objectModifier.Edit(obj);
+            builder.MakeSnapshotActual("", null);
             foreach (var spcColumn in spcObject.Columns)
             {
                 var spcColVal = ValueTextClear(spcColumn.Value);
