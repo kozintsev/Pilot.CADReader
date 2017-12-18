@@ -2,28 +2,23 @@
 
 namespace Ascon.Pilot.SDK.CadReader
 {
-    class CreateDocRreview : IObserver<IDataObject>
+    internal class CreateDocRreview : IObserver<IDataObject>
     {
         private readonly IObjectsRepository _repository;
-        private readonly IObjectModifier _modifier;
-        private Action<Guid> _onLoadedAction;
-        private IObjectBuilder _builder;
+        private Action<IDataObject> _onLoadedAction;
         private IDisposable _subscription;
         private bool _created;
-        private Guid _parentId;
 
-        public CreateDocRreview(IObjectsRepository repository, IObjectModifier modifier)
+        public CreateDocRreview(IObjectsRepository repository)
         {
             _repository = repository;
-            _modifier = modifier;
         }
 
-        public void Create(Guid parentId, Action<Guid> onLoadedAction)
+        public void Create(Guid id, Action<IDataObject> onLoadedAction)
         {
             _created = false;
-            _parentId = parentId;
             _onLoadedAction = onLoadedAction;
-            //_subscription = _repository.SubscribeObjects(new[] { _bimObject.GlobalId }).Subscribe(this);
+            _subscription = _repository.SubscribeObjects(new[] { id }).Subscribe(this);
         }
 
         public void OnCompleted()
@@ -39,29 +34,25 @@ namespace Ascon.Pilot.SDK.CadReader
             if (_created)
                 return;
 
-            if (value.State == DataState.Loaded && value.ObjectStateInfo.State == ObjectState.DeletedPermanently)
-            {
-                _onLoadedAction(value.Id);
-                return;
-            }
-            if (value.State == DataState.Loaded && value.ObjectStateInfo.State == ObjectState.InRecycleBin)
+            if (value.State == DataState.Loaded)
             {
                 _created = true;
-                _onLoadedAction(value.Id);
-                return;
+                SubscriptionDispose();
+                _onLoadedAction(value);
+            }
+        }
+
+        private void SubscriptionDispose()
+        {
+            try
+            {
+                _subscription?.Dispose();
+            }
+            catch
+            {
+                //ignor
             }
 
-            if (value.State == DataState.Loaded && value.ObjectStateInfo.State != ObjectState.DeletedPermanently && value.ObjectStateInfo.State != ObjectState.InRecycleBin)
-            {
-                _created = true;
-                _onLoadedAction(value.Id);
-                return;
-            }
-            if (value.State == DataState.NonExistent)
-            {
-                _created = true;
-                _onLoadedAction(value.Id);
-            }
         }
     }
 }

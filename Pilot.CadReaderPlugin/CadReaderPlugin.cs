@@ -179,6 +179,54 @@ namespace Ascon.Pilot.SDK.CadReader
             });
         }
 
+        private void UpdateSpcByPilot(Specification spc)
+        {
+            var loader = new ObjectLoader(_objectsRepository);
+            loader.Load(spc.GlobalId, obj =>
+            {
+                var needToChange = false;
+
+                var builder = _objectModifier.Edit(obj);
+
+                //var spcColVal = ValueTextClear(spcColumn.Value);
+                // проверка нужно ли изменять объект
+                foreach (var attrObj in obj.Attributes)
+                {
+                    if (attrObj.Key == "name")
+                    {
+                        if (attrObj.Value.ToString() != ValueTextClear(spc.Name))
+                        {
+                            builder.SetAttribute(attrObj.Key, ValueTextClear(spc.Name));
+                            needToChange = true;
+                        }
+                    }
+                    if (attrObj.Key == "mark")
+                    {
+                        if (attrObj.Value.ToString() != ValueTextClear(spc.Designation))
+                        {
+                            builder.SetAttribute(attrObj.Key, ValueTextClear(spc.Designation));
+                            needToChange = true;
+                        }
+                    }
+                }
+
+                // получаем xps файл из Обозревателя
+                var fileFromPilot = obj.Files.FirstOrDefault(f => IsFileExtension(f.Name, ".xps"));
+                var xpsFile = spc.PreviewDocument;
+                if (xpsFile != null && fileFromPilot != null)
+                {
+                    // md5 в нижнем регистре расчитывается и возвращается пилотом
+                    var fileNameMd5 = CalculatorMd5Checksum.Go(xpsFile);
+                    if (!string.IsNullOrEmpty(fileNameMd5) && fileFromPilot.Md5 != fileNameMd5)
+                    {
+                        builder.AddFile(xpsFile);
+                        needToChange = true;
+                    }
+                }
+                if (needToChange) _objectModifier.Apply();
+            });
+        }
+
         private void UpdateSpcObjByPilot(SpcObject spcObject)
         {
             if (_dataObjects.Count == 0)
@@ -225,6 +273,7 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             var t = GetTypeSpecification();
             var builder = _objectModifier.Create(parent, t);
+            var obj = builder.DataObject;
             spc.GlobalId = builder.DataObject.Id;
             
             builder.SetAttribute("name", spc.Name);
@@ -237,7 +286,38 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             _objectModifier.Apply();
 
-            //todo: необходимо создать связь с исходным файлом
+
+            if (!File.Exists(spc.FileName)) return;
+            string[] paths = { spc.FileName };
+            var storageObjects = _objectsRepository.GetStorageObjects(paths);
+            var storageObject = storageObjects.FirstOrDefault();
+
+            if (storageObject == null) return;
+
+            foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+            {
+                _objectModifier.RemoveLink(obj, relation);
+            }
+
+            var relationId = Guid.NewGuid();
+            var relationName = relationId.ToString();
+            const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+            var selectedRealtion = new Relation
+            {
+                Id = relationId,
+                Type = relationType,
+                Name = storageObject.DataObject.DisplayName,
+                TargetId = storageObject.DataObject.Id
+            };
+            var chosenRelation = new Relation
+            {
+                Id = relationId,
+                Type = relationType,
+                Name = relationName,
+                TargetId = spc.GlobalId
+            };
+            _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+            _objectModifier.Apply();
         }
 
         private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
@@ -245,6 +325,7 @@ namespace Ascon.Pilot.SDK.CadReader
             var t = GetTypeBySectionName(spcObject.SectionName);
             if (t == null) return;
             var builder = _objectModifier.Create(parent, t);
+            var obj = builder.DataObject;
             spcObject.GlobalId = builder.DataObject.Id;
             foreach (var attr in spcObject.Columns)
             {
@@ -259,42 +340,47 @@ namespace Ascon.Pilot.SDK.CadReader
                     builder.SetAttribute(attr.TypeName, val);
             }
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
-            if (doc != null)
+
+            if (doc == null) return;
+
+            var fileName = doc.FileName;
+            string[] paths = { fileName };
+            var storageObjects = _objectsRepository.GetStorageObjects(paths);
+            var storageObject = storageObjects.FirstOrDefault();
+
+            if (File.Exists(spcObject.PreviewDocument))
             {
-                var fileName = doc.FileName;
-                string[] paths = { fileName };
-                var storageObjects = _objectsRepository.GetStorageObjects(paths);
-                var storageObject = storageObjects.FirstOrDefault();
-
-                if (File.Exists(spcObject.PreviewDocument))
-                {
-                    builder.AddFile(spcObject.PreviewDocument);
-                }
-                _objectModifier.Apply();
-
-                if (storageObject == null) return;
-                //Create relations
-                var relationId = Guid.NewGuid();
-                var relationName = relationId.ToString();
-                const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-                var selectedRealtion = new Relation
-                {
-                    Id = relationId,
-                    Type = relationType,
-                    Name = storageObject.DataObject.DisplayName,
-                    TargetId = storageObject.DataObject.Id
-                };
-                var chosenRelation = new Relation
-                {
-                    Id = relationId,
-                    Type = relationType,
-                    Name = relationName,
-                    TargetId = builder.DataObject.Id
-                };
-                _objectModifier.CreateLink(selectedRealtion, chosenRelation);
-                _objectModifier.Apply();
+                builder.AddFile(spcObject.PreviewDocument);
             }
-            
+            _objectModifier.Apply();
+
+            if (storageObject == null) return;
+
+            foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+            {
+                _objectModifier.RemoveLink(obj, relation);
+            }
+
+            //Create relations
+            var relationId = Guid.NewGuid();
+            var relationName = relationId.ToString();
+            const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+            var selectedRealtion = new Relation
+            {
+                Id = relationId,
+                Type = relationType,
+                Name = storageObject.DataObject.DisplayName,
+                TargetId = storageObject.DataObject.Id
+            };
+            var chosenRelation = new Relation
+            {
+                Id = relationId,
+                Type = relationType,
+                Name = relationName,
+                TargetId = builder.DataObject.Id
+            };
+            _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+            _objectModifier.Apply();
         }
 
         private void AddInformationToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
@@ -320,6 +406,10 @@ namespace Ascon.Pilot.SDK.CadReader
                     if (spc.GlobalId == Guid.Empty)
                     {
                         CreateNewSpcToPilot(parent, spc);
+                    }
+                    else
+                    {
+                        UpdateSpcByPilot(spc);
                     }
                 }
             }
