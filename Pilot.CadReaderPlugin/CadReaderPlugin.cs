@@ -236,7 +236,6 @@ namespace Ascon.Pilot.SDK.CadReader
             if (obj == null)
                 return;
             var builder = _objectModifier.Edit(obj);
-            builder.MakeSnapshotActual("", null);
             foreach (var spcColumn in spcObject.Columns)
             {
                 var spcColVal = ValueTextClear(spcColumn.Value);
