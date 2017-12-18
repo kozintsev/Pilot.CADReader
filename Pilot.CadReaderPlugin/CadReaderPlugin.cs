@@ -266,7 +266,6 @@ namespace Ascon.Pilot.SDK.CadReader
                     builder.CreateFileSnapshot("").AddFile(pdfFile);
                 }
             }
-            //TODO: внесмотря на провекрку выдаётся ошибка, если изменился только чертёж
             if (needToChange) _objectModifier.Apply();
         }
 
