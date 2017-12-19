@@ -183,23 +183,24 @@ namespace Ascon.Pilot.SDK.CadReader
 
                 var builder = _objectModifier.Edit(obj);
 
-                //var spcColVal = ValueTextClear(spcColumn.Value);
+                var spcName = ValueTextClear(spc.Name);
+                var spcDesignation = ValueTextClear(spc.Designation);
                 // проверка нужно ли изменять объект
                 foreach (var attrObj in obj.Attributes)
                 {
                     if (attrObj.Key == "name")
                     {
-                        if (attrObj.Value.ToString() != ValueTextClear(spc.Name))
+                        if (attrObj.Value.ToString() != spcName)
                         {
-                            builder.SetAttribute(attrObj.Key, ValueTextClear(spc.Name));
+                            builder.SetAttribute(attrObj.Key, spcName);
                             needToChange = true;
                         }
                     }
                     if (attrObj.Key == "mark")
                     {
-                        if (attrObj.Value.ToString() != ValueTextClear(spc.Designation))
+                        if (attrObj.Value.ToString() != spcDesignation)
                         {
-                            builder.SetAttribute(attrObj.Key, ValueTextClear(spc.Designation));
+                            builder.SetAttribute(attrObj.Key, spcDesignation);
                             needToChange = true;
                         }
                     }
