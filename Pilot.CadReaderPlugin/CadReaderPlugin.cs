@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using Ascon.Pilot.SDK.CadReader.Analyzer;
 using Ascon.Pilot.SDK.CadReader.Form;
 using Ascon.Pilot.SDK.CadReader.Model;
@@ -87,6 +88,29 @@ namespace Ascon.Pilot.SDK.CadReader
                 listSpec.Add(spc);
             }
             // todo: необходимо построить дерево из спецификаций
+
+            if (listSpec.Count > 1)
+            {
+                // если спецификаций больше 1 то пыполняем анализ и ищем дочерние и корневые объекты
+                foreach (var spc in listSpec)
+                {
+                    foreach (var obj in spc.ListSpcObjects)
+                    {
+                        if (obj.SectionName == "Сборочные единицы" || obj.SectionNumber == 15)
+                        {
+                            foreach (var s in listSpec)
+                            {
+                                if (s.Designation.Contains(obj.Designation))
+                                {
+                                    s.Parent = spc;
+                                    spc.Children = s;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
             // формируем вторичное представление для спецификаций
             var kompasConverterTask = new Task<KompasConverter>(() =>
@@ -112,14 +136,9 @@ namespace Ascon.Pilot.SDK.CadReader
             _loader.Load(selected.Id, projectId =>
             {
                 if (projectId == null) return;
-                SynchronizeCheck(projectId, listSpec);
-                AddInformationToPilot(projectId, listSpec);
-                foreach (var spc in listSpec)
-                {
-                    SynchronizeCheck(projectId, spc.ListSpcObjects);
-                    AddInformationToPilot(projectId, spc.ListSpcObjects);
-
-                }
+                // создаём только корневые объекты
+                SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null));
+                AddInformationToPilot(projectId, listSpec.Where(i => i.Parent == null));
             });
         }
 
@@ -298,7 +317,7 @@ namespace Ascon.Pilot.SDK.CadReader
             var relationId = Guid.NewGuid();
             var relationName = relationId.ToString();
             const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-            var selectedRealtion = new Relation
+            var selectedRelation = new Relation
             {
                 Id = relationId,
                 Type = relationType,
@@ -312,8 +331,17 @@ namespace Ascon.Pilot.SDK.CadReader
                 Name = relationName,
                 TargetId = spc.GlobalId
             };
-            _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+            _objectModifier.CreateLink(selectedRelation, chosenRelation);
             _objectModifier.Apply();
+
+            var loader = new ObjectLoader(_objectsRepository);
+            loader.Load(spc.GlobalId, o =>
+            {
+                foreach (var spcObject in spc.ListSpcObjects)
+                {
+                    CreateNewSpcObjToPilot(o, spcObject);
+                }
+            });
         }
 
         private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
@@ -383,19 +411,6 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             foreach (var docEntity in listDoc)
             {
-                if (docEntity is SpcObject spcObject)
-                {
-                    if (string.IsNullOrEmpty(spcObject.SectionName)) continue;
-
-                    if (spcObject.GlobalId == Guid.Empty)
-                    {
-                        CreateNewSpcObjToPilot(parent, spcObject);
-                    }
-                    else
-                    {
-                        UpdateSpcObjByPilot(spcObject);
-                    }
-                }
                 if (docEntity is Specification spc)
                 {
                     if (spc.GlobalId == Guid.Empty)
@@ -413,7 +428,13 @@ namespace Ascon.Pilot.SDK.CadReader
         private IType GetTypeSpecification()
         {
             var pilotTypes = _objectsRepository.GetTypes();
-            return pilotTypes.FirstOrDefault(itype => itype.Name == "document");
+            return pilotTypes.FirstOrDefault(itype => itype.Name == "specification");
+        }
+
+        private IType GetTypeDrawing()
+        {
+            var pilotTypes = _objectsRepository.GetTypes();
+            return pilotTypes.FirstOrDefault(itype => itype.Name == "drawing");
         }
 
         private IType GetTypeBySectionName(string sectionName)
