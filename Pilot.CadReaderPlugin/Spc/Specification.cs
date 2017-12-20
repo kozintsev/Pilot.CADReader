@@ -29,9 +29,9 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
         /// </summary>
         public string FileName { get; set; }
         
-        public Specification Children { get; set; }
+        public List<Specification> Children { get; set; }
         
-        public Specification Parent { get; set; }
+        public List<Specification> Parent { get; set; }
 
         public List<SpcObject> ListSpcObjects { get; protected set; }
 

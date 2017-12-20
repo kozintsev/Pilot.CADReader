@@ -68,9 +68,6 @@ namespace Ascon.Pilot.SDK.CadReader
 
         private void SetInformationOnMenuClick(IDataObject selected)
         {
-            var logForm = new LogForm();
-            logForm.Show();
-            logForm.AddLog("Start!");
             var listSpec = new List<Specification>();
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
@@ -81,8 +78,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 var spc = GetInformationFromKompas(fileSpw);
                 if (spc == null)
                 {
-                    // скорее всего спецификация из ранних ниже КОМПАС-3D V16
-                    logForm.AddLog("Информация не может быть получена. Cкорее всего спецификация сделана в версии ниже КОМПАС-3D V16");
+                    MessageBox.Show("Информация не может быть получена. Cкорее всего спецификация сделана в версии ниже КОМПАС-3D V16");
                     continue;
                 }
                 listSpec.Add(spc);
@@ -102,8 +98,10 @@ namespace Ascon.Pilot.SDK.CadReader
                             {
                                 if (s.Designation.Contains(obj.Designation))
                                 {
-                                    s.Parent = spc;
-                                    spc.Children = s;
+                                    if (s.Parent == null) s.Parent = new List<Specification>();
+                                    if (spc.Children == null) spc.Children = new List<Specification>();
+                                    s.Parent.Add(spc);
+                                    spc.Children.Add(s);
                                 }
                             }
                         }
@@ -113,32 +111,34 @@ namespace Ascon.Pilot.SDK.CadReader
 
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
             // формируем вторичное представление для спецификаций
-            var kompasConverterTask = new Task<KompasConverter>(() =>
-            {
-                var k = new KompasConverter(listSpec);
-                k.KompasConvertToXps();
-                return k;
-            });
-            kompasConverterTask.Start();
-            kompasConverterTask.Wait();
+            //var kompasConverterTask = new Task<KompasConverter>(() =>
+            //{
+            //    var k = new KompasConverter(listSpec);
+            //    k.KompasConvertToXps();
+            //    return k;
+            //});
+            //kompasConverterTask.Start();
+            //kompasConverterTask.Wait();
 
-            foreach (var spc in listSpec)
-            {
-                kompasConverterTask = new Task<KompasConverter>(() =>
-                {
-                    var k = new KompasConverter(spc.ListSpcObjects);
-                    k.KompasConvertToPdf();
-                    return k;
-                });
-                kompasConverterTask.Start();
-                kompasConverterTask.Wait();
-            }
+            //foreach (var spc in listSpec)
+            //{
+            //    kompasConverterTask = new Task<KompasConverter>(() =>
+            //    {
+            //        var k = new KompasConverter(spc.ListSpcObjects);
+            //        k.KompasConvertToPdf();
+            //        return k;
+            //    });
+            //    kompasConverterTask.Start();
+            //    kompasConverterTask.Wait();
+            //}
             _loader.Load(selected.Id, projectId =>
             {
                 if (projectId == null) return;
                 // создаём только корневые объекты
-                SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null));
-                AddInformationToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null), b =>
+                {
+                    AddInformationToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                });
             });
         }
 
@@ -167,7 +167,7 @@ namespace Ascon.Pilot.SDK.CadReader
         }
 
 
-        private void SynchronizeCheck(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
+        private void SynchronizeCheck(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc, Action<bool> onLoadedAction)
         {
             var children = parent.TypesByChildren;
             var loader = new LoaderOfObjects(_objectsRepository);
@@ -190,6 +190,7 @@ namespace Ascon.Pilot.SDK.CadReader
                         doc.SetGlobalId(colunmValue == attrMarkValue ? obj.Id : Guid.Empty);
                     }
                 }
+                onLoadedAction(true);
             });
         }
 
@@ -284,7 +285,7 @@ namespace Ascon.Pilot.SDK.CadReader
             });
         }
 
-        private void CreateNewSpcToPilot(IDataObject parent, Specification spc)
+        private void CreateNewSpcToPilot(IDataObject parent, Specification spc, Action<IDataObject, Specification> onLoadedAction)
         {
             var t = GetTypeSpecification();
             var builder = _objectModifier.Create(parent, t);
@@ -341,6 +342,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 {
                     CreateNewSpcObjToPilot(o, spcObject);
                 }
+                onLoadedAction(obj, spc);
             });
         }
 
@@ -389,7 +391,7 @@ namespace Ascon.Pilot.SDK.CadReader
             var relationId = Guid.NewGuid();
             var relationName = relationId.ToString();
             const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-            var selectedRealtion = new Relation
+            var selectedRelation = new Relation
             {
                 Id = relationId,
                 Type = relationType,
@@ -403,7 +405,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 Name = relationName,
                 TargetId = builder.DataObject.Id
             };
-            _objectModifier.CreateLink(selectedRealtion, chosenRelation);
+            _objectModifier.CreateLink(selectedRelation, chosenRelation);
             _objectModifier.Apply();
         }
 
@@ -411,16 +413,23 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             foreach (var docEntity in listDoc)
             {
-                if (docEntity is Specification spc)
+                if (!(docEntity is Specification spc)) continue;
+
+                if (spc.GlobalId == Guid.Empty)
                 {
-                    if (spc.GlobalId == Guid.Empty)
+                    CreateNewSpcToPilot(parent, spc, (obj, specification) =>
                     {
-                        CreateNewSpcToPilot(parent, spc);
-                    }
-                    else
-                    {
-                        UpdateSpcByPilot(spc);
-                    }
+                        if (specification.Children == null) return;
+                        foreach (var specificationChild in specification.Children)
+                        {
+                            Sy
+                        }
+                        
+                    });
+                }
+                else
+                {
+                    UpdateSpcByPilot(spc);
                 }
             }
         }
@@ -431,35 +440,31 @@ namespace Ascon.Pilot.SDK.CadReader
             return pilotTypes.FirstOrDefault(itype => itype.Name == "specification");
         }
 
-        private IType GetTypeDrawing()
-        {
-            var pilotTypes = _objectsRepository.GetTypes();
-            return pilotTypes.FirstOrDefault(itype => itype.Name == "drawing");
-        }
 
         private IType GetTypeBySectionName(string sectionName)
         {
             // ReSharper disable once RedundantAssignment
-            var title = string.Empty;
+            var name = string.Empty;
             var pilotTypes = _objectsRepository.GetTypes();
             foreach (var itype in pilotTypes)
             {
-                title = itype.Title;
-                if (ParsingSectionName(sectionName, "документ") && title == "Документ")
+                name = itype.Name;
+
+                if (ParsingSectionName(sectionName, "документ") && name == "drawing")
                     return itype;
-                if (ParsingSectionName(sectionName, "комплекс") && title == "Комплекс")
+                if (ParsingSectionName(sectionName, "комплекс") && name == "drawing")
                     return itype;
-                if (ParsingSectionName(sectionName, "сборочн") && title == "Сборочная единица")
+                if (ParsingSectionName(sectionName, "сборочн") && name == "specification")
                     return itype;
-                if (ParsingSectionName(sectionName, "детал") && title == "Деталь")
+                if (ParsingSectionName(sectionName, "детал") && name == "drawing")
                     return itype;
-                if (ParsingSectionName(sectionName, "стандарт") && title == "Стандартное изделие")
+                if (ParsingSectionName(sectionName, "стандарт") && name == "stdpart")
                     return itype;
-                if (ParsingSectionName(sectionName, "проч") && title == "Прочее изделие")
+                if (ParsingSectionName(sectionName, "проч") && name == "other")
                     return itype;
-                if (ParsingSectionName(sectionName, "материал") && title == "Материал")
+                if (ParsingSectionName(sectionName, "материал") && name == "material")
                     return itype;
-                if (ParsingSectionName(sectionName, "комплект") && title == "Комплект")
+                if (ParsingSectionName(sectionName, "комплект") && name == "complect")
                     return itype;
             }
             return null;
