@@ -135,9 +135,21 @@ namespace Ascon.Pilot.SDK.CadReader
             {
                 if (projectId == null) return;
                 // создаём только корневые объекты
+                // затем создаём только спецификации
+                // а потом к ним прилинковываем остальные объекты линейно
                 SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null), b =>
                 {
-                    AddInformationToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                    CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                    foreach(var l in listSpec)
+                    {
+                       foreach(var ob in l.ListSpcObjects)
+                        {
+                            _loader.Load(l.GlobalId, o =>
+                            {
+                                CreateNewSpcObjToPilot(o, ob);
+                            });
+                        }
+                    }
                 });
             });
         }
@@ -285,7 +297,7 @@ namespace Ascon.Pilot.SDK.CadReader
             });
         }
 
-        private void CreateNewSpcToPilot(IDataObject parent, Specification spc, Action<IDataObject, Specification> onLoadedAction)
+        private void CreateNewSpcToPilot(IDataObject parent, Specification spc)
         {
             var t = GetTypeSpecification();
             var builder = _objectModifier.Create(parent, t);
@@ -335,21 +347,16 @@ namespace Ascon.Pilot.SDK.CadReader
             _objectModifier.CreateLink(selectedRelation, chosenRelation);
             _objectModifier.Apply();
 
-            var loader = new ObjectLoader(_objectsRepository);
-            loader.Load(spc.GlobalId, o =>
+            foreach(var cSpc in spc.Children)
             {
-                foreach (var spcObject in spc.ListSpcObjects)
-                {
-                    CreateNewSpcObjToPilot(o, spcObject);
-                }
-                onLoadedAction(obj, spc);
-            });
+                CreateNewSpcToPilot(obj, cSpc);
+            }
         }
 
-        private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
+        private IDataObject CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
         {
             var t = GetTypeBySectionName(spcObject.SectionName);
-            if (t == null) return;
+            if (t == null) return null;
             var builder = _objectModifier.Create(parent, t);
             var obj = builder.DataObject;
             spcObject.GlobalId = builder.DataObject.Id;
@@ -367,7 +374,7 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
 
-            if (doc == null) return;
+            if (doc == null) return null;
 
             var fileName = doc.FileName;
             string[] paths = { fileName };
@@ -380,7 +387,7 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             _objectModifier.Apply();
 
-            if (storageObject == null) return;
+            if (storageObject == null) return null;
 
             foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
             {
@@ -407,9 +414,10 @@ namespace Ascon.Pilot.SDK.CadReader
             };
             _objectModifier.CreateLink(selectedRelation, chosenRelation);
             _objectModifier.Apply();
+            return obj;
         }
 
-        private void AddInformationToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
+        private void CreateAndUpdateSpcToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
         {
             foreach (var docEntity in listDoc)
             {
@@ -417,15 +425,7 @@ namespace Ascon.Pilot.SDK.CadReader
 
                 if (spc.GlobalId == Guid.Empty)
                 {
-                    CreateNewSpcToPilot(parent, spc, (obj, specification) =>
-                    {
-                        if (specification.Children == null) return;
-                        foreach (var specificationChild in specification.Children)
-                        {
-                            Sy
-                        }
-                        
-                    });
+                    CreateNewSpcToPilot(parent, spc);
                 }
                 else
                 {
