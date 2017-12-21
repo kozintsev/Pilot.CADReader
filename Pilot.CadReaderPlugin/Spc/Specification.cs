@@ -39,8 +39,6 @@ namespace Ascon.Pilot.SDK.CadReader.Spc
 
         public List<SpcSection> SpcSections { get; protected set; }
 
-        public IFile File { get; set; }
-
         public string GetName()
         {
             return Name;

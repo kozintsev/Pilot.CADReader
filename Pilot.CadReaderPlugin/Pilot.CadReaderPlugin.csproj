@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="Analyzer\CdwAnalyzer.cs" />
     <Compile Include="CalculatorMd5Checksum.cs" />
-    <Compile Include="CreateDocRreview.cs" />
     <Compile Include="DataObjectsWrapper.cs" />
     <Compile Include="Form\LogForm.xaml.cs">
       <DependentUpon>LogForm.xaml</DependentUpon>
@@ -103,6 +102,7 @@
     <Compile Include="Spc\SpcSection.cs" />
     <Compile Include="Analyzer\SpwAnalyzer.cs" />
     <Compile Include="Analyzer\StorageAnalayzer.cs" />
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

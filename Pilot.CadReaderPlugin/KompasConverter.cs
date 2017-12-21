@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Uln.KompasShell;
 using NLog;
@@ -9,143 +10,78 @@ using NLog;
 
 namespace Ascon.Pilot.SDK.CadReader
 {
-    internal class KompasConverter
+    internal class KompasConverter : IDisposable
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static string tmpXps;
         private static string PilotPrinterFolder;
-        private KomapsShell _komaps;
-        private bool _isKompasInit;
-        private readonly List<SpcObject> _listSpcObject;
-        private readonly List<Specification> _listSpc;
+        private readonly KomapsShell _komaps;
         private const string SOURCE_DOC_EXT = ".cdw";
         private const string PDF_EXT = ".pdf";
         private const string XPS_EXT = ".xps";
 
-        public KompasConverter(List<SpcObject> listSpcObject)
-        {
-            _listSpc = null;
-            _listSpcObject = listSpcObject;
-            Init();
-        }
-
-        public KompasConverter(List<Specification> listSpc)
-        {
-            _listSpcObject = null;
-            _listSpc = listSpc;
-            Init();
-        }
-
-        private static void Init()
+        public KompasConverter()
         {
             //c:\ProgramData\ASCON\Pilot_Print\tmp.xps
             PilotPrinterFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "ASCON\\Pilot_Print\\");
             tmpXps = Path.Combine(PilotPrinterFolder, "tmp.xps");
+            _komaps = new KomapsShell();
+            var isKompasInit = _komaps.InitKompas(out var message);
+            if (!isKompasInit) Logger.Error(message);
         }
 
-        public void KompasConvertToPdf()
+        public void KompasConvertToPdf(List<SpcObject> listSpcObject)
         {
-            KompasConvertTo(PDF_EXT);
-        }
+            if (listSpcObject == null) return;
 
-        public void KompasConvertToXps()
-        {
-            KompasConvertTo(XPS_EXT);
-        }
-
-        private void KompasConvertTo(string type)
-        {
-            using (_komaps = new KomapsShell())
-            {
-                _isKompasInit = _komaps.InitKompas(out var message);
-                if (!_isKompasInit) Logger.Error(message);
-
-                if (_listSpcObject != null)
-                {
-                    DocConverter(type, message);
-                }
-                if(_listSpc != null)
-                {
-                    SpcConverter(type, message);
-                }
-                _komaps.ExitKompas();
-            }
-        }
-
-        private void DocConverter(string type, string message)
-        {
-            foreach (var spcObject in _listSpcObject)
+            foreach (var spcObject in listSpcObject)
             {
                 var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
                 if (doc == null) continue;
                 var fileName = doc.FileName;
                 if (!File.Exists(fileName)) continue;
-                if (type == PDF_EXT)
                 {
                     var pdfFile = Path.GetTempFileName() + PDF_EXT;
-                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
+                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out var message);
+                    if (!isConvert)
+                        continue;
                     spcObject.PreviewDocument = pdfFile;
-                    if (!isConvert)
-                    {
-                        Logger.Error(message);
-                        continue;
-                    }
-                }
-                if (type == XPS_EXT)
-                {
-                    var isConvert = _komaps.PrintToXps(fileName);
-                    var xpsFile = Guid.NewGuid() + ".xps";
-                    File.Move(tmpXps, xpsFile);
-                    spcObject.PreviewDocument = xpsFile;
-                    File.Delete(tmpXps);
-                    if (!isConvert)
-                    {
-                        Logger.Error(message);
-                        continue;
-                    }
                 }
             }
         }
 
-        private void SpcConverter(string type, string message)
+        public void KompasConvertToXps(List<Specification> listSpc)
         {
-            foreach(var spc in _listSpc)
+            if (listSpc == null) return;
+            foreach (var spc in listSpc)
             {
                 var fileName = spc.FileName;
                 if (!File.Exists(fileName)) continue;
-                if (type == PDF_EXT)
-                {
-                    var pdfFile = Path.GetTempFileName() + PDF_EXT;
-                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out message);
-                    spc.PreviewDocument = pdfFile;
-                    if (!isConvert)
-                    {
-                        Logger.Error(message);
-                        continue;
-                    }
-                }
-                if (type == XPS_EXT)
-                {
                     var isConvert = _komaps.PrintToXps(fileName);
-                    var xpsFile = Path.Combine(PilotPrinterFolder, Guid.NewGuid() + ".xps");
-                    File.Move(tmpXps, xpsFile);
-                    spc.PreviewDocument = xpsFile;
-                    //File.Delete(tmpXps);
                     if (!isConvert)
                     {
-                        Logger.Error(message);
                         continue;
                     }
-                }
+                    var xpsFile = Path.Combine(PilotPrinterFolder, Guid.NewGuid() + XPS_EXT);
+                    Thread.Sleep(1000);
+                    if (Utility.IsFileMove(tmpXps, xpsFile))
+                        spc.PreviewDocument = xpsFile;
+                    Utility.TryDeleteFile(tmpXps);
             }
         }
-
+       
         private static bool IsFileExtension(string name, string ext)
         {
             if (string.IsNullOrEmpty(name))
                 return false;
             var theExt = Path.GetExtension(name).ToLower();
             return theExt == ext;
+        }
+
+        public void Dispose()
+        {
+            _komaps.ExitKompas();
+            _komaps.Dispose();
         }
     }
 }

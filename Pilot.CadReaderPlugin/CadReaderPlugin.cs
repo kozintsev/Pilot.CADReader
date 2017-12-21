@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Ascon.Pilot.SDK.CadReader.Analyzer;
@@ -111,26 +112,21 @@ namespace Ascon.Pilot.SDK.CadReader
 
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
             // формируем вторичное представление для спецификаций
-            //var kompasConverterTask = new Task<KompasConverter>(() =>
-            //{
-            //    var k = new KompasConverter(listSpec);
-            //    k.KompasConvertToXps();
-            //    return k;
-            //});
-            //kompasConverterTask.Start();
-            //kompasConverterTask.Wait();
+            var kompasConverterTask = new Task<KompasConverter>(() =>
+            {
+                using (var k = new KompasConverter())
+                {
+                    k.KompasConvertToXps(listSpec);
+                    foreach (var spc in listSpec)
+                    {
+                        k.KompasConvertToPdf(spc.ListSpcObjects);
+                    }
+                    return k;
+                }
+            });
+            kompasConverterTask.Start();
+            kompasConverterTask.Wait();
 
-            //foreach (var spc in listSpec)
-            //{
-            //    kompasConverterTask = new Task<KompasConverter>(() =>
-            //    {
-            //        var k = new KompasConverter(spc.ListSpcObjects);
-            //        k.KompasConvertToPdf();
-            //        return k;
-            //    });
-            //    kompasConverterTask.Start();
-            //    kompasConverterTask.Wait();
-            //}
             _loader.Load(selected.Id, projectId =>
             {
                 if (projectId == null) return;
@@ -306,12 +302,13 @@ namespace Ascon.Pilot.SDK.CadReader
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", ValueTextClear(spc.Designation));
 
-
             if (File.Exists(spc.PreviewDocument))
             {
                 builder.AddFile(spc.PreviewDocument);
             }
             _objectModifier.Apply();
+
+            Thread.Sleep(2000);
 
             var loader = new ObjectLoader(_objectsRepository);
             loader.Load(spc.GlobalId, obj =>
@@ -368,7 +365,6 @@ namespace Ascon.Pilot.SDK.CadReader
             var t = GetTypeBySectionName(spcObject.SectionName);
             if (t == null) return;
             var builder = _objectModifier.Create(parent, t);
-            var obj = builder.DataObject;
             spcObject.GlobalId = builder.DataObject.Id;
             foreach (var attr in spcObject.Columns)
             {
@@ -399,31 +395,35 @@ namespace Ascon.Pilot.SDK.CadReader
 
             if (storageObject == null) return;
 
-            //foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
-            //{
-            //    _objectModifier.RemoveLink(obj, relation);
-            //}
+            if (storageObject.DataObject.Id == Guid.Empty) return;
 
-            ////Create relations
-            //var relationId = Guid.NewGuid();
-            //var relationName = relationId.ToString();
-            //const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-            //var selectedRelation = new Relation
-            //{
-            //    Id = relationId,
-            //    Type = relationType,
-            //    Name = storageObject.DataObject.DisplayName,
-            //    TargetId = storageObject.DataObject.Id
-            //};
-            //var chosenRelation = new Relation
-            //{
-            //    Id = relationId,
-            //    Type = relationType,
-            //    Name = relationName,
-            //    TargetId = builder.DataObject.Id
-            //};
-            //_objectModifier.CreateLink(selectedRelation, chosenRelation);
-            //_objectModifier.Apply();
+            var loader = new ObjectLoader(_objectsRepository);
+            loader.Load(spcObject.GlobalId, obj =>
+            {
+                foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+                {
+                    _objectModifier.RemoveLink(obj, relation);
+                }
+                var relationId = Guid.NewGuid();
+                var relationName = relationId.ToString();
+                const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+                var selectedRelation = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = storageObject.DataObject.DisplayName,
+                    TargetId = storageObject.DataObject.Id
+                };
+                var chosenRelation = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = relationName,
+                    TargetId = builder.DataObject.Id
+                };
+                _objectModifier.CreateLink(selectedRelation, chosenRelation);
+                _objectModifier.Apply();
+            });
         }
 
         private void CreateAndUpdateSpcToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
