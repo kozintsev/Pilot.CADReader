@@ -190,8 +190,6 @@ namespace Ascon.Pilot.SDK.CadReader
                 var generalDocEntities = listDoc as IGeneralDocEntity[] ?? listDoc.ToArray();
                 foreach (var obj in objects)
                 {
-                    if (obj.Id == _selected.Id)
-                        continue;
                     var attrMarkValue = string.Empty;
                     foreach (var a in obj.Attributes)
                     {
@@ -350,6 +348,12 @@ namespace Ascon.Pilot.SDK.CadReader
                 _objectModifier.CreateLink(selectedRelation, chosenRelation);
                 _objectModifier.Apply();
 
+                foreach (var spcObject in spc.ListSpcObjects)
+                {
+                    if (spcObject.SectionNumber == 15) continue;
+                    CreateNewSpcObjToPilot(obj, spcObject);
+                }
+
                 if (spc.Children == null) return;
 
                 foreach (var cSpc in spc.Children)
@@ -359,10 +363,10 @@ namespace Ascon.Pilot.SDK.CadReader
             });
         }
 
-        private IDataObject CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
+        private void CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
         {
             var t = GetTypeBySectionName(spcObject.SectionName);
-            if (t == null) return null;
+            if (t == null) return;
             var builder = _objectModifier.Create(parent, t);
             var obj = builder.DataObject;
             spcObject.GlobalId = builder.DataObject.Id;
@@ -380,7 +384,7 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             var doc = spcObject.Documents.FirstOrDefault(f => IsFileExtension(f.FileName, SOURCE_DOC_EXT));
 
-            if (doc == null) return null;
+            if (doc == null) return;
 
             var fileName = doc.FileName;
             string[] paths = { fileName };
@@ -393,34 +397,33 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             _objectModifier.Apply();
 
-            if (storageObject == null) return null;
+            if (storageObject == null) return;
 
-            foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
-            {
-                _objectModifier.RemoveLink(obj, relation);
-            }
+            //foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+            //{
+            //    _objectModifier.RemoveLink(obj, relation);
+            //}
 
-            //Create relations
-            var relationId = Guid.NewGuid();
-            var relationName = relationId.ToString();
-            const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-            var selectedRelation = new Relation
-            {
-                Id = relationId,
-                Type = relationType,
-                Name = storageObject.DataObject.DisplayName,
-                TargetId = storageObject.DataObject.Id
-            };
-            var chosenRelation = new Relation
-            {
-                Id = relationId,
-                Type = relationType,
-                Name = relationName,
-                TargetId = builder.DataObject.Id
-            };
-            _objectModifier.CreateLink(selectedRelation, chosenRelation);
-            _objectModifier.Apply();
-            return obj;
+            ////Create relations
+            //var relationId = Guid.NewGuid();
+            //var relationName = relationId.ToString();
+            //const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+            //var selectedRelation = new Relation
+            //{
+            //    Id = relationId,
+            //    Type = relationType,
+            //    Name = storageObject.DataObject.DisplayName,
+            //    TargetId = storageObject.DataObject.Id
+            //};
+            //var chosenRelation = new Relation
+            //{
+            //    Id = relationId,
+            //    Type = relationType,
+            //    Name = relationName,
+            //    TargetId = builder.DataObject.Id
+            //};
+            //_objectModifier.CreateLink(selectedRelation, chosenRelation);
+            //_objectModifier.Apply();
         }
 
         private void CreateAndUpdateSpcToPilot(IDataObject parent, IEnumerable<IGeneralDocEntity> listDoc)
