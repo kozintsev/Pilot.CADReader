@@ -27,7 +27,7 @@ namespace Ascon.Pilot.SDK.CadReader
         private const string SOURCE_DOC_EXT = ".cdw";
         // выбранный с помощью контекстного меню клиента объект
         private IDataObject _selected;
-       
+
         [ImportingConstructor]
         public CadReaderPlugin(IObjectModifier modifier, IObjectsRepository repository, IPersonalSettings personalSettings)
         {
@@ -35,7 +35,7 @@ namespace Ascon.Pilot.SDK.CadReader
             _objectsRepository = repository;
             _loader = new ObjectLoader(repository);
         }
-        
+
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
         /// </summary>
@@ -43,7 +43,7 @@ namespace Ascon.Pilot.SDK.CadReader
         /// <returns>Очищенная строка</returns>
         private static string ValueTextClear(string str)
         {
-            return str.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
+            return str?.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
         }
 
         /// <summary>
@@ -137,20 +137,22 @@ namespace Ascon.Pilot.SDK.CadReader
                 // создаём только корневые объекты
                 // затем создаём только спецификации
                 // а потом к ним прилинковываем остальные объекты линейно
-                SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null), b =>
-                {
-                    CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
-                    foreach(var l in listSpec)
-                    {
-                       foreach(var ob in l.ListSpcObjects)
-                        {
-                            _loader.Load(l.GlobalId, o =>
-                            {
-                                CreateNewSpcObjToPilot(o, ob);
-                            });
-                        }
-                    }
-                });
+                CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
+
+                //SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null), b =>
+                //{
+                //    //CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                //    //foreach (var l in listSpec)
+                //    //{
+                //    //    foreach (var ob in l.ListSpcObjects)
+                //    //    {
+                //    //        _loader.Load(l.GlobalId, o =>
+                //    //        {
+                //    //            CreateNewSpcObjToPilot(o, ob);
+                //    //        });
+                //    //    }
+                //    //}
+                //});
             });
         }
 
@@ -196,7 +198,7 @@ namespace Ascon.Pilot.SDK.CadReader
                         if (a.Key == "mark")
                             attrMarkValue = a.Value.ToString();
                     }
-                    foreach(var doc in generalDocEntities)
+                    foreach (var doc in generalDocEntities)
                     {
                         var colunmValue = ValueTextClear(doc.GetDesignation());
                         doc.SetGlobalId(colunmValue == attrMarkValue ? obj.Id : Guid.Empty);
@@ -301,12 +303,11 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             var t = GetTypeSpecification();
             var builder = _objectModifier.Create(parent, t);
-            var obj = builder.DataObject;
             spc.GlobalId = builder.DataObject.Id;
-            
+
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", ValueTextClear(spc.Designation));
-            
+
 
             if (File.Exists(spc.PreviewDocument))
             {
@@ -314,43 +315,48 @@ namespace Ascon.Pilot.SDK.CadReader
             }
             _objectModifier.Apply();
 
-
-            if (!File.Exists(spc.FileName)) return;
-            string[] paths = { spc.FileName };
-            var storageObjects = _objectsRepository.GetStorageObjects(paths);
-            var storageObject = storageObjects.FirstOrDefault();
-
-            if (storageObject == null) return;
-
-            foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+            var loader = new ObjectLoader(_objectsRepository);
+            loader.Load(spc.GlobalId, obj =>
             {
-                _objectModifier.RemoveLink(obj, relation);
-            }
+                if (!File.Exists(spc.FileName)) return;
+                string[] paths = { spc.FileName };
+                var storageObjects = _objectsRepository.GetStorageObjects(paths);
+                var storageObject = storageObjects.FirstOrDefault();
 
-            var relationId = Guid.NewGuid();
-            var relationName = relationId.ToString();
-            const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
-            var selectedRelation = new Relation
-            {
-                Id = relationId,
-                Type = relationType,
-                Name = storageObject.DataObject.DisplayName,
-                TargetId = storageObject.DataObject.Id
-            };
-            var chosenRelation = new Relation
-            {
-                Id = relationId,
-                Type = relationType,
-                Name = relationName,
-                TargetId = spc.GlobalId
-            };
-            _objectModifier.CreateLink(selectedRelation, chosenRelation);
-            _objectModifier.Apply();
+                if (storageObject == null) return;
 
-            foreach(var cSpc in spc.Children)
-            {
-                CreateNewSpcToPilot(obj, cSpc);
-            }
+                foreach (var relation in obj.Relations.Where(x => x.Type == ObjectRelationType.SourceFiles))
+                {
+                    _objectModifier.RemoveLink(obj, relation);
+                }
+
+                var relationId = Guid.NewGuid();
+                var relationName = relationId.ToString();
+                const ObjectRelationType relationType = ObjectRelationType.SourceFiles;
+                var selectedRelation = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = storageObject.DataObject.DisplayName,
+                    TargetId = storageObject.DataObject.Id
+                };
+                var chosenRelation = new Relation
+                {
+                    Id = relationId,
+                    Type = relationType,
+                    Name = relationName,
+                    TargetId = spc.GlobalId
+                };
+                _objectModifier.CreateLink(selectedRelation, chosenRelation);
+                _objectModifier.Apply();
+
+                if (spc.Children == null) return;
+
+                foreach (var cSpc in spc.Children)
+                {
+                    CreateNewSpcToPilot(obj, cSpc);
+                }
+            });
         }
 
         private IDataObject CreateNewSpcObjToPilot(IDataObject parent, SpcObject spcObject)
