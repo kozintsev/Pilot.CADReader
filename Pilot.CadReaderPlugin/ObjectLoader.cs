@@ -18,13 +18,13 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             _loaded = false;
             _onLoadedAction = onLoadedAction;
-            _subscription = _repository.SubscribeObjects(new[] {id}).Subscribe(this);
-            _subscription.Dispose();
+            _subscription = _repository.SubscribeObjects(new[] { id }).Subscribe(this);
         }
+
 
         public void OnNext(IDataObject value)
         {
-            if (value.State != DataState.Loaded) 
+            if (value.State != DataState.Loaded)
                 return;
 
             if (_loaded)
@@ -32,6 +32,7 @@ namespace Ascon.Pilot.SDK.CadReader
 
             _loaded = true;
 
+            SubscriptionDispose();
             _onLoadedAction(value);
         }
 
@@ -41,6 +42,19 @@ namespace Ascon.Pilot.SDK.CadReader
 
         public void OnCompleted()
         {
+        }
+
+        private void SubscriptionDispose()
+        {
+            try
+            {
+                _subscription?.Dispose();
+            }
+            catch
+            {
+                //ignor
+            }
+
         }
     }
 }

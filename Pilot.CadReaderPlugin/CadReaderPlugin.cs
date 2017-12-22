@@ -22,6 +22,7 @@ namespace Ascon.Pilot.SDK.CadReader
     {
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
+        private readonly ObjectLoader _loader;
         private List<Specification> _listSpec;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
         private const string ADD_DOC_TO_PILOT = "ADD_DOC_TO_PILOT";
@@ -36,7 +37,9 @@ namespace Ascon.Pilot.SDK.CadReader
             _objectModifier = modifier;
             _objectsRepository = repository;
             _listSpec = new List<Specification>();
+            _loader = new ObjectLoader(repository);
         }
+
 
         /// <summary>
         /// Очистка строки полученной из спецификации от служибных символов: $| и @/
@@ -72,6 +75,17 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             var loader = new ObjectLoader(_objectsRepository);
             if (_listSpec == null) return;
+            if(_listSpec.Count == 0) return;
+            // для объектов спецификациий формируем pdf, для спецификаций формируем xps
+            // формируем вторичное представление для спецификаций
+            using (var k = new KompasConverter())
+            {
+                k.KompasConvertToXps(_listSpec);
+                foreach (var spc in _listSpec)
+                {
+                    k.KompasConvertToPdf(spc.ListSpcObjects);
+                }
+            }
             // прикрепляем xps'ки
             foreach (var spc in _listSpec)
             {
@@ -88,7 +102,6 @@ namespace Ascon.Pilot.SDK.CadReader
         private void SetInformationOnMenuClick(IDataObject selected)
         {
             _listSpec.Clear();
-            var loader = new ObjectLoader(_objectsRepository);
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
             if (path == null) return;
@@ -109,24 +122,7 @@ namespace Ascon.Pilot.SDK.CadReader
                 _listSpec = SpecificationAnalyzer.CreateTree(_listSpec);
             }
 
-            // для объектов спецификациий формируем pdf, для спецификаций формируем xps
-            // формируем вторичное представление для спецификаций
-            var kompasConverterTask = new Task<KompasConverter>(() =>
-            {
-                using (var k = new KompasConverter())
-                {
-                    k.KompasConvertToXps(_listSpec);
-                    //foreach (var spc in _listSpec)
-                    //{
-                    //    k.KompasConvertToPdf(spc.ListSpcObjects);
-                    //}
-                    return k;
-                }
-            });
-            kompasConverterTask.Start();
-            kompasConverterTask.Wait();
-
-            loader.Load(selected.Id, projectId =>
+            _loader.Load(selected.Id, projectId =>
             {
                 if (projectId == null) return;
                 // создаём только корневые объекты
@@ -300,7 +296,7 @@ namespace Ascon.Pilot.SDK.CadReader
 
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", ValueTextClear(spc.Designation));
-
+            // todo: нужен callbakc о создании или изменении объекта
             //if (File.Exists(spc.PreviewDocument))
             //{
             //    builder.AddFile(spc.PreviewDocument);
