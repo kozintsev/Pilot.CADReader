@@ -1,6 +1,6 @@
 ﻿namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class SpcDocument
+    public class SpcDocument
     {
         /// <summary>
         /// Исходный файл

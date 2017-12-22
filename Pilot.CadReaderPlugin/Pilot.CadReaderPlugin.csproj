@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analyzer\CdwAnalyzer.cs" />
+    <Compile Include="Analyzer\SpecificationAnalyzer.cs" />
     <Compile Include="CalculatorMd5Checksum.cs" />
     <Compile Include="DataObjectsWrapper.cs" />
     <Compile Include="Form\LogForm.xaml.cs">

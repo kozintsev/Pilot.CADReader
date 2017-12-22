@@ -5,7 +5,7 @@ using System;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class SpcObject : GeneralProp, IGeneralDocEntity
+    public class SpcObject : GeneralProp, IGeneralDocEntity
     {
         public List<SpcColumn> Columns;
 

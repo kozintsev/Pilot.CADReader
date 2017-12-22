@@ -1,6 +1,6 @@
 ﻿namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class SpcSection
+    public class SpcSection
     {
         public int Number { get; set; }
 

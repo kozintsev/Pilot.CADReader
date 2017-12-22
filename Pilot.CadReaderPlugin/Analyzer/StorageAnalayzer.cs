@@ -2,7 +2,7 @@
 
 // ReSharper disable InconsistentNaming
 
-namespace Ascon.Pilot.SDK.CadReader
+namespace Ascon.Pilot.SDK.CadReader.Analyzer
 {
     internal class StorageAnalayzer
     {

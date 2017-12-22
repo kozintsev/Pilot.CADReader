@@ -5,7 +5,7 @@ using System;
 
 namespace Ascon.Pilot.SDK.CadReader.Spc
 {
-    internal class Specification : GeneralProp, IGeneralDocEntity
+    public class Specification : GeneralProp, IGeneralDocEntity
     {
         public string Name
         {

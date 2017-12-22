@@ -22,8 +22,9 @@ namespace Ascon.Pilot.SDK.CadReader
     {
         private readonly IObjectModifier _objectModifier;
         private readonly IObjectsRepository _objectsRepository;
-        private readonly ObjectLoader _loader;
+        private List<Specification> _listSpec;
         private const string ADD_INFORMATION_TO_PILOT = "ADD_INFORMATION_TO_PILOT";
+        private const string ADD_DOC_TO_PILOT = "ADD_DOC_TO_PILOT";
         private const string ABOUT_PROGRAM_MENU = "ABOUT_PROGRAM_MENU";
         private const string SOURCE_DOC_EXT = ".cdw";
         // выбранный с помощью контекстного меню клиента объект
@@ -34,7 +35,7 @@ namespace Ascon.Pilot.SDK.CadReader
         {
             _objectModifier = modifier;
             _objectsRepository = repository;
-            _loader = new ObjectLoader(repository);
+            _listSpec = new List<Specification>();
         }
 
         /// <summary>
@@ -67,9 +68,27 @@ namespace Ascon.Pilot.SDK.CadReader
             return theExt == ext;
         }
 
+        private void SetDocOnMenuClick()
+        {
+            var loader = new ObjectLoader(_objectsRepository);
+            if (_listSpec == null) return;
+            // прикрепляем xps'ки
+            foreach (var spc in _listSpec)
+            {
+                if (spc.GlobalId == Guid.Empty) continue;
+                loader.Load(spc.GlobalId, obj =>
+                {
+                    var builder = _objectModifier.Edit(obj);
+                    builder.AddFile(spc.PreviewDocument);
+                    _objectModifier.Apply();
+                });
+            }
+        }
+
         private void SetInformationOnMenuClick(IDataObject selected)
         {
-            var listSpec = new List<Specification>();
+            _listSpec.Clear();
+            var loader = new ObjectLoader(_objectsRepository);
             var storage = new StorageAnalayzer(_objectsRepository);
             var path = storage.GetProjectFolderByPilotStorage(selected);
             if (path == null) return;
@@ -82,32 +101,12 @@ namespace Ascon.Pilot.SDK.CadReader
                     MessageBox.Show("Информация не может быть получена. Cкорее всего спецификация сделана в версии ниже КОМПАС-3D V16");
                     continue;
                 }
-                listSpec.Add(spc);
+                _listSpec.Add(spc);
             }
-            // todo: необходимо построить дерево из спецификаций
 
-            if (listSpec.Count > 1)
+            if (_listSpec.Count > 1)
             {
-                // если спецификаций больше 1 то пыполняем анализ и ищем дочерние и корневые объекты
-                foreach (var spc in listSpec)
-                {
-                    foreach (var obj in spc.ListSpcObjects)
-                    {
-                        if (obj.SectionName == "Сборочные единицы" || obj.SectionNumber == 15)
-                        {
-                            foreach (var s in listSpec)
-                            {
-                                if (s.Designation.Contains(obj.Designation))
-                                {
-                                    if (s.Parent == null) s.Parent = new List<Specification>();
-                                    if (spc.Children == null) spc.Children = new List<Specification>();
-                                    s.Parent.Add(spc);
-                                    spc.Children.Add(s);
-                                }
-                            }
-                        }
-                    }
-                }
+                _listSpec = SpecificationAnalyzer.CreateTree(_listSpec);
             }
 
             // для объектов спецификациий формируем pdf, для спецификаций формируем xps
@@ -116,8 +115,8 @@ namespace Ascon.Pilot.SDK.CadReader
             {
                 using (var k = new KompasConverter())
                 {
-                    k.KompasConvertToXps(listSpec);
-                    foreach (var spc in listSpec)
+                    k.KompasConvertToXps(_listSpec);
+                    foreach (var spc in _listSpec)
                     {
                         k.KompasConvertToPdf(spc.ListSpcObjects);
                     }
@@ -127,18 +126,18 @@ namespace Ascon.Pilot.SDK.CadReader
             kompasConverterTask.Start();
             kompasConverterTask.Wait();
 
-            _loader.Load(selected.Id, projectId =>
+            loader.Load(selected.Id, projectId =>
             {
                 if (projectId == null) return;
                 // создаём только корневые объекты
                 // затем создаём только спецификации
                 // а потом к ним прилинковываем остальные объекты линейно
-                CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
+                CreateAndUpdateSpcToPilot(projectId, _listSpec.Where(i => i.Parent == null));
 
-                //SynchronizeCheck(projectId, listSpec.Where(i => i.Parent == null), b =>
+                //SynchronizeCheck(projectId, _listSpec.Where(i => i.Parent == null), b =>
                 //{
-                //    //CreateAndUpdateSpcToPilot(projectId, listSpec.Where(i => i.Parent == null));
-                //    //foreach (var l in listSpec)
+                //    //CreateAndUpdateSpcToPilot(projectId, _listSpec.Where(i => i.Parent == null));
+                //    //foreach (var l in _listSpec)
                 //    //{
                 //    //    foreach (var ob in l.ListSpcObjects)
                 //    //    {
@@ -302,10 +301,10 @@ namespace Ascon.Pilot.SDK.CadReader
             builder.SetAttribute("name", spc.Name);
             builder.SetAttribute("mark", ValueTextClear(spc.Designation));
 
-            if (File.Exists(spc.PreviewDocument))
-            {
-                builder.AddFile(spc.PreviewDocument);
-            }
+            //if (File.Exists(spc.PreviewDocument))
+            //{
+            //    builder.AddFile(spc.PreviewDocument);
+            //}
             _objectModifier.Apply();
 
             Thread.Sleep(2000);
@@ -498,12 +497,18 @@ namespace Ascon.Pilot.SDK.CadReader
             builder.AddItem(ADD_INFORMATION_TO_PILOT, 1)
                    .WithHeader("Д_обавить информацию из файлов")
                    .WithIcon(icon);
+            builder.AddItem(ADD_DOC_TO_PILOT, 1)
+                .WithHeader("Д_обавить документы")
+                .WithIcon(icon);
         }
 
         public void OnMenuItemClick(string name, ObjectsViewContext context)
         {
             if (name == ADD_INFORMATION_TO_PILOT)
                 SetInformationOnMenuClick(context.SelectedObjects.FirstOrDefault());
+            if (name == ADD_DOC_TO_PILOT)
+                SetDocOnMenuClick();
+
         }
 
         public void Build(IMenuBuilder builder, MainViewContext context)
