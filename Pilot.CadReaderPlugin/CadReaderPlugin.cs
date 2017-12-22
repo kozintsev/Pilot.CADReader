@@ -116,10 +116,10 @@ namespace Ascon.Pilot.SDK.CadReader
                 using (var k = new KompasConverter())
                 {
                     k.KompasConvertToXps(_listSpec);
-                    foreach (var spc in _listSpec)
-                    {
-                        k.KompasConvertToPdf(spc.ListSpcObjects);
-                    }
+                    //foreach (var spc in _listSpec)
+                    //{
+                    //    k.KompasConvertToPdf(spc.ListSpcObjects);
+                    //}
                     return k;
                 }
             });
@@ -306,8 +306,6 @@ namespace Ascon.Pilot.SDK.CadReader
             //    builder.AddFile(spc.PreviewDocument);
             //}
             _objectModifier.Apply();
-
-            Thread.Sleep(2000);
 
             var loader = new ObjectLoader(_objectsRepository);
             loader.Load(spc.GlobalId, obj =>
@@ -497,7 +495,7 @@ namespace Ascon.Pilot.SDK.CadReader
             builder.AddItem(ADD_INFORMATION_TO_PILOT, 1)
                    .WithHeader("Д_обавить информацию из файлов")
                    .WithIcon(icon);
-            builder.AddItem(ADD_DOC_TO_PILOT, 1)
+            builder.AddItem(ADD_DOC_TO_PILOT, 2)
                 .WithHeader("Д_обавить документы")
                 .WithIcon(icon);
         }
@@ -508,7 +506,6 @@ namespace Ascon.Pilot.SDK.CadReader
                 SetInformationOnMenuClick(context.SelectedObjects.FirstOrDefault());
             if (name == ADD_DOC_TO_PILOT)
                 SetDocOnMenuClick();
-
         }
 
         public void Build(IMenuBuilder builder, MainViewContext context)
