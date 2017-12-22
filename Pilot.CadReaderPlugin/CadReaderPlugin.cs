@@ -89,13 +89,26 @@ namespace Ascon.Pilot.SDK.CadReader
             // прикрепляем xps'ки
             foreach (var spc in _listSpec)
             {
-                if (spc.GlobalId == Guid.Empty) continue;
+                if (spc.GlobalId == Guid.Empty || spc.PreviewDocument == null) continue;
                 loader.Load(spc.GlobalId, obj =>
                 {
                     var builder = _objectModifier.Edit(obj);
                     builder.AddFile(spc.PreviewDocument);
                     _objectModifier.Apply();
                 });
+
+                foreach (var spcObject in spc.ListSpcObjects)
+                {
+                    if (spcObject.GlobalId != Guid.Empty && spcObject.PreviewDocument != null)
+                    {
+                        loader.Load(spcObject.GlobalId, obj =>
+                        {
+                            var builder = _objectModifier.Edit(obj);
+                            builder.AddFile(spcObject.PreviewDocument);
+                            _objectModifier.Apply();
+                        });
+                    }
+                }
             }
         }
 

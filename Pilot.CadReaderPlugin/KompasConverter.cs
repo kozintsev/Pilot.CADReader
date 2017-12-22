@@ -40,13 +40,11 @@ namespace Ascon.Pilot.SDK.CadReader
                 if (doc == null) continue;
                 var fileName = doc.FileName;
                 if (!File.Exists(fileName)) continue;
-                {
-                    var pdfFile = Path.GetTempFileName() + PDF_EXT;
-                    var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out var message);
-                    if (!isConvert)
-                        continue;
-                    spcObject.PreviewDocument = pdfFile;
-                }
+                var pdfFile = Path.GetTempFileName() + PDF_EXT;
+                var isConvert = _komaps.ConvertToPdf(fileName, pdfFile, out var message);
+                if (!isConvert)
+                    continue;
+                spcObject.PreviewDocument = pdfFile;
             }
         }
 
