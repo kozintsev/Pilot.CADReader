@@ -5,7 +5,7 @@ using System.Windows;
 using System.ComponentModel.Composition;
 using Ascon.Pilot.SDK.ObjectCard;
 
-namespace Ascon.Pilot.SDK.KompasAttrReader
+namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 {
     [Export(typeof(IAutoimportHandler))]
     [Export(typeof(IObjectCardHandler))]
@@ -50,15 +50,51 @@ namespace Ascon.Pilot.SDK.KompasAttrReader
 
         public bool Handle(IAttributeModifier modifier, ObjectCardContext context)
         {
-            throw new NotImplementedException();
+            var isObjectModification = context.EditiedObject != null;
+            if (isObjectModification || context.IsReadOnly)
+                return false;
+
+            var parent = context.Parent;
+            var sourceAttr = context.DisplayAttributes.FirstOrDefault(a => a.Type == AttributeType.String);
+            if (sourceAttr == null)
+                return false;
+
+            var sourceValue = parent.Attributes.FirstOrDefault(a => a.Key == sourceAttr.Name);
+            if (sourceValue.Value == null)
+                return false;
+
+            var targetAttr = context.DisplayAttributes.FirstOrDefault(a => a.Type == AttributeType.String);
+            if (targetAttr == null)
+                return false;
+
+            var valueToSet =
+                $"Parent is {sourceValue.Value}; IsDocument:{context.Parent.Type.HasFiles}; Can be mount:{context.Parent.Type.IsMountable}";
+
+            modifier.SetValue(targetAttr.Name, valueToSet);
+            return true;
         }
 
         public bool OnValueChanged(IAttribute sender, AttributeValueChangedEventArgs args, IAttributeModifier modifier)
         {
-            throw new NotImplementedException();
+            var currentAttributeValues = string.Empty;
+            foreach (var displayAttribute in args.Context.DisplayAttributes)
+            {
+                currentAttributeValues += displayAttribute.Name == sender.Name
+                    ? args.NewValue
+                    : displayAttribute.Name + ": " + args.Context.AttributesValues[displayAttribute.Name] + Environment.NewLine;
+            }
+
+            if (args.Context.Type.Name == "Document" && sender.Name == "Sheet_number")
+            {
+                var newNameAttrValue = "Sheet no " + args.NewValue + "; " + (args.Context.EditiedObject == null ? " New object " : " Existed object");
+                modifier.SetValue("Name", newNameAttrValue);
+                return true;
+            }
+
+            return false;
         }
 
-        private string Localize(AutoimportSource autoimportSource)
+        private static string Localize(AutoimportSource autoimportSource)
         {
             switch (autoimportSource)
             {
