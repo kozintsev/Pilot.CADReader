@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Windows;
 using System.ComponentModel.Composition;
 using Ascon.Pilot.SDK.ObjectCard;
 
@@ -22,7 +25,27 @@ namespace Ascon.Pilot.SDK.KompasAttrReader
 
         public bool Handle(string filePath, string sourceFilePath, AutoimportSource autoimportSource)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var selection = _dialogService.ShowDocumentsSelectorDialog().ToList();
+                if (selection.Count != 1)
+                    return false;
+                var document = selection.First();
+                if (!document.Type.HasFiles)
+                    MessageBox.Show("Error", "Selected element can not have files", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                var message = "Auto-imported from " + Localize(autoimportSource);
+                _modifier
+                    .Edit(document)
+                    .CreateFileSnapshot(message)
+                    .AddFile(filePath);
+                _modifier.Apply();
+                return true;
+            }
+            finally
+            {
+                File.Delete(filePath);
+            }
         }
 
         public bool Handle(IAttributeModifier modifier, ObjectCardContext context)
@@ -33,6 +56,21 @@ namespace Ascon.Pilot.SDK.KompasAttrReader
         public bool OnValueChanged(IAttribute sender, AttributeValueChangedEventArgs args, IAttributeModifier modifier)
         {
             throw new NotImplementedException();
+        }
+
+        private string Localize(AutoimportSource autoimportSource)
+        {
+            switch (autoimportSource)
+            {
+                case AutoimportSource.Unknown:
+                    return "Unknown";
+                case AutoimportSource.PilotXps:
+                    return "Pilot XPS printer";
+                case AutoimportSource.UserFolder:
+                    return "user auto-import directory";
+                default:
+                    throw new NotSupportedException();
+            }
         }
     }
 }
