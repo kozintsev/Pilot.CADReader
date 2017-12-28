@@ -58,12 +58,12 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 
                 if (IsFileExtension(sourceFilePath, SOURCE_DOC_EXT))
                 {
-                    var taskOpenSpwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
-                    taskOpenSpwFile.Start();
-                    taskOpenSpwFile.Wait();
-                    if (taskOpenSpwFile.Result.IsCompleted)
+                    var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
+                    taskOpenCdwFile.Start();
+                    taskOpenCdwFile.Wait();
+                    if (taskOpenCdwFile.Result.IsCompleted)
                     {
-                        var drawing = taskOpenSpwFile.Result.Drawing;
+                        var drawing = taskOpenCdwFile.Result.Drawing;
                     }
                 }
 
