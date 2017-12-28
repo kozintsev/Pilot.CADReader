@@ -7,23 +7,7 @@ namespace KompasFileReader.Spc
 {
     public class Specification : GeneralProp, IGeneralDocEntity
     {
-        public string Name
-        {
-            get
-            {
-                var spcProp = ListSpcProps.FirstOrDefault(prop => prop.Name == "Наименование");
-                return spcProp?.Value;
-            }
-        }
-
-        public string Designation
-        {
-            get
-            {
-                var spcProp = ListSpcProps.FirstOrDefault(prop => prop.Name == "Обозначение");
-                return spcProp?.Value;
-            }
-        }
+        
         /// <summary>
         /// Путь к файлу спецификации на диске
         /// </summary>
@@ -34,8 +18,6 @@ namespace KompasFileReader.Spc
         public List<Specification> Parent { get; set; }
 
         public List<SpcObject> ListSpcObjects { get; protected set; }
-
-        public List<SpcProp> ListSpcProps  { get; protected set; }
 
         public List<SpcSection> SpcSections { get; protected set; }
 

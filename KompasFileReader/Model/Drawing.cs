@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using KompasFileReader.Spc;
 
 namespace KompasFileReader.Model
 {
-    public class Drawing : GeneralMechEntity, IGeneralDocEntity
+    public class Drawing : GeneralProp, IGeneralDocEntity
     {
         public List<DrawingSheet> Sheets { get; set; }
 
@@ -24,7 +25,7 @@ namespace KompasFileReader.Model
 
         public void SetGlobalId(Guid value)
         {
-            Guid = value;
+            GlobalId = value;
         }
     }
 }

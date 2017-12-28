@@ -109,6 +109,7 @@ namespace KompasFileReader.Analyzer
                 Drawing.Sheets.Add(ds);
             }
             // все циклы завершены
+            Drawing.ListSpcProps = Prop;
             IsCompleted = true;
         }
        
