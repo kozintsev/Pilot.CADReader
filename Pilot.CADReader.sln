@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KAPITypes", "KAPITypes\KAPI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin.Tests", "Pilot.CadReaderPlugin.Tests\Pilot.CadReaderPlugin.Tests.csproj", "{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasAttrReader", "KompasAttrReader\KompasAttrReader.csproj", "{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasFileReader", "KompasFileReader\KompasFileReader.csproj", "{21424CDB-0741-4BF5-9491-5D0D4AC137DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
