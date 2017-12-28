@@ -56,5 +56,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KompasFileReader\KompasFileReader.csproj">
+      <Project>{21424cdb-0741-4bf5-9491-5d0d4ac137dd}</Project>
+      <Name>KompasFileReader</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

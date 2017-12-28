@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ascon.Uln.KompasShell;
+using KompasFileReader.Analyzer;
 
 namespace Pilot.CadReaderPlugin.Tests
 {
@@ -86,6 +88,30 @@ namespace Pilot.CadReaderPlugin.Tests
                 Assert.IsTrue(string.IsNullOrEmpty(result));
             }
             Assert.IsTrue(File.Exists(StartupPath + @"\spc.pdf"), "Pdf file not found");
+        }
+
+        [TestMethod]
+        public void TestSpwReader()
+        {
+            const string path = @"\078.505.9.0100.00.SPW";
+            var fullPath = StartupPath + path;
+            using (var inputStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                taskOpenSpwFile.Start();
+                taskOpenSpwFile.Wait();
+                if (!taskOpenSpwFile.Result.IsCompleted)
+                {
+                    Assert.Fail("SpwAnalyzer has not result");
+                }
+                var spc = taskOpenSpwFile.Result.GetSpecification;
+                spc.FileName = fullPath;
+                Assert.IsTrue(spc.Designation.Contains("078.505.9.0100.00"), "Designation is not equivalent to 078.505.9.0100.00");
+            }
         }
     }
 }

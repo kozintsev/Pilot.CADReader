@@ -6,7 +6,7 @@ using KompasFileReader.Spc;
 
 namespace KompasFileReader.Analyzer
 {
-    internal class SpwAnalyzer : Specification
+    public class SpwAnalyzer : Specification
     {
         private XDocument _xDoc;
 

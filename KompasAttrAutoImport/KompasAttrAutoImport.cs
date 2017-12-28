@@ -3,7 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.ComponentModel.Composition;
+using System.Threading;
+using System.Threading.Tasks;
 using Ascon.Pilot.SDK.ObjectCard;
+using KompasFileReader.Analyzer;
+using KompasFileReader.Spc;
+
+// ReSharper disable InconsistentNaming
 
 namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 {
@@ -14,6 +20,8 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 
         private readonly IObjectModifier _modifier;
         private readonly IPilotDialogService _dialogService;
+        private const string SOURCE_DOC_EXT = ".cdw";
+        private const string SPW_EXT = "*.spw";
 
         [ImportingConstructor]
         public KompasAttrAutoImport(IObjectModifier modifier, IPilotDialogService dialogService)
@@ -25,27 +33,44 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 
         public bool Handle(string filePath, string sourceFilePath, AutoimportSource autoimportSource)
         {
-            try
+            if (string.IsNullOrWhiteSpace(sourceFilePath)) return false;
+            // если исходный файл компас. Проверяем расширения.
+            if (!IsFileExtension(sourceFilePath, SOURCE_DOC_EXT) && !IsFileExtension(sourceFilePath, SPW_EXT))
+                return false;
+            // Тут выполняем анализ документа и извлекаем из него информацию об обознаяении и наименовании
+            using (var inputStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
             {
-                var selection = _dialogService.ShowDocumentsSelectorDialog().ToList();
-                if (selection.Count != 1)
-                    return false;
-                var document = selection.First();
-                if (!document.Type.HasFiles)
-                    MessageBox.Show("Error", "Selected element can not have files", MessageBoxButton.OK, MessageBoxImage.Error);
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                if (IsFileExtension(sourceFilePath, SPW_EXT))
+                {
+                    var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                    taskOpenSpwFile.Start();
+                    taskOpenSpwFile.Wait();
+                    if (taskOpenSpwFile.Result.IsCompleted)
+                    {
+                        var spc = taskOpenSpwFile.Result.GetSpecification;
+                        spc.FileName = sourceFilePath;
+                    }
+                }
 
-                var message = "Auto-imported from " + Localize(autoimportSource);
-                _modifier
-                    .Edit(document)
-                    .CreateFileSnapshot(message)
-                    .AddFile(filePath);
-                _modifier.Apply();
-                return true;
+                if (IsFileExtension(sourceFilePath, SOURCE_DOC_EXT))
+                {
+                    var taskOpenSpwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
+                    taskOpenSpwFile.Start();
+                    taskOpenSpwFile.Wait();
+                    if (taskOpenSpwFile.Result.IsCompleted)
+                    {
+                        var drawing = taskOpenSpwFile.Result.Drawing;
+                    }
+                }
+
             }
-            finally
-            {
-                File.Delete(filePath);
-            }
+            Thread.Sleep(2000);
+            return false;
+
         }
 
         public bool Handle(IAttributeModifier modifier, ObjectCardContext context)
@@ -106,6 +131,38 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                     return "user auto-import directory";
                 default:
                     throw new NotSupportedException();
+            }
+        }
+
+        private static bool IsFileExtension(string name, string ext)
+        {
+            if (string.IsNullOrEmpty(name))
+                return false;
+            var theExt = Path.GetExtension(name).ToLower();
+            return theExt == ext;
+        }
+
+        /// <summary>
+        /// Метод получает информацию из спецификации и возвращает экземпляр класса Specification
+        /// </summary>
+        /// <param name="filename">Имя файла</param>
+        /// <returns>Объект спецификации</returns>
+        private static Specification GetInformationFromKompas(string filename)
+        {
+            using (var inputStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                taskOpenSpwFile.Start();
+                taskOpenSpwFile.Wait();
+                if (!taskOpenSpwFile.Result.IsCompleted)
+                    return null;
+                var spc = taskOpenSpwFile.Result.GetSpecification;
+                spc.FileName = filename;
+                return spc;
             }
         }
     }
