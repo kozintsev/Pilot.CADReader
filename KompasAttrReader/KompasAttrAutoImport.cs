@@ -6,14 +6,14 @@ namespace Ascon.Pilot.SDK.KompasAttrReader
 {
     [Export(typeof(IAutoimportHandler))]
     [Export(typeof(IObjectCardHandler))]
-    public class KompasAttrReader : IAutoimportHandler, IObjectCardHandler
+    public class KompasAttrAutoImport : IAutoimportHandler, IObjectCardHandler
     {
 
         private readonly IObjectModifier _modifier;
         private readonly IPilotDialogService _dialogService;
 
         [ImportingConstructor]
-        public KompasAttrReader(IObjectModifier modifier, IPilotDialogService dialogService)
+        public KompasAttrAutoImport(IObjectModifier modifier, IPilotDialogService dialogService)
         {
             _modifier = modifier;
             _dialogService = dialogService;

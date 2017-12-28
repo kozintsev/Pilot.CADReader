@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KAPITypes", "KAPITypes\KAPI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin.Tests", "Pilot.CadReaderPlugin.Tests\Pilot.CadReaderPlugin.Tests.csproj", "{CA3B9FDB-2538-4801-813A-BDD8CAA2E26C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasAttrReader", "KompasAttrReader\KompasAttrReader.csproj", "{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasAttrAutoImport", "KompasAttrReader\KompasAttrAutoImport.csproj", "{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasFileReader", "KompasFileReader\KompasFileReader.csproj", "{21424CDB-0741-4BF5-9491-5D0D4AC137DD}"
 EndProject
