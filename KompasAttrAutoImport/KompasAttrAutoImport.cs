@@ -23,7 +23,7 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
     public class KompasAttrAutoImport : IAutoimportHandler, IObjectCardHandler, ISettingsFeature
     {
         private IGeneralDocEntity _doc;
-        private List<PairPilotKompasAttr> _pairPilotKompasAttrs;
+        private readonly List<PairPilotKompasAttr> _pairPilotKompasAttrs;
         private const string SOURCE_DOC_EXT = ".cdw";
         private const string SPW_EXT = "*.spw";
         public string Key { get; }
@@ -128,7 +128,7 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
             return str?.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
         }
 
-        private List<PairPilotKompasAttr> GetListPairPilotKompasAttr(string json)
+        private static List<PairPilotKompasAttr> GetListPairPilotKompasAttr(string json)
         {
             try
             {
