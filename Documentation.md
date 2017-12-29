@@ -4,11 +4,11 @@
 
 ```json
 [{
-		'NameAttrPilot': 'name',
-		'NamePropKompas': 'Наименование'
+		"NameAttrPilot": "name",
+		"NamePropKompas": "Наименование"
 	}, {
-		'NameAttrPilot': 'mark',
-		'NamePropKompas': 'Обозначение'
+		"NameAttrPilot": "mark",
+		"NamePropKompas": "Обозначение"
 	}
 ]
 
