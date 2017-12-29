@@ -1,10 +1,17 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using Ascon.Pilot.SDK.KompasAttrAutoImport.Model;
 using Ascon.Pilot.SDK.ObjectCard;
 using KompasFileReader.Analyzer;
 using KompasFileReader.Model;
+using Newtonsoft.Json;
 
 // ReSharper disable InconsistentNaming
 
@@ -12,11 +19,26 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
 {
     [Export(typeof(IAutoimportHandler))]
     [Export(typeof(IObjectCardHandler))]
-    public class KompasAttrAutoImport : IAutoimportHandler, IObjectCardHandler
+    [Export(typeof(ISettingsFeature))]
+    public class KompasAttrAutoImport : IAutoimportHandler, IObjectCardHandler, ISettingsFeature
     {
         private IGeneralDocEntity _doc;
+        private List<PairPilotKompasAttr> _pairPilotKompasAttrs;
         private const string SOURCE_DOC_EXT = ".cdw";
         private const string SPW_EXT = "*.spw";
+        public string Key { get; }
+        public string Title { get; }
+        public FrameworkElement Editor { get; }
+
+        [ImportingConstructor]
+        public KompasAttrAutoImport(IPersonalSettings personalSettings)
+        {
+            Key = "KompasAttrAutoImport-E74EA6D5-C31E-4FE2-84E9-5AB64E503126";
+            Title = "Автоимпорт атрибутов из КОМПАС-3D";
+            Editor = null;
+            var setting = new SettingLoader(personalSettings);
+            _pairPilotKompasAttrs = GetListPairPilotKompasAttr(setting.Json);
+        }
 
         public bool Handle(string filePath, string sourceFilePath, AutoimportSource autoimportSource)
         {
@@ -68,16 +90,24 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                 return false;
             if (_doc == null)
                 return false;
-            var des = _doc.GetDesignation();
-            var name = _doc.GetName();
-            modifier.SetValue("mark", ValueTextClear(des));
-            modifier.SetValue("name", name);
+            var docProp = _doc.GetProps();
+            foreach (var pairPilotKompasAttr in _pairPilotKompasAttrs)
+            {
+                var val = docProp.FirstOrDefault(x => x.Name == pairPilotKompasAttr.NamePropKompas)?.Value;
+                if (val != null)
+                    modifier.SetValue(pairPilotKompasAttr.NameAttrPilot, ValueTextClear(val));
+            }
             return true;
         }
 
         public bool OnValueChanged(IAttribute sender, AttributeValueChangedEventArgs args, IAttributeModifier modifier)
         {
             return false;
+        }
+
+        public void SetValueProvider(ISettingValueProvider settingValueProvider)
+        {
+
         }
 
         private static bool IsFileExtension(string name, string ext)
@@ -97,5 +127,22 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
         {
             return str?.Replace("$|", "").Replace(" @/", " ").Replace("@/", " ");
         }
+
+        private List<PairPilotKompasAttr> GetListPairPilotKompasAttr(string json)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<List<PairPilotKompasAttr>>(json);
+
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        
+
+        
     }
 }

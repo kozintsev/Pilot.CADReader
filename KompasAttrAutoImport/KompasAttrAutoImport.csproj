@@ -38,6 +38,9 @@
     <Reference Include="Ascon.Pilot.Theme, Version=17.0.36.23182, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Ascon.Pilot.SDK.17.0.36.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -51,7 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KompasAttrAutoImport.cs" />
+    <Compile Include="Model\PairPilotKompasAttr.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

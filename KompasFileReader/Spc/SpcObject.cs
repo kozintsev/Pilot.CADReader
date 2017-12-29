@@ -24,7 +24,7 @@ namespace KompasFileReader.Spc
         /// </summary>
         public string Id { get; set; }
 
-        public string Name
+        public new string Name
         {
             get
             {
@@ -33,7 +33,7 @@ namespace KompasFileReader.Spc
             }
         }
 
-        public string Designation
+        public new string Designation
         {
             get
             {
@@ -54,6 +54,11 @@ namespace KompasFileReader.Spc
         public string GetDesignation()
         {
             return Designation;
+        }
+
+        public List<SpcProp> GetProps()
+        {
+            return ListSpcProps;
         }
 
         public void SetGlobalId(Guid value)

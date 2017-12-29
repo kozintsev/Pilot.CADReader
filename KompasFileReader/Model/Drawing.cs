@@ -23,6 +23,11 @@ namespace KompasFileReader.Model
             return Designation;
         }
 
+        public List<SpcProp> GetProps()
+        {
+            return ListSpcProps;
+        }
+
         public void SetGlobalId(Guid value)
         {
             GlobalId = value;

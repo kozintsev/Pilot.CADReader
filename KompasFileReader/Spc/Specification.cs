@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using KompasFileReader.Model;
 using System;
 
@@ -29,6 +28,11 @@ namespace KompasFileReader.Spc
         public string GetDesignation()
         {
             return Designation;
+        }
+
+        public List<SpcProp> GetProps()
+        {
+            return ListSpcProps;
         }
 
         public void SetGlobalId(Guid value)
