@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using KompasFileReader.Spc;
+using KompasFileReader.Model.Spc;
 
 namespace KompasFileReader.Model
 {
@@ -13,7 +13,7 @@ namespace KompasFileReader.Model
 
         string GetDesignation();
 
-        List<SpcProp> GetProps();
+        List<DocProp> GetProps();
 
         void SetGlobalId(Guid value);
     }

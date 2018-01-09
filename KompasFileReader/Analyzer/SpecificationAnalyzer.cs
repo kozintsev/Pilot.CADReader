@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using KompasFileReader.Spc;
+using KompasFileReader.Model;
 
 namespace KompasFileReader.Analyzer
 {

@@ -1,9 +1,8 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
-using KompasFileReader.Model;
 using System;
 
-namespace KompasFileReader.Spc
+namespace KompasFileReader.Model.Spc
 {
     public class SpcObject : GeneralProp, IGeneralDocEntity
     {
@@ -56,7 +55,7 @@ namespace KompasFileReader.Spc
             return Designation;
         }
 
-        public List<SpcProp> GetProps()
+        public List<DocProp> GetProps()
         {
             return ListSpcProps;
         }

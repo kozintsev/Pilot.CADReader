@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Xml.Linq;
+using System.Collections.Generic;
 using KompasFileReader.Model;
-using KompasFileReader.Spc;
+using KompasFileReader.Model.Spc;
 
 namespace KompasFileReader.Analyzer
 {
@@ -12,7 +12,7 @@ namespace KompasFileReader.Analyzer
 
         public bool Opened { get; private set; }
         public bool IsCompleted { get; private set; }
-        public List<SpcProp> Prop { get; private set; }
+        public List<DocProp> Prop { get; private set; }
         public Drawing Drawing { get; private set; }
 
         public CdwAnalyzer(Stream fileStream)
@@ -40,7 +40,7 @@ namespace KompasFileReader.Analyzer
                 return;
 
             Drawing = new Drawing();
-            Prop = new List<SpcProp>();
+            Prop = new List<DocProp>();
 
             var properties = _xDoc.Descendants("property");
             foreach (var prop in properties)
@@ -65,7 +65,7 @@ namespace KompasFileReader.Analyzer
                         if (attr.Name == "unitId") unitId = attr.Value;
                     }
                     if (id == null || id != id2) continue;
-                    var spcProp = new SpcProp
+                    var spcProp = new DocProp
                     {
                         Name = name,
                         Value = val,

@@ -1,4 +1,4 @@
-﻿namespace KompasFileReader.Spc
+﻿namespace KompasFileReader.Model.Spc
 {
     /// <summary>
     /// Пример name="Формат" typeName="format" type="1" number="1" blockNumber="0" value="A1" modified="0"

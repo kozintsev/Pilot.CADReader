@@ -2,7 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using KompasFileReader.Spc;
+using KompasFileReader.Model;
+using KompasFileReader.Model.Spc;
 
 namespace KompasFileReader.Analyzer
 {
@@ -39,7 +40,7 @@ namespace KompasFileReader.Analyzer
             if (_xDoc == null)
                 return;
             SpcSections = new List<SpcSection>();
-            ListSpcProps = new List<SpcProp>();
+            ListSpcProps = new List<DocProp>();
             ListSpcObjects = new List<SpcObject>();
 
             var properties = _xDoc.Descendants("property");
@@ -65,7 +66,7 @@ namespace KompasFileReader.Analyzer
                         if (attr.Name == "unitId") unitId = attr.Value;
                     }
                     if (id == null || id != id2) continue;
-                    var spcProp = new SpcProp
+                    var spcProp = new DocProp
                     {
                         Name = name,
                         Value = val,

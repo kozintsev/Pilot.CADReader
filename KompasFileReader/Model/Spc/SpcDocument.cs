@@ -1,4 +1,4 @@
-﻿namespace KompasFileReader.Spc
+﻿namespace KompasFileReader.Model.Spc
 {
     public class SpcDocument
     {

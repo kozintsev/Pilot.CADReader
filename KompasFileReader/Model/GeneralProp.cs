@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 
-namespace KompasFileReader.Spc
+namespace KompasFileReader.Model
 {
     public abstract class GeneralProp
     {
@@ -15,7 +15,7 @@ namespace KompasFileReader.Spc
         /// </summary>
         public string PreviewDocument { get; set; }
 
-        public List<SpcProp> ListSpcProps { get; set; }
+        public List<DocProp> ListSpcProps { get; set; }
 
         public string Name
         {

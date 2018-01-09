@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
-using KompasFileReader.Model;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using KompasFileReader.Model.Spc;
 
-namespace KompasFileReader.Spc
+namespace KompasFileReader.Model
 {
+    /// <summary>
+    /// Класс для спецификации (свойства храняться в папке Spc)
+    /// </summary>
     public class Specification : GeneralProp, IGeneralDocEntity
     {
         
@@ -30,7 +33,7 @@ namespace KompasFileReader.Spc
             return Designation;
         }
 
-        public List<SpcProp> GetProps()
+        public List<DocProp> GetProps()
         {
             return ListSpcProps;
         }

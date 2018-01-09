@@ -51,17 +51,15 @@
     <Compile Include="ExtractZipFile.cs" />
     <Compile Include="Model\Drawing.cs" />
     <Compile Include="Model\DrawingSheet.cs" />
-    <Compile Include="Model\GeneralMechEntity.cs" />
     <Compile Include="Model\IGeneralDocEntity.cs" />
-    <Compile Include="Model\PropertyDescription.cs" />
+    <Compile Include="Model\Specification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Spc\GeneralProp.cs" />
-    <Compile Include="Spc\SpcColumn.cs" />
-    <Compile Include="Spc\SpcDocument.cs" />
-    <Compile Include="Spc\SpcObject.cs" />
-    <Compile Include="Spc\SpcProp.cs" />
-    <Compile Include="Spc\SpcSection.cs" />
-    <Compile Include="Spc\Specification.cs" />
+    <Compile Include="Model\GeneralProp.cs" />
+    <Compile Include="Model\Spc\SpcColumn.cs" />
+    <Compile Include="Model\Spc\SpcDocument.cs" />
+    <Compile Include="Model\Spc\SpcObject.cs" />
+    <Compile Include="Model\DocProp.cs" />
+    <Compile Include="Model\Spc\SpcSection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using KompasFileReader.Spc;
 
 namespace KompasFileReader.Model
 {
+    /// <summary>
+    /// Класс чертежа
+    /// </summary>
     public class Drawing : GeneralProp, IGeneralDocEntity
     {
         public List<DrawingSheet> Sheets { get; set; }
@@ -23,7 +25,7 @@ namespace KompasFileReader.Model
             return Designation;
         }
 
-        public List<SpcProp> GetProps()
+        public List<DocProp> GetProps()
         {
             return ListSpcProps;
         }
