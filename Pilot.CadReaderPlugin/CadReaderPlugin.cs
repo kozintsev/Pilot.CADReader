@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using System.Windows;
 using Ascon.Pilot.SDK.CadReader.Analyzer;
 using Ascon.Pilot.SDK.CadReader.Form;
-using Ascon.Pilot.SDK.CadReader.Model;
-using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Pilot.SDK.Menu;
+using KompasFileReader.Analyzer;
+using KompasFileReader.Model;
+using KompasFileReader.Model.Spc;
+using SpecificationAnalyzer = KompasFileReader.Analyzer.SpecificationAnalyzer;
 
 // ReSharper disable InconsistentNaming
 

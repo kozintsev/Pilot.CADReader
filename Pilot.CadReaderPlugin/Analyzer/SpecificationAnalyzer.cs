@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Ascon.Pilot.SDK.CadReader.Spc;
+using KompasFileReader.Model;
 
 namespace Ascon.Pilot.SDK.CadReader.Analyzer
 {

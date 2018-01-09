@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Ascon.Pilot.SDK.CadReader.Spc;
 using Ascon.Uln.KompasShell;
+using KompasFileReader.Model;
+using KompasFileReader.Model.Spc;
 using NLog;
 // ReSharper disable InconsistentNaming
 
