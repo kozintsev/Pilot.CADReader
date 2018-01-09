@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using Ascon.Pilot.SDK.KompasAttrAutoImport.Model;
 using Ascon.Pilot.SDK.ObjectCard;
 using KompasFileReader.Analyzer;
@@ -24,8 +23,8 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
     {
         private IGeneralDocEntity _doc;
         private readonly List<PairPilotKompasAttr> _pairPilotKompasAttrs;
-        private const string SOURCE_DOC_EXT = ".cdw";
-        private const string SPW_EXT = "*.spw";
+        private const string CDW_EXT = ".cdw";
+        private const string SPW_EXT = ".spw";
         public string Key { get; }
         public string Title { get; }
         public FrameworkElement Editor { get; }
@@ -44,7 +43,7 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
         {
             if (string.IsNullOrWhiteSpace(sourceFilePath)) return false;
             // если исходный файл компас. Проверяем расширения.
-            if (!IsFileExtension(sourceFilePath, SOURCE_DOC_EXT) && !IsFileExtension(sourceFilePath, SPW_EXT))
+            if (!IsFileExtension(sourceFilePath, CDW_EXT) && !IsFileExtension(sourceFilePath, SPW_EXT))
                 return false;
             // Тут выполняем анализ документа и извлекаем из него информацию об обознаяении и наименовании
             using (var inputStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
@@ -66,7 +65,7 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                     }
                 }
 
-                if (IsFileExtension(sourceFilePath, SOURCE_DOC_EXT))
+                if (IsFileExtension(sourceFilePath, CDW_EXT))
                 {
                     var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
                     taskOpenCdwFile.Start();
@@ -140,9 +139,5 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                 return null;
             }
         }
-
-        
-
-        
     }
 }
