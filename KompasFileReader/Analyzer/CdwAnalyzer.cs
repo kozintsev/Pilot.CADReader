@@ -2,7 +2,6 @@
 using System.Xml.Linq;
 using System.Collections.Generic;
 using KompasFileReader.Model;
-using KompasFileReader.Model.Spc;
 
 namespace KompasFileReader.Analyzer
 {
