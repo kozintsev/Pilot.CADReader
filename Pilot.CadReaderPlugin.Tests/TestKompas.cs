@@ -140,5 +140,32 @@ namespace Pilot.CadReaderPlugin.Tests
                 }
             }
         }
+
+        [TestMethod]
+        public void TestCdwReader2()
+        {
+            const string path = @"\6013-AR.cdw";
+            var fullPath = StartupPath + path;
+            using (var inputStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+
+                var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
+                taskOpenCdwFile.Start();
+                taskOpenCdwFile.Wait();
+                if (taskOpenCdwFile.Result.IsCompleted)
+                {
+                    var drawing = taskOpenCdwFile.Result.Drawing;
+                    Assert.IsTrue(drawing.Designation.Contains("ЛСУ-6013-АР"), "Designation is not equivalent to 078.505.9.0100.00");
+                }
+                else
+                {
+                    Assert.Fail("SpwAnalyzer has not result");
+                }
+            }
+        }
     }
 }

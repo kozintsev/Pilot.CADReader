@@ -35,12 +35,14 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
             Key = "KompasAttrAutoImport-E74EA6D5-C31E-4FE2-84E9-5AB64E503126";
             Title = "Автоимпорт атрибутов из КОМПАС-3D";
             Editor = null;
+            _doc = null;
             var setting = new SettingLoader(personalSettings);
             _pairPilotKompasAttrs = GetListPairPilotKompasAttr(setting.Json);
         }
 
         public bool Handle(string filePath, string sourceFilePath, AutoimportSource autoimportSource)
         {
+            _doc = null;
             if (string.IsNullOrWhiteSpace(sourceFilePath)) return false;
             // если исходный файл компас. Проверяем расширения.
             if (!IsFileExtension(sourceFilePath, CDW_EXT) && !IsFileExtension(sourceFilePath, SPW_EXT))
@@ -63,6 +65,10 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                         spc.FileName = sourceFilePath;
                         _doc = spc;
                     }
+                    else
+                    {
+                        _doc = null;
+                    }
                 }
 
                 if (IsFileExtension(sourceFilePath, CDW_EXT))
@@ -74,6 +80,10 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
                     {
                         var drawing = taskOpenCdwFile.Result.Drawing;
                         _doc = drawing;
+                    }
+                    else
+                    {
+                        _doc = null;
                     }
                 }
             }
