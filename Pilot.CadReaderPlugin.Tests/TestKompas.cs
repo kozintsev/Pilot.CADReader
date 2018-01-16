@@ -159,7 +159,8 @@ namespace Pilot.CadReaderPlugin.Tests
                 if (taskOpenCdwFile.Result.IsCompleted)
                 {
                     var drawing = taskOpenCdwFile.Result.Drawing;
-                    Assert.IsTrue(drawing.Designation.Contains("ЛСУ-6013-АР"), "Designation is not equivalent to 078.505.9.0100.00");
+                    Assert.IsTrue(drawing.Designation.Contains("ЛСУ-6013-АР"), "Designation is not equivalent to ЛСУ-6013-АР");
+                    Assert.IsTrue(drawing.Name.Contains("Локальная сорбционная установка"), "Наименование не соответствует Локальная сорбционная установка");
                 }
                 else
                 {
