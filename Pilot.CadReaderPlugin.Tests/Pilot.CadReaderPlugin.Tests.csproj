@@ -56,7 +56,12 @@
     <None Include="TestSourceFiles\078.505.9.0100.00.SPW">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="TestSourceFiles\Spc.md5" />
+    <None Include="TestSourceFiles\6013-AR.cdw">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="TestSourceFiles\Spc.md5">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="TestSourceFiles\Spc.spw">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
