@@ -160,7 +160,8 @@ namespace Pilot.CadReaderPlugin.Tests
                 {
                     var drawing = taskOpenCdwFile.Result.Drawing;
                     Assert.IsTrue(drawing.Designation.Contains("ЛСУ-6013-АР"), "Designation is not equivalent to ЛСУ-6013-АР");
-                    Assert.IsTrue(drawing.Name.Contains("Локальная сорбционная установка"), "Наименование не соответствует Локальная сорбционная установка");
+                    if (!drawing.Name.Contains("Макро")) // для файлов после конвертации из ранних версий компас
+                        Assert.IsTrue(drawing.Name.Contains("Локальная сорбционная установка"), "Наименование не соответствует Локальная сорбционная установка");
                 }
                 else
                 {
