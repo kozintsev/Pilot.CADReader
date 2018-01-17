@@ -48,48 +48,55 @@ namespace Ascon.Pilot.SDK.KompasAttrAutoImport
             if (!IsFileExtension(sourceFilePath, CDW_EXT) && !IsFileExtension(sourceFilePath, SPW_EXT))
                 return false;
             // Тут выполняем анализ документа и извлекаем из него информацию об обознаяении и наименовании
-            using (var inputStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
+            try
             {
-                var ms = new MemoryStream();
-                inputStream.Seek(0, SeekOrigin.Begin);
-                inputStream.CopyTo(ms);
-                ms.Position = 0;
-                if (IsFileExtension(sourceFilePath, SPW_EXT))
+                using (var inputStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
                 {
-                    var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
-                    taskOpenSpwFile.Start();
-                    taskOpenSpwFile.Wait();
-                    if (taskOpenSpwFile.Result.IsCompleted)
+                    var ms = new MemoryStream();
+                    inputStream.Seek(0, SeekOrigin.Begin);
+                    inputStream.CopyTo(ms);
+                    ms.Position = 0;
+                    if (IsFileExtension(sourceFilePath, SPW_EXT))
                     {
-                        var spc = taskOpenSpwFile.Result.GetSpecification;
-                        spc.FileName = sourceFilePath;
-                        _doc = spc;
+                        var taskOpenSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                        taskOpenSpwFile.Start();
+                        taskOpenSpwFile.Wait();
+                        if (taskOpenSpwFile.Result.IsCompleted)
+                        {
+                            var spc = taskOpenSpwFile.Result.GetSpecification;
+                            spc.FileName = sourceFilePath;
+                            _doc = spc;
+                        }
+                        else
+                        {
+                            _doc = null;
+                        }
                     }
-                    else
-                    {
-                        _doc = null;
-                    }
-                }
 
-                if (IsFileExtension(sourceFilePath, CDW_EXT))
-                {
-                    var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
-                    taskOpenCdwFile.Start();
-                    taskOpenCdwFile.Wait();
-                    if (taskOpenCdwFile.Result.IsCompleted)
+                    if (IsFileExtension(sourceFilePath, CDW_EXT))
                     {
-                        var drawing = taskOpenCdwFile.Result.Drawing;
-                        _doc = drawing;
-                    }
-                    else
-                    {
-                        _doc = null;
+                        var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
+                        taskOpenCdwFile.Start();
+                        taskOpenCdwFile.Wait();
+                        if (taskOpenCdwFile.Result.IsCompleted)
+                        {
+                            var drawing = taskOpenCdwFile.Result.Drawing;
+                            _doc = drawing;
+                        }
+                        else
+                        {
+                            _doc = null;
+                        }
                     }
                 }
             }
+            catch (Exception)
+            {
+                _doc = null;
+                return false;
+            }
             Thread.Sleep(2000);
             return false;
-
         }
 
         public bool Handle(IAttributeModifier modifier, ObjectCardContext context)
