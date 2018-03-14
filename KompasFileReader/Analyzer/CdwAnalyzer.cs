@@ -44,7 +44,7 @@ namespace KompasFileReader.Analyzer
             var properties = _xDoc.Descendants("property");
             foreach (var prop in properties)
             {
-                string id = null, val = null;
+                string id = null, val = null, source = null;
                 foreach (var attr in prop.Attributes())
                 {
                     if (attr.Name == "id") id = attr.Value;
