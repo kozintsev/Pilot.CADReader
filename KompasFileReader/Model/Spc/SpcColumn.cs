@@ -27,4 +27,29 @@
 
         public int Modified { get; set; }
     }
+     
+      public class AddColumn
+    {
+        /// <summary>
+        /// Пример name="Масса" или name="ID материала" 
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Пример typeName="massa" typeName="Обозначение материала"
+        /// </summary>
+        public string TypeName { get; set; }
+
+        public int Type { get; set; }
+
+        public int Number { get; set; }
+
+        public int BlockNumber { get; set; }
+        /// <summary>
+        /// Пример value="0,35" или value="Лист$dБ-ПН-4 ГОСТ 19903-74;Ст3пс 2-св ГОСТ 14637-89$"
+        /// </summary>
+        public string Value { get; set; }
+
+        public int Modified { get; set; }
+    }
 }
