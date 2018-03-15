@@ -12,5 +12,6 @@
          public string TypeValue { get; set; }
          public string NatureId { get; set; }
          public string UnitId { get; set; }
+         public string Source { get; set; }
     }
 }

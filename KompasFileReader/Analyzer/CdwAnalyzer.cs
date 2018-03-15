@@ -44,11 +44,12 @@ namespace KompasFileReader.Analyzer
             var properties = _xDoc.Descendants("property");
             foreach (var prop in properties)
             {
-                string id = null, val = null;
+                string id = null, val = null, source = null;
                 foreach (var attr in prop.Attributes())
                 {
                     if (attr.Name == "id") id = attr.Value;
                     if (attr.Name == "value") val = attr.Value;
+                    if (attr.Name == "source") source = attr.Value;
                 }
                 var propertyDescriptions = _xDoc.Descendants("propertyDescription");
                 foreach (var propertyDescription in propertyDescriptions)
@@ -70,7 +71,8 @@ namespace KompasFileReader.Analyzer
                         Value = val,
                         TypeValue = typeValue,
                         NatureId = natureId,
-                        UnitId = unitId
+                        UnitId = unitId,
+                        Source = source
                     };
                     Prop.Add(spcProp);
                 }

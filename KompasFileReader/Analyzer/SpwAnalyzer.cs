@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System;
 using System.Linq;
 using System.Xml.Linq;
 using KompasFileReader.Model;
@@ -77,7 +78,19 @@ namespace KompasFileReader.Analyzer
                     ListSpcProps.Add(spcProp);
                 }
             }
-
+            
+            var spcDescription = _xDoc.Descendants("style");
+            foreach (var tion in spcDescription)
+            {
+                foreach (var attr in spcDescription.Attributes())
+                {
+                    if (attr.Name == "id")
+                    {
+                        IDSpec = attr.Value;
+                    }
+                }
+            }
+            
             var sections = _xDoc.Descendants("section");
             bool isName = false, isNumber = false;
             foreach (var section in sections)
@@ -132,6 +145,10 @@ namespace KompasFileReader.Analyzer
                                         col.Name = attr.Value;
                                     if (attr.Name == "typeName")
                                         col.TypeName = attr.Value;
+                                    if (attr.Name == "number")
+                                        col.Number = Convert.ToInt32(attr.Value);
+                                    if (attr.Name == "blockNumber")
+                                        col.BlockNumber = Convert.ToInt32(attr.Value);
                                     if (attr.Name == "value")
                                         col.Value = attr.Value;
                                 }
@@ -139,6 +156,30 @@ namespace KompasFileReader.Analyzer
                                 spcObject.Columns.Add(col);
                             }
                         }
+                         
+                        if (context.Name.ToString() == "additionalColumns")
+                        {
+                            foreach (var column in context.Elements())
+                            {
+                                var col = new AddColumn();
+                                foreach (var attr in column.Attributes())
+                                {
+                                    if (attr.Name == "name")
+                                        col.Name = attr.Value;
+                                    if (attr.Name == "typeName")
+                                        col.TypeName = attr.Value;
+                                    if (attr.Name == "number")
+                                        col.Number = Convert.ToInt32(attr.Value);
+                                    if (attr.Name == "blockNumber")
+                                        col.BlockNumber = Convert.ToInt32(attr.Value);
+                                    if (attr.Name == "value")
+                                        col.Value = attr.Value;
+                                }
+                                // добавляем колонку спецификации в объект
+                                spcObject.AColumns.Add(col);
+                            }
+                        }
+                        
                         if (context.Name.ToString() != "documents") continue;
                         foreach (var document in context.Elements())
                         {
