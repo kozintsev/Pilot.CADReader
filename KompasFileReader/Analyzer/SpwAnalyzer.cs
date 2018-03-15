@@ -79,17 +79,8 @@ namespace KompasFileReader.Analyzer
                 }
             }
             
-            var spcDescription = _xDoc.Descendants("style");
-            foreach (var tion in spcDescription)
-            {
-                foreach (var attr in spcDescription.Attributes())
-                {
-                    if (attr.Name == "id")
-                    {
-                        IDSpec = attr.Value;
-                    }
-                }
-            }
+            var style = _xDoc.Descendants("style").FirstOrDefault();
+            Id = style?.Attributes().FirstOrDefault(x => x.Name == "id")?.Value;
             
             var sections = _xDoc.Descendants("section");
             bool isName = false, isNumber = false;

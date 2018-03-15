@@ -53,7 +53,7 @@ namespace KompasFileReader.Model.Spc
             }
         }
         
-        public new string Primechan
+        public string Note
         {
             get
             {
@@ -71,7 +71,7 @@ namespace KompasFileReader.Model.Spc
             }
         }
         
-        public new string Massa
+        public string Mass
         {
             get
             {
@@ -80,7 +80,7 @@ namespace KompasFileReader.Model.Spc
             }
         }
         
-        public new string IDMat
+        public string IdMaterial
         {
             get
             {
@@ -89,7 +89,7 @@ namespace KompasFileReader.Model.Spc
             }
         }
 
-        public new string ObozMat
+        public string MaterialDesignation
         {
             get
             {
