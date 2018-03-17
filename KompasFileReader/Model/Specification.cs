@@ -15,7 +15,7 @@ namespace KompasFileReader.Model
         /// </summary>
         public string FileName { get; set; }
         
-        public string Id { get; set; }
+        public int IdStyle { get; set; }
         
         public List<Specification> Children { get; set; }
         

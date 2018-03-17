@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pilot.CadReaderPlugin", "Pilot.CadReaderPlugin\Pilot.CadReaderPlugin.csproj", "{1FF8C39F-4853-468E-B872-2440E98CC140}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasAttrAutoImport", "KompasAttrAutoImport\KompasAttrAutoImport.csproj", "{FE0DA33A-FBAD-4BBE-B964-EB51FD193CDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasFileReader", "KompasFileReader\KompasFileReader.csproj", "{21424CDB-0741-4BF5-9491-5D0D4AC137DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KompasFileReader.Test", "KompasFileReader.Test\KompasFileReader.Test.csproj", "{02A3FA59-227B-4C79-B590-FE646A6DEA5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21424CDB-0741-4BF5-9491-5D0D4AC137DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02A3FA59-227B-4C79-B590-FE646A6DEA5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A3FA59-227B-4C79-B590-FE646A6DEA5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A3FA59-227B-4C79-B590-FE646A6DEA5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A3FA59-227B-4C79-B590-FE646A6DEA5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
