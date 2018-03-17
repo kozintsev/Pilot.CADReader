@@ -113,5 +113,30 @@ namespace KompasFileReader.Test
                 Assert.IsTrue(taskOpenCdwWithSpwFile.Result.IdStyle == 1, "CdwWithSpwAnalyzer has not result");
             }
         }
+        //Тест для проверки считывания Id спецификации. Файл специально подобран без объектов спецификации внутри.
+        //Если выпадет сообщение CdwWithSpwAnalyzer has not result, то тест совсем не пройден еще на этапе чтения файла.
+        //Если выпадет сообщение CdwWithSpwAnalyzer has not result IdStyle incorrect, то тест пройден наполовину (чтение IdStyle не прервало процесс чтения всего файла, но IdStyle не то, что должно быть).
+        [TestMethod]
+        public void TestCdwWithSpwReader2()
+        {
+            const string path = @"\078.505.0.0102.00.A3.cdw";
+            var fullPath = StartupPath + path;
+            using (var inputStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                var taskOpenCdwWithSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                taskOpenCdwWithSpwFile.Start();
+                taskOpenCdwWithSpwFile.Wait();
+                if (!taskOpenCdwWithSpwFile.Result.IsCompleted)
+                {
+                    Assert.Fail("CdwWithSpwAnalyzer has not result");
+                }
+                var spc = taskOpenCdwWithSpwFile.Result.GetSpecification;
+                Assert.IsTrue(taskOpenCdwWithSpwFile.Result.IdStyle == 0, "CdwWithSpwAnalyzer has not result IdStyle incorrect");
+            }
+        }
     }
 }
