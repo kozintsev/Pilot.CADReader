@@ -79,9 +79,17 @@ namespace KompasFileReader.Analyzer
                 }
             }
             
-            var style = _xDoc.Descendants("style").FirstOrDefault();
-            Id = style?.Attributes().FirstOrDefault(x => x.Name == "id")?.Value;
-            
+            var style = _xDoc.Descendants("spcDescription")
+                             .FirstOrDefault()
+                             .Descendants("style")
+                             .FirstOrDefault();
+            var strTmp = style?.Attributes().FirstOrDefault(x => x.Name == "id")?.Value;
+
+            if (decimal.TryParse(strTmp.Replace(".", ","), out decimal resultTmp))
+                IdStyle = (int)resultTmp;
+            else
+                IdStyle = 0;
+
             var sections = _xDoc.Descendants("section");
             bool isName = false, isNumber = false;
             foreach (var section in sections)
