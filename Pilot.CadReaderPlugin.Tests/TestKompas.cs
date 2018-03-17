@@ -169,5 +169,33 @@ namespace Pilot.CadReaderPlugin.Tests
                 }
             }
         }
+        //Тест для проверки считывания Id спецификации. Если null, то тест не пройден.
+         [TestMethod]
+        public void TestCdwWithSpwReader()
+        {
+            const string path = @"\079.25.00.00.000.cdw";
+            var fullPath = StartupPath + path;
+            using (var inputStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                var taskOpenCdwWithSpwFile = new Task<SpwAnalyzer>(() => new SpwAnalyzer(ms));
+                taskOpenCdwWithSpwFile.Start();
+                taskOpenCdwWithSpwFile.Wait();
+                if (!taskOpenCdwWithSpwFile.Result.IsCompleted)
+                {
+                    Assert.Fail("CdwWithSpwAnalyzer has not result");
+                }
+                var spc = taskOpenCdwWithSpwFile.Result.GetSpecification;
+
+                if(taskOpenCdwWithSpwFile.Result.Id == null)
+                  Assert.Fail("CdwWithSpwAnalyzer has not result. Id is null.");
+                else
+                  Assert.IsTrue(spc.Designation.Contains("079.25.00.00.000"), "Designation is not equivalent to 079.25.00.00.000");
+
+            }
+        }
     }
 }
