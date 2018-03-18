@@ -80,12 +80,12 @@ namespace KompasFileReader.Analyzer
             }
             
             var style = _xDoc.Descendants("spcDescription")
-                             .FirstOrDefault()
+                             .FirstOrDefault()?
                              .Descendants("style")
                              .FirstOrDefault();
-            var strTmp = style?.Attributes().FirstOrDefault(x => x.Name == "id")?.Value;
+            var strTmp = style?.Attributes().FirstOrDefault(x => x.Name == "id")?.Value.Replace(".", ",");
 
-            if (decimal.TryParse(strTmp.Replace(".", ","), out decimal resultTmp))
+            if (decimal.TryParse(strTmp, out decimal resultTmp))
                 IdStyle = (int)resultTmp;
             else
                 IdStyle = 0;
