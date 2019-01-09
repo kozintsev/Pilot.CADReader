@@ -40,6 +40,12 @@
       <HintPath>..\..\..\..\..\..\NugetPackages\Ascon.Pilot.SDK.18.39.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DotNetZip, Version=1.13.0.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\..\NugetPackages\DotNetZip.1.13.0\lib\net40\DotNetZip.dll</HintPath>
+    </Reference>
+    <Reference Include="KompasFileReader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\..\NugetPackages\KompasFileReader.1.0.0\lib\netstandard2.0\KompasFileReader.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\..\NugetPackages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -60,12 +66,6 @@
     <Compile Include="Model\PairPilotKompasAttr.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SettingLoader.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\KompasFileReader\KompasFileReader.csproj">
-      <Project>{21424cdb-0741-4bf5-9491-5d0d4ac137dd}</Project>
-      <Name>KompasFileReader</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
