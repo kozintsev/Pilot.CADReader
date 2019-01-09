@@ -138,5 +138,41 @@ namespace KompasFileReader.Test
                 Assert.IsTrue(taskOpenCdwWithSpwFile.Result.IdStyle == 0, "CdwWithSpwAnalyzer has not result IdStyle incorrect");
             }
         }
+          //Тест для проверки считывания формата чертежа. 
+        //Если выпадет сообщение CdwWithSpwAnalyzer has not result, то тест совсем не пройден еще на этапе чтения файла.
+        //Если выпадет сообщение Format is null, то тест пройден наполовину (Формат чертежа не удается прочитать).
+    
+         [TestMethod]
+        public void TestCdwReader3()
+        {
+            const string path = @"\6013-AR.cdw";
+            var fullPath = StartupPath + path;
+            using (var inputStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            {
+                var ms = new MemoryStream();
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(ms);
+                ms.Position = 0;
+                var taskOpenCdwFile = new Task<CdwAnalyzer>(() => new CdwAnalyzer(ms));
+                taskOpenCdwFile.Start();
+                taskOpenCdwFile.Wait();
+                if (taskOpenCdwFile.Result.IsCompleted)
+                {
+                    var drawing = taskOpenCdwFile.Result.Drawing;
+                    foreach (KompasFileReader.Model.DrawingSheet ee in taskOpenCdwFile.Result.Drawing.Sheets)
+                    {
+                        if (ee != null)
+                        {
+                           string FormatTxt = ee.Format;
+                            Assert.IsTrue(ee.Format != null, "Format is null");
+                        }
+                    }
+                }
+                else
+                {
+                    Assert.Fail("CdwWithSpwAnalyzer has not result");
+                }
+            }
+        }
     }
 }

@@ -82,6 +82,9 @@ namespace KompasFileReader.Analyzer
             foreach (var sheet in sheets)
             {
                 var ds = new DrawingSheet();
+                  // Возможная ошибка в строке  foreach (var attr in sheet.Attributes()). 
+                //Внутрь цикла попасть не можем потому что мы не учли, что тип xml узла может быть не только XElement, но и XComment.
+                /*
                 foreach (var attr in sheet.Attributes())
                 {
                     string strnum;
@@ -106,6 +109,38 @@ namespace KompasFileReader.Analyzer
                     strnum = attr.Value;
                     if (int.TryParse(strnum, out number))
                         ds.Width = number;
+                }*/
+                // Код исправляющий ошибку:
+                  foreach (XNode attrs in sheet.Nodes())
+                {
+                    XElement elm = attrs as XElement;
+                    
+                    if (elm != null)
+                    {
+                        string strnum;
+                        int number;
+                        foreach (XAttribute attr in elm.Attributes())
+                        {
+                            if (attr.Name == "format")
+                                ds.Format = attr.Value;
+                            if (attr.Name == "orientation")
+                            {
+                                strnum = attr.Value;
+                                if (int.TryParse(strnum, out number))
+                                    ds.Orientation = number;
+                            }
+                            if (attr.Name == "height")
+                            {
+                                strnum = attr.Value;
+                                if (int.TryParse(strnum, out number))
+                                    ds.Height = number;
+                            }
+                            if (attr.Name != "width") continue;
+                            strnum = attr.Value;
+                            if (int.TryParse(strnum, out number))
+                                ds.Width = number;
+                        }
+                    }
                 }
                 Drawing.Sheets.Add(ds);
             }
