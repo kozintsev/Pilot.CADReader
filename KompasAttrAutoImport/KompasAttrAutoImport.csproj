@@ -33,15 +33,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ascon.Pilot.SDK, Version=17.0.36.23182, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\..\NugetPackages\Ascon.Pilot.SDK.18.0.30.0\lib\net40-Client\Ascon.Pilot.SDK.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\NugetPackages\Ascon.Pilot.SDK.18.39.0\lib\net40-client\Ascon.Pilot.SDK.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Ascon.Pilot.Theme, Version=17.0.36.23182, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\..\NugetPackages\Ascon.Pilot.SDK.18.0.30.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\NugetPackages\Ascon.Pilot.SDK.18.39.0\lib\net40-Client\Ascon.Pilot.Theme.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\..\NugetPackages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\NugetPackages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationFramework" />

@@ -138,11 +138,12 @@ namespace KompasFileReader.Test
                 Assert.IsTrue(taskOpenCdwWithSpwFile.Result.IdStyle == 0, "CdwWithSpwAnalyzer has not result IdStyle incorrect");
             }
         }
-          //Тест для проверки считывания формата чертежа. 
-        //Если выпадет сообщение CdwWithSpwAnalyzer has not result, то тест совсем не пройден еще на этапе чтения файла.
-        //Если выпадет сообщение Format is null, то тест пройден наполовину (Формат чертежа не удается прочитать).
-    
-         [TestMethod]
+        /// <summary>
+        /// Тест для проверки считывания формата чертежа.
+        /// Если выпадет сообщение CdwWithSpwAnalyzer has not result, то тест совсем не пройден еще на этапе чтения файла.
+        /// Если выпадет сообщение Format is null, то тест пройден наполовину (Формат чертежа не удается прочитать).
+        /// </summary>
+        [TestMethod]
         public void TestCdwReader3()
         {
             const string path = @"\6013-AR.cdw";
@@ -163,7 +164,7 @@ namespace KompasFileReader.Test
                     {
                         if (ee != null)
                         {
-                           string FormatTxt = ee.Format;
+                            string FormatTxt = ee.Format;
                             Assert.IsTrue(ee.Format != null, "Format is null");
                         }
                     }
